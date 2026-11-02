@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Climate Quest</title>
+<style>
+html,body{margin:0;padding:0;height:100%;background:#0E1B2C;color:#F4FAFD;font-family:"Avenir Next","Avenir","Trebuchet MS",Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+#app{position:fixed;left:0;right:0;top:0;bottom:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;}
+#bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#0A1522;border-bottom:1px solid #22384F;}
+#barTitle{font-weight:800;color:#BFE6F5;font-size:17px;letter-spacing:0.3px;}
+.sbtn{background:#1D3350;color:#DDEFF8;border:1px solid #2E4C6E;border-radius:10px;padding:8px 12px;font-family:inherit;font-size:14px;font-weight:600;}
+.scr{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 30px 14px;}
+h1{font-size:40px;line-height:1.05;margin:14px 0 6px 0;color:#FFFFFF;font-weight:800;}
+h2{font-size:24px;margin:6px 0 10px 0;color:#FFFFFF;}
+.lead{color:#BFE6F5;font-size:16px;line-height:1.45;margin:0 0 16px 0;}
+label{display:block;font-weight:700;font-size:15px;margin:12px 0 4px 0;color:#DDEFF8;}
+input,select,textarea{width:100%;font-family:inherit;font-size:17px;padding:12px;border-radius:12px;border:2px solid #2E4C6E;background:#F4FAFD;color:#0E1B2C;}
+textarea{min-height:130px;resize:vertical;}
+.big{display:block;width:100%;background:#FF7A2F;color:#1A0F08;border:0;border-radius:14px;padding:15px;font-family:inherit;font-size:18px;font-weight:800;margin-top:12px;}
+.big.alt{background:#BFE6F5;color:#0E1B2C;}
+.link{display:block;margin:16px auto 0 auto;background:none;border:0;color:#8FC9E3;font-family:inherit;font-size:15px;text-decoration:underline;}
+.msg{color:#FFD2B8;font-weight:700;min-height:20px;margin:8px 0 0 0;font-size:15px;line-height:1.4;}
+.cvwrap{width:100%;display:flex;justify-content:center;}
+.cvwrap canvas{display:block;border-radius:14px;}
+.ch{display:flex;align-items:center;width:100%;text-align:left;background:#16283E;border:1px solid #27425F;border-radius:14px;padding:12px;margin:0 0 10px 0;color:#F4FAFD;font-family:inherit;}
+.ch .num{flex:0 0 38px;height:38px;border-radius:19px;background:#BFE6F5;color:#0E1B2C;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center;margin-right:12px;}
+.ch.off .num{background:#2E4C6E;color:#9FB8CC;}
+.ch .tx{flex:1 1 auto;}
+.ch .tx b{display:block;font-size:17px;}
+.ch .tx small{display:block;color:#9FC3D8;font-size:13px;margin-top:2px;line-height:1.3;}
+.pill{flex:0 0 auto;font-size:12px;font-weight:800;padding:5px 9px;border-radius:10px;background:#FF7A2F;color:#1A0F08;margin-left:8px;}
+.ch.off .pill{background:#22384F;color:#9FB8CC;}
+.pill.done{background:#6FE3A4;color:#0E1B2C;}
+.hello{font-size:18px;color:#BFE6F5;margin:2px 0 14px 0;}
+.dlg{background:#F4FAFD;color:#0E1B2C;border-radius:16px;padding:14px;margin-top:12px;}
+.dlgTop{display:flex;justify-content:space-between;align-items:center;}
+#spName{font-weight:800;font-size:17px;}
+#stepCount{font-size:13px;color:#4A6B85;font-weight:700;}
+#spText{font-size:17px;line-height:1.45;margin:8px 0 6px 0;min-height:76px;}
+.row{display:flex;align-items:center;}
+.row .sbtn{margin-right:8px;}
+.row .big{margin-top:0;flex:1 1 auto;}
+.dlg .sbtn{background:#DDEFF8;color:#0E1B2C;border-color:#B5D3E5;}
+.dlg .link{color:#2A6F96;}
+.hud{background:#16283E;border:1px solid #27425F;border-radius:14px;padding:10px 12px;margin-bottom:10px;}
+.hudRow{display:flex;justify-content:space-between;font-size:15px;margin-top:4px;color:#BFE6F5;}
+.hudRow b{color:#FFFFFF;}
+.heat{display:flex;align-items:center;margin-top:8px;font-size:13px;color:#9FC3D8;font-weight:700;}
+.heat span{margin-right:10px;}
+.heatBar{flex:1 1 auto;height:12px;border-radius:6px;background:#0A1522;overflow:hidden;border:1px solid #27425F;}
+#heatFill{height:100%;width:0%;background:#6FE3A4;}
+.hold{display:block;width:132px;height:132px;border-radius:66px;margin:12px auto 0 auto;background:#FF7A2F;border:6px solid #FFD2B8;color:#1A0F08;font-family:inherit;font-weight:800;font-size:18px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+.hold.on{background:#FFA36B;}
+.overlay{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(5,12,20,0.82);padding:20px 14px;overflow-y:auto;z-index:20;display:none;}
+.card{background:#F4FAFD;color:#0E1B2C;border-radius:18px;padding:16px;max-width:560px;margin:30px auto;}
+.card h2{color:#0E1B2C;}
+.card p{font-size:16px;line-height:1.5;}
+.qhead{font-size:13px;color:#9FC3D8;font-weight:800;margin-bottom:6px;}
+.qtext{font-size:19px;line-height:1.4;font-weight:700;margin:0 0 12px 0;}
+.opt{display:block;width:100%;text-align:left;background:#16283E;color:#F4FAFD;border:2px solid #2E4C6E;border-radius:12px;padding:13px;margin-bottom:8px;font-family:inherit;font-size:16px;}
+.opt.right{background:#1F5C3E;border-color:#6FE3A4;}
+.opt.wrong{background:#5C2626;border-color:#FF8A80;}
+.why{background:#F4FAFD;color:#0E1B2C;border-radius:12px;padding:12px;font-size:15px;line-height:1.45;margin-top:6px;}
+.qcv{display:block;width:100%;height:auto;border-radius:12px;background:#FFFFFF;touch-action:none;}
+.chips{display:flex;flex-wrap:wrap;margin:10px 0 0 0;}
+.chip{background:#16283E;color:#F4FAFD;border:2px solid #2E4C6E;border-radius:20px;padding:9px 14px;font-family:inherit;font-size:15px;font-weight:700;margin:0 8px 8px 0;}
+.chip.sel{background:#FF7A2F;color:#1A0F08;border-color:#FFD2B8;}
+.chip.placed{border-color:#6FE3A4;}
+.tools{display:flex;flex-wrap:wrap;margin:10px 0 0 0;}
+.score{font-size:56px;font-weight:800;color:#6FE3A4;margin:10px 0 0 0;}
+#repPreview img{display:block;width:100%;border-radius:8px;margin-top:12px;background:#FFFFFF;}
+.note{color:#9FC3D8;font-size:14px;line-height:1.45;}
+.mis{background:#16283E;border:1px solid #27425F;border-radius:14px;padding:12px;margin-bottom:10px;}
+.mis p{margin:6px 0;font-size:16px;line-height:1.4;}
+.mis .big{margin-top:0;}
+.row2{display:flex;justify-content:space-between;align-items:center;margin:8px 0;}
+#sDate{font-weight:800;color:#FFFFFF;font-size:16px;}
+.stats{background:#16283E;border:1px solid #27425F;border-radius:14px;padding:10px 12px;margin:10px 0;font-size:14px;line-height:1.6;color:#BFE6F5;}
+.stats b{color:#FFFFFF;}
+.ctr{text-align:center;margin:6px 0 0 0;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="bar">
+    <button id="btnHome" class="sbtn">Chapters</button>
+    <span id="barTitle">Climate Quest</span>
+    <button id="btnSound" class="sbtn">Sound: On</button>
+  </div>
+
+  <div id="scrSign" class="scr">
+    <div class="cvwrap"><canvas id="heroCv"></canvas></div>
+    <h1>Climate Quest</h1>
+    <p class="lead">Drill into ancient ice, follow the air, and build cities in the right climates.</p>
+    <label for="inName">Your name</label>
+    <input id="inName" type="text" autocomplete="off" placeholder="First and last name">
+    <label for="inPeriod">Class period</label>
+    <select id="inPeriod">
+      <option value="">Choose your period</option>
+      <option>1</option><option>2</option><option>3</option><option>4</option>
+      <option>5</option><option>6</option><option>7</option><option>8</option>
+    </select>
+    <button id="btnStart" class="big">Start</button>
+    <p id="signMsg" class="msg"></p>
+  </div>
+
+  <div id="scrMenu" class="scr">
+    <p id="hello" class="hello"></p>
+    <div id="chList"></div>
+    <button id="btnReport" class="big alt">Make my PDF report</button>
+    <button id="btnSwitch" class="link">Not you? Change name</button>
+  </div>
+
+  <div id="scrSoon" class="scr">
+    <h2 id="soonTitle"></h2>
+    <p class="lead">This chapter is coming soon. Try another chapter for now.</p>
+    <button id="btnSoonBack" class="big alt">Back to chapters</button>
+  </div>
+
+  <div id="scrStory" class="scr">
+    <div class="cvwrap"><canvas id="storyCv"></canvas></div>
+    <div class="dlg">
+      <div class="dlgTop"><span id="spName"></span><span id="stepCount"></span></div>
+      <p id="spText"></p>
+      <div class="row">
+        <button id="btnPrev" class="sbtn">Back</button>
+        <button id="btnReplay" class="sbtn">Replay</button>
+        <button id="btnNext" class="big">Next</button>
+      </div>
+      <button id="btnSkip" class="link">Skip to the activity</button>
+    </div>
+  </div>
+
+  <div id="scrDrill" class="scr">
+    <div class="hud">
+      <b id="dCore"></b>
+      <div class="hudRow"><span>Depth: <b id="dDepth">0 m</b></span><span>Ice age: <b id="dAge">today</b></span></div>
+      <div class="heat"><span>Motor heat</span><div class="heatBar"><div id="heatFill"></div></div></div>
+    </div>
+    <div class="cvwrap"><canvas id="drillCv"></canvas></div>
+    <p id="dMsg" class="msg"></p>
+    <button id="btnHold" class="hold">Hold to drill</button>
+    <button id="btnPull" class="big">Pull up the ice core</button>
+  </div>
+
+  <div id="scrSeason" class="scr">
+    <div class="mis">
+      <b id="misHead"></b>
+      <p id="misText"></p>
+      <div class="row"><button id="btnHint" class="sbtn">Hint</button><button id="btnCheck" class="big">Check</button></div>
+      <p id="misMsg" class="msg"></p>
+    </div>
+    <div class="cvwrap"><canvas id="orbCv"></canvas></div>
+    <p class="note ctr">Drag Earth around its orbit. Not to scale!</p>
+    <div class="row2"><span id="sDate"></span><button id="btnPlay" class="sbtn">Play a year</button></div>
+    <div class="cvwrap"><canvas id="sideCv"></canvas></div>
+    <div class="stats">
+      <div>Northern Hemisphere: <b id="sNH"></b></div>
+      <div>Southern Hemisphere: <b id="sSH"></b></div>
+      <div>Direct rays hit: <b id="sRays"></b></div>
+      <div>Orlando, FL: <b id="sOrl"></b></div>
+      <div>Brisbane, Australia: <b id="sBri"></b></div>
+      <div>South Pole: <b id="sPole"></b></div>
+    </div>
+    <div class="cvwrap"><canvas id="beamCv"></canvas></div>
+  </div>
+
+  <div id="scrQuiz" class="scr"><div id="quizBody"></div></div>
+
+  <div id="scrReport" class="scr">
+    <h2>My PDF report</h2>
+    <p id="repInfo" class="lead"></p>
+    <button id="btnMakePdf" class="big">Create my PDF</button>
+    <button id="btnShare" class="big alt">Share or save the PDF</button>
+    <p id="repStatus" class="msg"></p>
+    <p class="note">Send the PDF to your teacher in Canvas. If sharing does not work on your device, press and hold each page below to save it, or take screenshots.</p>
+    <div id="repPreview"></div>
+  </div>
+</div>
+
+<div id="coreCard" class="overlay">
+  <div class="card">
+    <h2 id="ccTitle"></h2>
+    <div class="cvwrap"><canvas id="coreCv"></canvas></div>
+    <p id="ccText"></p>
+    <button id="ccNext" class="big">Next core</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var FONT='"Avenir Next","Avenir","Trebuchet MS",Helvetica,Arial,sans-serif';
+var KEY='climateQuest_v1';
+var S={name:'',period:'',res:{}};
+var V={on:true};
+var cur='';
+var DPR=Math.min(window.devicePixelRatio||1,3);
+function $(id){return document.getElementById(id);}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o){S.name=o.name||'';S.period=o.period||'';S.res=o.res||{};}}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function clean(t){return String(t||'').replace(/[\uD800-\uDFFF]/g,'').replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"');}
+function fmt(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+function rnd(i){var x=Math.sin(i*12.9898+78.233)*43758.5453;return x-Math.floor(x);}
+
+/* ---------- chapters ---------- */
+var CH=[
+ {id:'ch1',title:'Ice Core Drill',desc:'Antarctica: drill into 800,000 years of ice.',ready:true},
+ {id:'ch2',title:'Sunlight and Seasons',desc:'Tilt the Earth and move it around the Sun.',ready:true},
+ {id:'ch3',title:'Earth\'s Energy Balance',desc:'Greenhouse gases and albedo.'},
+ {id:'ch4',title:'Orbit Cycles and Ice Ages',desc:'How changes in Earth\'s orbit bring ice ages.'},
+ {id:'ch5',title:'Moving Air',desc:'Convection, the Coriolis effect, and air masses.'},
+ {id:'ch6',title:'Mountains and Rain Shadows',desc:'Push a cloud over a mountain.'},
+ {id:'ch7',title:'City Planner',desc:'Match each city to the right climate.'},
+ {id:'ch8',title:'Climate Spiral',desc:'1880 to today in one minute.'}
+];
+
+/* ---------- audio ---------- */
+var AC=null,noiseBuf=null,drillNodes=null;
+function ac(){if(!AC){var C=window.AudioContext||window.webkitAudioContext;if(C){try{AC=new C();}catch(e){AC=null;}}}if(AC&&AC.state==='suspended'){AC.resume();}return AC;}
+function tone(f,d,type,v,f2,delay){if(!V.on)return;var a=ac();if(!a)return;var t0=a.currentTime+(delay||0);var o=a.createOscillator();var g=a.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t0);if(f2){o.frequency.exponentialRampToValueAtTime(f2,t0+d);}g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(v||0.12,t0+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t0+d);o.connect(g);g.connect(a.destination);o.start(t0);o.stop(t0+d+0.05);}
+var sfx={
+ click:function(){tone(700,0.06,'triangle',0.07);},
+ good:function(){tone(660,0.12,'sine',0.14);tone(880,0.12,'sine',0.14,null,0.1);tone(1320,0.22,'sine',0.14,null,0.2);},
+ bad:function(){tone(240,0.28,'square',0.05,140);},
+ buzz:function(){tone(120,0.5,'sawtooth',0.07,70);},
+ winch:function(){tone(260,1.4,'sawtooth',0.035,520);}
+};
+function startDrillSnd(){if(drillNodes||!V.on)return;var a=ac();if(!a)return;if(!noiseBuf){var len=a.sampleRate;noiseBuf=a.createBuffer(1,len,a.sampleRate);var d=noiseBuf.getChannelData(0);for(var i=0;i<len;i++){d[i]=Math.random()*2-1;}}
+ var src=a.createBufferSource();src.buffer=noiseBuf;src.loop=true;var bp=a.createBiquadFilter();bp.type='bandpass';bp.frequency.value=480;bp.Q.value=0.8;var g=a.createGain();g.gain.value=0.11;
+ var o=a.createOscillator();o.type='sawtooth';o.frequency.value=62;var og=a.createGain();og.gain.value=0.035;
+ src.connect(bp);bp.connect(g);g.connect(a.destination);o.connect(og);og.connect(a.destination);src.start();o.start();drillNodes={src:src,o:o};}
+function stopDrillSnd(){if(!drillNodes)return;try{drillNodes.src.stop();drillNodes.o.stop();}catch(e){}drillNodes=null;}
+
+/* ---------- speech ---------- */
+function pickVoice(){if(!window.speechSynthesis)return null;var vs=speechSynthesis.getVoices();if(!vs||!vs.length)return null;var pref=['Samantha','Ava','Allison','Susan','Karen','Moira'];for(var p=0;p<pref.length;p++){for(var i=0;i<vs.length;i++){if(vs[i].name.indexOf(pref[p])===0&&vs[i].lang.indexOf('en')===0)return vs[i];}}for(var j=0;j<vs.length;j++){if(vs[j].lang==='en-US')return vs[j];}return null;}
+function say(t,pitch){if(!window.speechSynthesis)return;speechSynthesis.cancel();if(!V.on)return;var u=new SpeechSynthesisUtterance(t);u.rate=0.97;u.pitch=pitch||1;u.lang='en-US';var v=pickVoice();if(v){u.voice=v;}speechSynthesis.speak(u);}
+function hush(){if(window.speechSynthesis){speechSynthesis.cancel();}}
+
+/* ---------- screens + loop ---------- */
+var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','scrQuiz','scrReport'];
+var raf=null,loopFn=null;
+function stopLoops(){loopFn=null;if(raf){cancelAnimationFrame(raf);}raf=null;stopDrillSnd();}
+function startLoop(fn){stopLoops();loopFn=fn;var last=0;function f(ts){if(loopFn!==fn)return;var dt=last?Math.min(0.05,(ts-last)/1000):0.016;last=ts;fn(dt,ts/1000);raf=requestAnimationFrame(f);}raf=requestAnimationFrame(f);}
+function show(id){stopLoops();hush();for(var i=0;i<screens.length;i++){$(screens[i]).style.display=(screens[i]===id)?'block':'none';}cur=id;$('btnHome').style.visibility=(id==='scrSign'||id==='scrMenu')?'hidden':'visible';$('coreCard').style.display='none';$(id).scrollTop=0;}
+function setupCanvas(cv,lw,lh,maxHFrac){var w=cv.parentNode.clientWidth||360;var maxH=window.innerHeight*(maxHFrac||0.5);if(w*lh/lw>maxH){w=maxH*lw/lh;}var h=w*lh/lw;cv.style.width=Math.round(w)+'px';cv.style.height=Math.round(h)+'px';cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);var c=cv.getContext('2d');var k=cv.width/lw;c.setTransform(k,0,0,k,0,0);return c;}
+
+/* ---------- drawing helpers ---------- */
+function CE(c,x,y,rx,ry){c.save();c.translate(x,y);c.scale(rx,ry);c.beginPath();c.arc(0,0,1,0,6.2832);c.restore();}
+function circ(c,x,y,r){c.beginPath();c.arc(x,y,r,0,6.2832);c.fill();}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
+function txt(c,s,x,y,font,col,align){c.font=font;c.fillStyle=col;c.textAlign=align||'left';c.fillText(s,x,y);c.textAlign='left';}
+function h2r(h){return [parseInt(h.substr(1,2),16),parseInt(h.substr(3,2),16),parseInt(h.substr(5,2),16)];}
+function mix(a,b,f){var A=h2r(a),B=h2r(b);return 'rgb('+Math.round(A[0]+(B[0]-A[0])*f)+','+Math.round(A[1]+(B[1]-A[1])*f)+','+Math.round(A[2]+(B[2]-A[2])*f)+')';}
+function sky(c,w,h,top,bot){var g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,top);g.addColorStop(1,bot);c.fillStyle=g;c.fillRect(0,0,w,h);}
+
+function person(c,x,y,s,col,o,t){
+ var b=Math.sin(t*3+x*0.13)*1.2*s;
+ c.save();c.translate(x,y);
+ c.fillStyle='rgba(60,90,120,0.18)';CE(c,0,0,16*s,4*s);c.fill();
+ c.fillStyle='#2B2F3A';rr(c,-11*s,-10*s,9*s,10*s,3*s);c.fill();rr(c,2*s,-10*s,9*s,10*s,3*s);c.fill();
+ c.translate(0,b);
+ c.fillStyle=col;CE(c,0,-28*s,16*s,20*s);c.fill();
+ c.fillStyle='rgba(255,255,255,0.55)';c.fillRect(-15*s,-22*s,30*s,3*s);
+ c.strokeStyle='rgba(0,0,0,0.25)';c.lineWidth=1.2*s;c.beginPath();c.moveTo(0,-44*s);c.lineTo(0,-10*s);c.stroke();
+ c.fillStyle=col;CE(c,-16*s,-28*s,5*s,11*s);c.fill();
+ if(o.wave){c.save();c.translate(16*s,-36*s);c.rotate(-2.2+Math.sin(t*5)*0.35);c.fillStyle=col;CE(c,0,-8*s,5*s,11*s);c.fill();c.fillStyle='#3A3F4B';circ(c,0,-19*s,4*s);c.restore();}
+ else{c.fillStyle=col;CE(c,16*s,-28*s,5*s,11*s);c.fill();c.fillStyle='#3A3F4B';circ(c,16*s,-17*s,4*s);}
+ c.fillStyle='#3A3F4B';circ(c,-16*s,-17*s,4*s);
+ if(o.clip){c.fillStyle='#8B5E3C';rr(c,-26*s,-34*s,11*s,14*s,1.5*s);c.fill();c.fillStyle='#FFFFFF';c.fillRect(-24.5*s,-32*s,8*s,10*s);}
+ c.fillStyle=col;circ(c,0,-52*s,14*s);
+ c.fillStyle='#EFE7D7';circ(c,0,-51*s,11*s);
+ c.fillStyle=o.skin||'#F2C9A5';circ(c,0,-50*s,8.5*s);
+ c.fillStyle='rgba(240,110,110,0.35)';circ(c,-5*s,-47*s,2.2*s);circ(c,5*s,-47*s,2.2*s);
+ c.fillStyle='#1F2229';circ(c,-3*s,-51*s,1.4*s);circ(c,3*s,-51*s,1.4*s);
+ c.strokeStyle='#1F2229';c.lineWidth=1.2*s;c.beginPath();c.arc(0,-48.5*s,3*s,0.2*Math.PI,0.8*Math.PI);c.stroke();
+ if(o.glasses){c.lineWidth=1*s;c.beginPath();c.arc(-3*s,-51*s,2.8*s,0,6.2832);c.stroke();c.beginPath();c.arc(3*s,-51*s,2.8*s,0,6.2832);c.stroke();}
+ if(o.goggles){c.fillStyle='#24384D';rr(c,-8*s,-63*s,16*s,4.5*s,2*s);c.fill();c.fillStyle='#8FD3F0';c.fillRect(-6*s,-62*s,5*s,2.5*s);c.fillRect(1*s,-62*s,5*s,2.5*s);}
+ c.restore();
+}
+function rig(c,x,y,s){
+ c.strokeStyle='#4E5D6E';c.lineWidth=3*s;c.beginPath();c.moveTo(x-20*s,y);c.lineTo(x,y-95*s);c.lineTo(x+20*s,y);c.stroke();
+ c.lineWidth=1.5*s;for(var k=1;k<5;k++){var yy=y-k*19*s;var hw=20*s*(1-k*19/95);var hw2=20*s*(1-(k-1)*19/95);c.beginPath();c.moveTo(x-hw,yy);c.lineTo(x+hw,yy);c.moveTo(x-hw2,yy+19*s);c.lineTo(x+hw,yy);c.stroke();}
+ c.strokeStyle='#2B2F3A';c.lineWidth=1.5*s;c.beginPath();c.moveTo(x,y-95*s);c.lineTo(x,y-24*s);c.stroke();
+ c.fillStyle='#FF7A2F';circ(c,x,y-95*s,4*s);rr(c,x-7*s,y-40*s,14*s,16*s,3*s);c.fill();
+ c.fillStyle='#3E7CB1';rr(c,x+24*s,y-26*s,28*s,24*s,3*s);c.fill();c.fillStyle='#BFE6F5';c.fillRect(x+30*s,y-20*s,9*s,7*s);
+ c.fillStyle='#6B7B8C';rr(c,x-32*s,y-6*s,64*s,8*s,2*s);c.fill();
+}
+function tent(c,x,y,s){c.fillStyle='#E0523A';c.beginPath();c.moveTo(x-38*s,y);c.quadraticCurveTo(x-36*s,y-46*s,x,y-48*s);c.quadraticCurveTo(x+36*s,y-46*s,x+38*s,y);c.closePath();c.fill();
+ c.strokeStyle='rgba(0,0,0,0.18)';c.lineWidth=1.5*s;c.beginPath();c.moveTo(x-20*s,y);c.quadraticCurveTo(x-18*s,y-40*s,x,y-47*s);c.moveTo(x+20*s,y);c.quadraticCurveTo(x+18*s,y-40*s,x,y-47*s);c.stroke();
+ c.fillStyle='#9E2F22';c.beginPath();c.moveTo(x-9*s,y);c.quadraticCurveTo(x-9*s,y-18*s,x,y-18*s);c.quadraticCurveTo(x+9*s,y-18*s,x+9*s,y);c.closePath();c.fill();}
+function flag(c,x,y,col,t){c.strokeStyle='#333333';c.lineWidth=1.5;c.beginPath();c.moveTo(x,y);c.lineTo(x,y-34);c.stroke();var w=Math.sin(t*4+x)*2;c.fillStyle=col;c.beginPath();c.moveTo(x,y-34);c.lineTo(x+14,y-29+w);c.lineTo(x,y-24);c.closePath();c.fill();}
+function snowfall(c,t,w,h,n){c.fillStyle='rgba(255,255,255,0.85)';for(var i=0;i<n;i++){var x=((i*53.7+t*10*(1+i%3)+Math.sin(t+i)*6)%w+w)%w;var y=(i*37.1+t*(16+(i%5)*4))%h;circ(c,x,y,1.1+(i%3)*0.4);}}
+
+/* Ice sheet cross-section. Depth 0..3270 m maps to y..y+hIce */
+function drawSection(c,x,y,w,hIce,hBed,bubbles){
+ var N=26,r=0.9,tot=0,k,fr=[];for(k=0;k<N;k++){fr.push(Math.pow(r,k));tot+=fr[k];}
+ var yy=y;for(k=0;k<N;k++){var hh=fr[k]/tot*hIce;var f=k/(N-1);c.fillStyle=(k%2===0)?mix('#F4FBFF','#86B7D4',f):mix('#E2F2FA','#6FA3C4',f);c.fillRect(x,yy,w,hh+0.7);yy+=hh;}
+ var ya=y+1300/3270*hIce;c.fillStyle='rgba(80,70,64,0.7)';c.fillRect(x,ya,w,1.6);
+ if(bubbles){c.fillStyle='rgba(255,255,255,0.85)';for(k=0;k<bubbles;k++){circ(c,x+rnd(k)*w,y+6+rnd(k+99)*hIce*0.28,0.7+rnd(k+7)*1.1);}}
+ c.fillStyle='#6B5440';c.fillRect(x,y+hIce,w,hBed);
+ c.fillStyle='#57432F';var n=Math.floor(w/18);for(k=0;k<n;k++){circ(c,x+9+k*18+rnd(k+3)*6,y+hIce+hBed*(0.3+rnd(k+5)*0.45),Math.min(hBed*0.3,2+rnd(k+11)*3));}
+}
+/* Approximate age-depth curve, loosely based on the EPICA Dome C core */
+var AGE_D=[0,500,1000,1500,2000,2500,2800,3000,3200,3300];
+var AGE_A=[0,18000,60000,120000,200000,310000,430000,560000,800000,800000];
+function ageAt(d){if(d<=0)return 0;for(var i=1;i<AGE_D.length;i++){if(d<=AGE_D[i]){var f=(d-AGE_D[i-1])/(AGE_D[i]-AGE_D[i-1]);return AGE_A[i-1]+f*(AGE_A[i]-AGE_A[i-1]);}}return 800000;}
+function ageStr(d){var a=ageAt(d);if(a<60)return 'today';if(a<10000){a=Math.round(a/100)*100;}else{a=Math.round(a/1000)*1000;}return 'about '+fmt(a)+' years';}
+
+function drawCoreShape(c,x,y,w,h,sw,mode,seed){
+ var g=c.createLinearGradient(0,y,0,y+h);g.addColorStop(0,'#F2FAFE');g.addColorStop(1,'#A9D3EA');
+ c.fillStyle=g;c.fillRect(x,y,w,h);
+ c.fillStyle='rgba(110,160,200,0.22)';for(var xx=x;xx<x+w;xx+=sw*2){c.fillRect(xx,y,Math.min(sw,x+w-xx),h);}
+ var i;if(mode==='bubbles'){for(i=0;i<46;i++){var bx=x+8+rnd(i+seed)*(w-16),by=y+6+rnd(i+seed+50)*(h-12),br=Math.max(0.6,Math.min(h*0.12,1+rnd(i+seed+9)*2.6));c.fillStyle='rgba(255,255,255,0.9)';circ(c,bx,by,br);c.strokeStyle='rgba(120,170,205,0.6)';c.lineWidth=0.7;c.beginPath();c.arc(bx,by,br,0,6.2832);c.stroke();}}
+ else{c.strokeStyle='rgba(255,255,255,0.95)';c.lineWidth=1;for(i=0;i<40;i++){var sx=x+8+rnd(i+seed)*(w-16),sy=y+6+rnd(i+seed+50)*(h-12),sr=1.5+rnd(i+seed+3)*2;c.beginPath();c.moveTo(sx-sr,sy);c.lineTo(sx+sr,sy);c.moveTo(sx,sy-sr);c.lineTo(sx,sy+sr);c.stroke();}}
+ c.fillStyle='rgba(255,255,255,0.45)';c.fillRect(x,y+h*0.12,w,h*0.12);
+ c.fillStyle='#CFE9F6';CE(c,x,y+h/2,h*0.16,h/2);c.fill();c.strokeStyle='#7FA9C4';c.lineWidth=1.2;CE(c,x,y+h/2,h*0.16,h/2);c.stroke();
+ c.fillStyle='#E7F5FC';CE(c,x+w,y+h/2,h*0.16,h/2);c.fill();CE(c,x+w,y+h/2,h*0.16,h/2);c.stroke();
+ c.beginPath();c.moveTo(x,y);c.lineTo(x+w,y);c.moveTo(x,y+h);c.lineTo(x+w,y+h);c.stroke();
+}
+
+/* ---------- story scenes ---------- */
+function sceneCamp(c,t){
+ sky(c,400,300,'#6FA9D6','#DDF0FA');
+ var g=c.createRadialGradient(330,92,4,330,92,62);g.addColorStop(0,'rgba(255,248,220,1)');g.addColorStop(1,'rgba(255,248,220,0)');c.fillStyle=g;c.fillRect(266,30,128,124);c.fillStyle='#FFF7DE';circ(c,330,92,13);
+ c.fillStyle='#C9E2F0';c.beginPath();c.moveTo(0,206);c.lineTo(60,190);c.lineTo(130,200);c.lineTo(210,186);c.lineTo(300,198);c.lineTo(400,188);c.lineTo(400,300);c.lineTo(0,300);c.closePath();c.fill();
+ var gi=c.createLinearGradient(0,210,0,300);gi.addColorStop(0,'#F8FCFF');gi.addColorStop(1,'#CFE5F2');c.fillStyle=gi;c.fillRect(0,212,400,88);
+ tent(c,62,236,1);rig(c,212,244,1);flag(c,22,262,'#E0523A',t);flag(c,382,256,'#2E9E5B',t);
+ person(c,140,276,0.95,'#2A9DB5',{glasses:true,clip:true,skin:'#E8B48F',wave:true},t);
+ person(c,285,278,0.88,'#FF7A2F',{goggles:true,skin:'#C68A5E'},t);
+ person(c,330,280,0.88,'#F2C230',{skin:'#F2C9A5'},t);
+ snowfall(c,t,400,300,36);
+}
+function flake(c,x,y,r,a){c.save();c.translate(x,y);c.rotate(a);c.beginPath();for(var k=0;k<3;k++){var an=k*Math.PI/3;c.moveTo(-Math.cos(an)*r,-Math.sin(an)*r);c.lineTo(Math.cos(an)*r,Math.sin(an)*r);}c.stroke();c.restore();}
+function sceneSnow(c,t){
+ sky(c,400,300,'#CDE8F7','#EEF7FC');
+ txt(c,'The weight of new snow squeezes the old snow',200,26,'700 13px '+FONT,'#123A55','center');
+ var X=[25,150,275],Y=42,W=100,H=190,i;
+ c.fillStyle='#FFFFFF';c.fillRect(X[0],Y,W,H);c.strokeStyle='#8DB9D3';c.lineWidth=1.3;
+ for(i=0;i<16;i++){flake(c,X[0]+12+rnd(i)*76,Y+12+rnd(i+30)*166,5,t*0.4+i);}
+ c.fillStyle='#EEF6FA';c.fillRect(X[1],Y,W,H);c.strokeStyle='#B4D2E3';c.lineWidth=1;
+ for(var gy=Y+7,row=0;gy<Y+H;gy+=10,row++){for(var gx=X[1]+6+(row%2)*5;gx<X[1]+W-3;gx+=10){c.fillStyle='#FFFFFF';circ(c,gx,gy,4.4);c.beginPath();c.arc(gx,gy,4.4,0,6.2832);c.stroke();}}
+ var g=c.createLinearGradient(0,Y,0,Y+H);g.addColorStop(0,'#BFE3F3');g.addColorStop(1,'#8FC3DE');c.fillStyle=g;c.fillRect(X[2],Y,W,H);
+ for(i=0;i<20;i++){var bx=X[2]+10+rnd(i+3)*80,by=Y+10+rnd(i+40)*170+Math.sin(t*2+i)*1.2,br=1.8+rnd(i+8)*3;c.fillStyle='rgba(240,250,255,0.9)';circ(c,bx,by,br);c.strokeStyle='#FFFFFF';c.beginPath();c.arc(bx,by,br,0,6.2832);c.stroke();}
+ c.strokeStyle='#7FA9C4';c.lineWidth=1.5;for(i=0;i<3;i++){c.strokeRect(X[i],Y,W,H);}
+ c.fillStyle='#FF7A2F';var ax=[137.5,262.5];for(i=0;i<2;i++){c.beginPath();c.moveTo(ax[i]-8,128);c.lineTo(ax[i]+7,137);c.lineTo(ax[i]-8,146);c.closePath();c.fill();}
+ var names=['Snow','Firn','Ice'],subs=['fluffy, full of air','packed grains','air sealed in bubbles'],dep=['at the surface','tens of meters down','~50 to 120 m down'];
+ for(i=0;i<3;i++){txt(c,names[i],X[i]+50,252,'800 15px '+FONT,'#123A55','center');txt(c,subs[i],X[i]+50,269,'600 10.5px '+FONT,'#2C4A63','center');txt(c,dep[i],X[i]+50,285,'600 10px '+FONT,'#4A6B85','center');}
+}
+function mol(c,k,x,y,a){c.save();c.translate(x,y);c.rotate(a);
+ if(k==='co2'){c.fillStyle='#E0523A';circ(c,-9,0,5);circ(c,9,0,5);c.fillStyle='#2B2B2B';circ(c,0,0,5.5);}
+ else if(k==='ch4'){c.fillStyle='#FFFFFF';c.strokeStyle='#9AA7B3';c.lineWidth=0.8;var hp=[[-6,-6],[6,-6],[-6,6],[6,6]];for(var i=0;i<4;i++){circ(c,hp[i][0],hp[i][1],3.2);c.beginPath();c.arc(hp[i][0],hp[i][1],3.2,0,6.2832);c.stroke();}c.fillStyle='#2B2B2B';circ(c,0,0,5.5);}
+ else if(k==='n2'){c.fillStyle='#4F7FD9';circ(c,-4,0,4.8);circ(c,4,0,4.8);}
+ else{c.fillStyle='#F09A8C';circ(c,-4,0,4.8);circ(c,4,0,4.8);}
+ c.restore();}
+function sceneBubbles(c,t){
+ var g=c.createRadialGradient(200,140,20,200,140,260);g.addColorStop(0,'#E8F6FD');g.addColorStop(1,'#94C8E6');c.fillStyle=g;c.fillRect(0,0,400,300);
+ c.strokeStyle='#2C4A63';c.lineWidth=14;c.beginPath();c.moveTo(276,214);c.lineTo(326,250);c.stroke();
+ c.fillStyle='#B5DDF0';circ(c,200,136,108);
+ var i;for(i=0;i<14;i++){var a=rnd(i)*6.28,d=78+rnd(i+5)*18;c.fillStyle='rgba(240,250,255,0.9)';circ(c,200+Math.cos(a)*d,136+Math.sin(a)*d,2+rnd(i+2)*4);}
+ c.fillStyle='rgba(244,251,255,0.97)';circ(c,200,136,64);c.strokeStyle='#FFFFFF';c.lineWidth=3;c.beginPath();c.arc(200,136,64,0,6.2832);c.stroke();
+ var M=[['co2',-28,-22],['n2',22,-30],['o2',-32,22],['ch4',24,20],['n2',-2,2],['co2',34,-4],['n2',-4,-40],['o2',4,40]];
+ for(i=0;i<M.length;i++){mol(c,M[i][0],200+M[i][1]+Math.sin(t*1.3+i)*4,136+M[i][2]+Math.cos(t*1.1+i*2)*4,t*0.6+i);}
+ c.strokeStyle='#2C4A63';c.lineWidth=6;c.beginPath();c.arc(200,136,108,0,6.2832);c.stroke();
+ txt(c,'Ancient air trapped in a bubble',200,264,'800 13px '+FONT,'#123A55','center');
+ c.fillStyle='#2B2B2B';circ(c,40,284,4);c.fillStyle='#E0523A';circ(c,32,284,3.5);circ(c,48,284,3.5);
+ txt(c,'CO2 carbon dioxide',58,288,'600 10.5px '+FONT,'#123A55');
+ c.fillStyle='#FFFFFF';circ(c,181,279,2.4);circ(c,191,279,2.4);circ(c,181,289,2.4);circ(c,191,289,2.4);c.fillStyle='#2B2B2B';circ(c,186,284,4);
+ txt(c,'CH4 methane',198,288,'600 10.5px '+FONT,'#123A55');
+ c.fillStyle='#4F7FD9';circ(c,286,284,3.5);circ(c,293,284,3.5);txt(c,'N2, O2 air',301,288,'600 10.5px '+FONT,'#123A55');
+}
+function sceneLayers(c,t){
+ sky(c,400,300,'#9ACDEB','#DDF0FA');
+ var X=80,Y=36,W=240,HI=222,HB=18;
+ c.fillStyle='#FFFFFF';c.fillRect(X,Y-5,W,5);
+ drawSection(c,X,Y,W,HI,HB,40);
+ c.strokeStyle='#2C4A63';c.lineWidth=1;c.strokeRect(X,Y,W,HI+HB);
+ var d=(t*380)%3800;if(d>3270)d=3270;var yd=Y+d/3270*HI;
+ c.fillStyle='#5E8FAE';c.fillRect(197,Y,6,yd-Y);c.fillStyle='#FF7A2F';c.fillRect(195,yd-7,10,8);
+ txt(c,'Depth',X-6,26,'800 11px '+FONT,'#123A55','right');txt(c,'Age of ice',X+W+6,26,'800 11px '+FONT,'#123A55');
+ var marks=[0,1000,2000,3000,3200];c.strokeStyle='#2C4A63';
+ for(var i=0;i<marks.length;i++){var m=marks[i],yy=Y+m/3270*HI;c.beginPath();c.moveTo(X-4,yy);c.lineTo(X,yy);c.moveTo(X+W,yy);c.lineTo(X+W+4,yy);c.stroke();
+  txt(c,fmt(m)+' m',X-6,yy+3.5,'600 10px '+FONT,'#123A55','right');
+  txt(c,m===0?'today':'~'+fmt(Math.round(ageAt(m)/1000)*1000)+' yr',X+W+6,yy+3.5,'600 10px '+FONT,'#123A55');}
+ txt(c,'ash layer',X+W-4,Y+1300/3270*HI-3,'600 9px '+FONT,'#3E3A36','right');
+ txt(c,'bedrock',X+W-4,Y+HI+13,'700 9px '+FONT,'#F4E6D4','right');
+ txt(c,'Deeper ice = older ice',200,292,'800 13px '+FONT,'#123A55','center');
+}
+function sceneCore(c,t){
+ c.fillStyle='#DCEFFA';c.fillRect(0,0,400,300);c.fillStyle='#C9DEEA';c.fillRect(0,190,400,110);
+ c.fillStyle='#7A5234';c.fillRect(30,190,12,110);c.fillRect(358,190,12,110);
+ c.fillStyle='#A0704A';c.fillRect(10,172,380,20);
+ var bob=Math.sin(t*1.5)*2;
+ c.fillStyle='#8A97A6';c.fillRect(60,62+bob,240,26);c.fillStyle='#5B6775';c.fillRect(70,70+bob,230,10);
+ c.fillStyle='#FF7A2F';for(var k=0;k<4;k++){c.beginPath();c.moveTo(300,62+bob+k*6.5);c.lineTo(312,65+bob+k*6.5);c.lineTo(300,68.5+bob+k*6.5);c.closePath();c.fill();}
+ txt(c,'Hollow drill barrel with cutting teeth',180,52,'800 12px '+FONT,'#123A55','center');
+ drawCoreShape(c,50,128,300,42,12,'bubbles',3);
+ txt(c,'Ice core: a cylinder of ice about 10 cm across',200,222,'800 12px '+FONT,'#123A55','center');
+ txt(c,'Pulled up a few meters at a time',200,240,'600 11px '+FONT,'#2C4A63','center');
+}
+function drawScene(c,name,t){if(name==='camp')sceneCamp(c,t);else if(name==='snow')sceneSnow(c,t);else if(name==='bubbles')sceneBubbles(c,t);else if(name==='layers')sceneLayers(c,t);else if(name==='core')sceneCore(c,t);else drawScene2(c,name,t);}
+
+/* ---------- story engine ---------- */
+var WHO={frost:{n:'Dr. Frost',col:'#1F7E94',pitch:1.05},sam:{n:'Sam (new worker)',col:'#D9601C',pitch:0.8},rosa:{n:'Rosa (new worker)',col:'#A37F00',pitch:1.3}};
+var story=null,sIdx=0;
+function startStory(steps,onDone,last){story={steps:steps,done:onDone,last:last};sIdx=0;show('scrStory');var c=setupCanvas($('storyCv'),400,300,0.42);startLoop(function(dt,t){drawScene(c,story.steps[sIdx].sc,t);});renderStep();}
+function renderStep(){var st=story.steps[sIdx],w=WHO[st.who];$('spName').textContent=w.n;$('spName').style.color=w.col;$('spText').textContent=st.tx;$('stepCount').textContent=(sIdx+1)+' / '+story.steps.length;$('btnPrev').style.visibility=sIdx>0?'visible':'hidden';$('btnNext').textContent=(sIdx===story.steps.length-1)?(story.last||'Start'):'Next';say(st.tx,w.pitch);}
+
+var CH1_STEPS=[
+ {sc:'camp',who:'frost',tx:"Welcome to Antarctica, team! I'm Dr. Frost. Right now we are standing on an ice sheet more than 3 kilometers thick."},
+ {sc:'camp',who:'sam',tx:"Three kilometers of ice? How did it all get here?"},
+ {sc:'camp',who:'frost',tx:"Snow! It falls here every year and almost never melts. New snow piles on top of old snow, year after year, for hundreds of thousands of years."},
+ {sc:'snow',who:'frost',tx:"The weight of the new snow squeezes the old snow underneath. First it packs into grainy old snow called firn. Then it turns into solid ice."},
+ {sc:'snow',who:'frost',tx:"Somewhere around 50 to 120 meters down, the little air spaces between the grains get sealed off. They become tiny air bubbles trapped inside the ice."},
+ {sc:'bubbles',who:'frost',tx:"Each bubble is a sample of ancient air. In the lab we measure the gases inside, like carbon dioxide and methane, to learn what Earth's atmosphere was like long ago."},
+ {sc:'bubbles',who:'frost',tx:"The ice holds other clues too. Special forms of hydrogen and oxygen, called isotopes, tell us how warm or cold it was. Layers of dust and volcanic ash record windstorms and eruptions."},
+ {sc:'layers',who:'rosa',tx:"So if the snow keeps piling up, the deepest ice must be the oldest?"},
+ {sc:'layers',who:'frost',tx:"Exactly! The newest ice is on top and the oldest ice is at the bottom. Deep down, the weight of all that ice squeezes the layers thinner and thinner."},
+ {sc:'layers',who:'frost',tx:"At a site called Dome C, scientists drilled about 3.2 kilometers down and pulled up ice about 800,000 years old."},
+ {sc:'layers',who:'rosa',tx:"800,000 years? That's older than our species!"},
+ {sc:'layers',who:'frost',tx:"Right! Modern humans have only been around for about 300,000 years. The ice shows carbon dioxide rose and fell between about 180 and 300 parts per million through ice ages and warm periods. Today it is over 420."},
+ {sc:'core',who:'frost',tx:"Our drill is a hollow tube with sharp teeth. It cuts out a cylinder of ice about 10 centimeters across, called an ice core. We pull it up a few meters at a time."},
+ {sc:'camp',who:'frost',tx:"Your job: drill three ice cores, each one deeper than the last. Hold the drill button to drill. If the motor gets too hot, let go so it can cool down. Let's go!"}
+];
+
+/* ---------- drill game ---------- */
+var CORES=[
+ {target:500,mode:'bubbles',sw:22,title:'Core 1: about 18,000 years old',fact:"This ice formed near the end of the last ice age, when giant ice sheets covered much of North America. Look at all the tiny air bubbles. Each one holds a sample of air from that time."},
+ {target:2000,mode:'crystal',sw:9,title:'Core 2: about 200,000 years old',fact:"The bubbles seem to vanish down here! The pressure is so high that the air gets squeezed into tiny crystals called clathrates. The air is still trapped, so scientists can still measure it. Notice the layers are squeezed thinner too."},
+ {target:3200,mode:'crystal',sw:4,title:'Core 3: about 800,000 years old!',fact:"Jackpot! This ice is older than our species. Ice this deep holds a record of about eight ice-age cycles, and its air shows carbon dioxide never got close to today's level of over 420 parts per million."}
+];
+var D={i:0,depth:0,start:0,heat:0,jam:0,hold:false,phase:'drill',pull:0,c:null};
+function dY(d){return 120+d/3270*335;}
+function startDrillGame(){show('scrDrill');D.i=0;D.depth=0;D.start=0;D.heat=0;D.jam=0;D.hold=false;D.phase='drill';D.pull=0;D.c=setupCanvas($('drillCv'),400,480,0.4);setDrillUI();startLoop(drillLoop);say("Hold the button to start drilling!",1.05);}
+function setDrillUI(){$('dCore').textContent='Ice core '+(D.i+1)+' of 3: drill to '+fmt(CORES[D.i].target)+' m';$('btnHold').style.display=(D.phase==='drill')?'block':'none';$('btnPull').style.display=(D.phase==='reached')?'block':'none';if(D.phase==='drill'){$('dMsg').textContent='';}}
+function drillLoop(dt,t){
+ var cr=CORES[D.i];
+ if(D.phase==='drill'){
+  if(D.jam>0){D.jam-=dt;D.heat=Math.max(0,D.heat-32*dt);if(D.jam<=0){$('dMsg').textContent=D.hold?'':'Motor cooled. Hold to drill again.';if(D.hold)startDrillSnd();}}
+  else if(D.hold){D.depth+=(cr.target-D.start)/8*dt;D.heat+=13*dt;
+   if(D.heat>=100){D.heat=100;D.jam=1.6;stopDrillSnd();sfx.buzz();$('dMsg').textContent='Motor too hot! Let go so it can cool down.';}
+   if(D.depth>=cr.target){D.depth=cr.target;D.phase='reached';D.hold=false;D.jam=0;$('btnHold').className='hold';stopDrillSnd();sfx.good();setDrillUI();$('dMsg').textContent='Target reached! Pull up the ice core.';}}
+  else{D.heat=Math.max(0,D.heat-30*dt);}
+ }else if(D.phase==='pull'){D.pull+=dt/1.6;if(D.pull>=1){D.pull=1;D.phase='card';showCoreCard();}}
+ $('dDepth').textContent=fmt(D.depth)+' m';$('dAge').textContent=ageStr(D.depth);
+ var hf=$('heatFill');hf.style.width=Math.round(D.heat)+'%';hf.style.background=D.heat<60?'#6FE3A4':(D.heat<85?'#F2C230':'#FF5A4A');
+ drawDrill(D.c,t);
+}
+function drawDrill(c,t){
+ sky(c,400,120,'#6FA9D6','#DDF0FA');c.fillStyle='#FFF7DE';circ(c,350,40,10);
+ c.fillStyle='#F8FCFF';c.fillRect(0,112,400,8);
+ tent(c,50,120,0.7);rig(c,200,121,0.95);
+ person(c,108,123,0.6,'#2A9DB5',{glasses:true,clip:true,skin:'#E8B48F'},t);
+ person(c,282,123,0.6,'#FF7A2F',{goggles:true,skin:'#C68A5E',wave:D.phase==='reached'},t);
+ person(c,318,124,0.6,'#F2C230',{skin:'#F2C9A5',wave:D.phase==='reached'},t);
+ drawSection(c,0,120,400,335,25,60);
+ var i;c.strokeStyle='rgba(18,58,85,0.55)';c.lineWidth=1;
+ for(i=0;i<=3000;i+=500){var y=dY(i);c.beginPath();c.moveTo(0,y);c.lineTo(8,y);c.stroke();if(i>0)txt(c,fmt(i)+' m',11,y+3.5,'600 10px '+FONT,'#123A55');}
+ var ty=dY(CORES[D.i].target);c.strokeStyle='#FF7A2F';c.lineWidth=2;c.setLineDash([6,5]);c.beginPath();c.moveTo(60,ty);c.lineTo(400,ty);c.stroke();c.setLineDash([]);
+ c.fillStyle='rgba(14,27,44,0.82)';rr(c,300,ty-20,94,17,6);c.fill();txt(c,'Target '+fmt(CORES[D.i].target)+' m',347,ty-8,'700 10px '+FONT,'#FFFFFF','center');
+ var yd=dY(D.depth);c.fillStyle='#5E8FAE';c.fillRect(196,120,8,Math.max(0,yd-120));
+ if(D.phase==='pull'||D.phase==='card'){var top=dY(CORES[D.i].target)-(dY(CORES[D.i].target)-96)*D.pull;c.strokeStyle='#3B4654';c.lineWidth=2;c.beginPath();c.moveTo(200,40);c.lineTo(200,top);c.stroke();drawCoreShape(c,195,top,10,30,3,'bubbles',1);}
+ else{c.strokeStyle='#3B4654';c.lineWidth=2;c.beginPath();c.moveTo(200,40);c.lineTo(200,yd-8);c.stroke();
+  var hot=D.jam>0&&Math.floor(t*8)%2===0;c.fillStyle=hot?'#FF3B30':'#FF7A2F';rr(c,193,yd-12,14,12,2);c.fill();
+  c.fillStyle='#4E5D6E';for(i=0;i<3;i++){c.beginPath();c.moveTo(194+i*4.5,yd);c.lineTo(196.2+i*4.5,yd+4);c.lineTo(198.5+i*4.5,yd);c.closePath();c.fill();}
+  if(D.hold&&D.jam<=0){c.fillStyle='rgba(255,255,255,0.9)';for(i=0;i<5;i++){circ(c,200+Math.sin(t*20+i*2)*9,yd+Math.cos(t*17+i)*4,1.4);}}}
+}
+function holdOn(e){if(e)e.preventDefault();ac();if(D.phase!=='drill')return;D.hold=true;$('btnHold').className='hold on';if(D.jam<=0){startDrillSnd();$('dMsg').textContent='';}}
+function holdOff(e){if(e)e.preventDefault();D.hold=false;$('btnHold').className='hold';stopDrillSnd();}
+function showCoreCard(){var cr=CORES[D.i];$('coreCard').style.display='block';$('ccTitle').textContent=cr.title;$('ccText').textContent=cr.fact;$('ccNext').textContent=(D.i<2)?'Drill the next core':'Take the quiz';
+ var c=setupCanvas($('coreCv'),600,190,0.3);c.fillStyle='#F4FAFD';c.fillRect(0,0,600,190);drawCoreShape(c,40,30,520,80,cr.sw,cr.mode,D.i*20+5);
+ c.fillStyle='#F2C230';c.fillRect(40,135,520,22);c.strokeStyle='#5A4500';c.lineWidth=1;for(var k=0;k<=10;k++){var x=40+k*52;c.beginPath();c.moveTo(x,135);c.lineTo(x,k%5===0?151:145);c.stroke();}
+ txt(c,'0',40,178,'700 14px '+FONT,'#123A55','center');txt(c,'50 cm',300,178,'700 14px '+FONT,'#123A55','center');txt(c,'1 m',560,178,'700 14px '+FONT,'#123A55','center');
+ say(cr.title.replace(':','.')+'. '+cr.fact,1.05);}
+function nextCore(){sfx.click();hush();$('coreCard').style.display='none';if(D.i<2){D.start=CORES[D.i].target;D.i++;D.phase='drill';D.heat=0;D.jam=0;D.pull=0;setDrillUI();}else{startQuiz('ch1',CH1_QUIZ);}}
+
+/* ---------- quiz backgrounds ---------- */
+function bgSheet(c){
+ var g=c.createLinearGradient(0,0,0,40);g.addColorStop(0,'#9ACDEB');g.addColorStop(1,'#CDE8F7');c.fillStyle=g;c.fillRect(0,0,600,40);
+ c.fillStyle='#FFFFFF';c.fillRect(0,40,600,70);c.strokeStyle='#9CC3DA';c.lineWidth=1.4;var i;for(i=0;i<26;i++){flake(c,10+rnd(i)*580,50+rnd(i+40)*52,4.5,i);}
+ drawSection(c,0,110,600,440,70,80);
+ c.strokeStyle='#2C4A63';c.lineWidth=2;c.beginPath();c.moveTo(340,292);c.lineTo(414,316);c.stroke();c.strokeRect(318,280,22,20);
+ c.fillStyle='#B5DDF0';circ(c,470,330,60);c.strokeStyle='#2C4A63';c.lineWidth=5;c.beginPath();c.arc(470,330,60,0,6.2832);c.stroke();
+ c.fillStyle='rgba(244,251,255,0.97)';circ(c,470,330,17);c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.arc(470,330,17,0,6.2832);c.stroke();
+ for(i=0;i<6;i++){var a=i*1.05+0.3;c.fillStyle='rgba(244,251,255,0.9)';circ(c,470+Math.cos(a)*40,330+Math.sin(a)*38,3+rnd(i)*3);}
+}
+function bgDraw(c){
+ var g=c.createLinearGradient(0,0,0,90);g.addColorStop(0,'#9ACDEB');g.addColorStop(1,'#DDF0FA');c.fillStyle=g;c.fillRect(0,0,600,90);
+ rig(c,300,92,0.85);c.fillStyle='#FFFFFF';c.fillRect(0,86,600,6);drawSection(c,0,90,600,450,60,70);
+}
+
+/* ---------- quiz data ---------- */
+var CH1_QUIZ=[
+ {t:'mc',q:'What do the tiny air bubbles in an ice core contain?',o:['Samples of ancient air','Melted seawater','Pure oxygen made by the ice','Water vapor from today'],a:0,why:'When snow turns into ice, air between the grains gets sealed into bubbles. That air is a sample of the atmosphere from when the ice formed.'},
+ {t:'mc',q:'Where is the OLDEST ice in an ice sheet?',o:['At the top','In the middle','At the bottom','All the ice is the same age'],a:2,why:'New snow piles on top of old snow, so the deepest ice is the oldest and the top is the newest.'},
+ {t:'mc',q:'About how far back does the Dome C ice core record go?',o:['8,000 years','80,000 years','800,000 years','8 million years'],a:2,why:'The Dome C core in Antarctica, about 3.2 km long, holds about 800,000 years of climate history.'},
+ {t:'mc',q:'What turns snow into solid ice in an ice sheet?',o:['The Sun melts it every day','The weight of new snow squeezes it','Seawater freezes into it','Wind blows it into blocks'],a:1,why:'The weight of the snow above packs the old snow into firn, and then into solid ice.'},
+ {t:'mc',q:'Compared to the 800,000-year ice core record, how much CO2 is in the air today?',o:['Lower than ever','About average','Higher than at any time in the record','Exactly the same'],a:2,why:'In the ice core record, CO2 stayed between about 180 and 300 ppm. Today it is over 420 ppm.'},
+ {t:'mc',q:'Which clue in the ice tells scientists how warm or cold it was?',o:['The color of the drill','Isotopes of hydrogen and oxygen in the ice','How loud the drill is','The size of the ice core'],a:1,why:'Special forms of hydrogen and oxygen atoms, called isotopes, change with temperature, so they work like an ancient thermometer.'},
+ {t:'label',q:'Label the ice sheet. Tap a label, then tap where it belongs on the picture.',bg:'sheet',labels:[{s:'Snow',x:300,y:75},{s:'Newest ice',x:300,y:145},{s:'Oldest ice',x:300,y:525},{s:'Air bubble',x:470,y:330}]},
+ {t:'draw',q:'Draw the drill going down into the ice. Then circle where you would find the OLDEST air bubbles.',bg:'draw'},
+ {t:'text',q:'In your own words, explain how an ice core tells scientists about Earth\'s ancient atmosphere.'}
+];
+
+/* ---------- quiz engine ---------- */
+var Q={ch:'',list:[],i:0,items:[]};
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined&&text!==null)e.textContent=text;return e;}
+function chTitle(id){for(var i=0;i<CH.length;i++){if(CH[i].id===id)return CH[i].title;}return id;}
+function startQuiz(ch,list){Q.ch=ch;Q.list=list;Q.i=0;Q.items=[];show('scrQuiz');renderQ();}
+function renderQ(){var b=$('quizBody');b.innerHTML='';$('scrQuiz').scrollTop=0;var q=Q.list[Q.i];
+ b.appendChild(el('div','qhead',chTitle(Q.ch)+' quiz: question '+(Q.i+1)+' of '+Q.list.length));
+ b.appendChild(el('p','qtext',q.q));
+ if(q.t==='mc')renderMC(b,q);else if(q.t==='text')renderText(b,q);else if(q.t==='label')renderLabel(b,q);else if(q.t==='draw')renderDraw(b,q);}
+function nextBtn(b){var n=el('button','big',Q.i<Q.list.length-1?'Next question':'See my results');n.onclick=function(){sfx.click();Q.i++;if(Q.i<Q.list.length)renderQ();else finishQuiz();};b.appendChild(n);}
+function renderMC(b,q){var btns=[];for(var i=0;i<q.o.length;i++){(function(i){var o=el('button','opt',String.fromCharCode(65+i)+'.  '+q.o[i]);o.onclick=function(){if(o.disabled)return;for(var k=0;k<btns.length;k++){btns[k].disabled=true;}btns[q.a].className='opt right';var ok=(i===q.a);if(!ok){o.className='opt wrong';sfx.bad();}else{sfx.good();}
+ Q.items.push({t:'mc',q:q.q,ans:q.o[i],ok:ok,right:q.o[q.a]});b.appendChild(el('div','why',(ok?'Correct! ':'Not quite. ')+q.why));nextBtn(b);};btns.push(o);b.appendChild(o);})(i);}}
+function renderText(b,q){var ta=el('textarea');ta.placeholder='Type your answer here. Use complete sentences.';b.appendChild(ta);var m=el('p','msg','');var s=el('button','big','Save my answer');s.onclick=function(){var v=clean(ta.value).replace(/^\s+|\s+$/g,'');if(v.split(/\s+/).length<8){m.textContent='Write at least one full sentence (8 or more words).';sfx.bad();return;}ta.disabled=true;s.style.display='none';m.textContent='';sfx.good();Q.items.push({t:'text',q:q.q,ans:v,ok:null});b.appendChild(el('div','why','Saved. Your teacher will read this answer in your PDF.'));nextBtn(b);};b.appendChild(s);b.appendChild(m);}
+function cpos(cv,e){var r=cv.getBoundingClientRect();var p=(e.touches&&e.touches.length)?e.touches[0]:((e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e);return {x:(p.clientX-r.left)*cv.width/r.width,y:(p.clientY-r.top)*cv.height/r.height};}
+function drawBg(c,name){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);if(name==='sheet')bgSheet(c);else if(name==='draw')bgDraw(c);else if(name==='sideJune')bgSideJune(c);else if(name==='sideDec')bgSideDec(c);}
+function lblOk(lb,p){if(lb.seg){var x1=lb.seg[0],y1=lb.seg[1],x2=lb.seg[2],y2=lb.seg[3],dx=x2-x1,dy=y2-y1,u=((p.x-x1)*dx+(p.y-y1)*dy)/(dx*dx+dy*dy);u=Math.max(0,Math.min(1,u));var ex=x1+u*dx-p.x,ey=y1+u*dy-p.y;return Math.sqrt(ex*ex+ey*ey)<(lb.tol||35);}var ddx=p.x-lb.x,ddy=p.y-lb.y;return Math.sqrt(ddx*ddx+ddy*ddy)<(lb.r||50);}
+function renderLabel(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=620;b.appendChild(cv);var c=cv.getContext('2d');var place=[],sel=-1,checked=false,chips=[];var i;for(i=0;i<q.labels.length;i++)place.push(null);
+ function tag(s,x,y,col){c.font='700 20px '+FONT;var w=c.measureText(s).width+20;var tx=Math.max(4,Math.min(596-w,x-w/2)),ty=y-44,above=true;if(ty<4){ty=y+14;above=false;}c.strokeStyle=col;c.lineWidth=2;c.beginPath();c.moveTo(x,y);c.lineTo(tx+w/2,above?ty+30:ty);c.stroke();c.fillStyle='rgba(14,27,44,0.9)';rr(c,tx,ty,w,30,9);c.fill();c.strokeStyle=col;c.lineWidth=2.5;rr(c,tx,ty,w,30,9);c.stroke();c.font='700 20px '+FONT;c.fillStyle='#FFFFFF';c.fillText(s,tx+10,ty+21);c.fillStyle=col;circ(c,x,y,7);c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.arc(x,y,7,0,6.2832);c.stroke();}
+ function redraw(res){drawBg(c,q.bg);var k;for(k=0;k<place.length;k++){if(place[k]){var col='#FF7A2F';if(res)col=res[k]?'#2E9E5B':'#E0312A';tag(q.labels[k].s,place[k].x,place[k].y,col);}}
+  if(res){for(k=0;k<place.length;k++){if(!res[k]){var lb=q.labels[k];if(lb.seg){c.setLineDash([8,6]);c.strokeStyle='#FF5A4A';c.lineWidth=4;c.beginPath();c.moveTo(lb.seg[0],lb.seg[1]);c.lineTo(lb.seg[2],lb.seg[3]);c.stroke();}c.setLineDash([5,4]);c.strokeStyle='#E0312A';c.lineWidth=3;c.beginPath();c.arc(q.labels[k].x,q.labels[k].y,22,0,6.2832);c.stroke();c.setLineDash([]);txt(c,q.labels[k].s+' goes here',q.labels[k].x,q.labels[k].y+40,'700 16px '+FONT,'#E0312A','center');}}}}
+ redraw(null);
+ function chipCls(){for(var k=0;k<chips.length;k++){chips[k].className='chip'+(place[k]?' placed':'')+(k===sel?' sel':'');}}
+ var row=el('div','chips');for(i=0;i<q.labels.length;i++){(function(i){var ch=el('button','chip',q.labels[i].s);ch.onclick=function(){if(checked)return;sfx.click();sel=i;chipCls();m.textContent='Now tap where "'+q.labels[i].s+'" belongs.';};chips.push(ch);row.appendChild(ch);})(i);}
+ b.appendChild(row);var m=el('p','msg','Tap a label first.');b.appendChild(m);
+ function tap(e){e.preventDefault();if(checked)return;if(sel<0){m.textContent='Tap a label button first, then tap the picture.';return;}var p=cpos(cv,e);place[sel]=p;sfx.click();redraw(null);var nxt=-1;for(var k=0;k<place.length;k++){if(!place[k]){nxt=k;break;}}sel=nxt;chipCls();m.textContent=nxt<0?'All labels placed. Tap Check, or tap a label to move it.':'Now place: '+q.labels[nxt].s;}
+ cv.addEventListener('touchstart',tap,false);cv.addEventListener('mousedown',tap,false);
+ var chk=el('button','big','Check my labels');chk.onclick=function(){var k;for(k=0;k<place.length;k++){if(!place[k]){m.textContent='Place every label first.';sfx.bad();return;}}checked=true;var res=[],n=0;for(k=0;k<place.length;k++){var dx=place[k].x-q.labels[k].x,dy=place[k].y-q.labels[k].y;res.push(lblOk(q.labels[k],place[k]));if(res[k])n++;}
+  redraw(res);chk.style.display='none';if(n===place.length)sfx.good();else sfx.bad();m.textContent='';
+  Q.items.push({t:'label',q:q.q,ans:n+' of '+place.length+' labels correct',ok:null,pts:n,max:place.length,img:cv.toDataURL('image/jpeg',0.75)});
+  b.appendChild(el('div','why',n+' of '+place.length+' labels in the right spot. Green tags are correct. Red circles show where any missed labels belong.'));nextBtn(b);};
+ b.appendChild(chk);}
+function renderDraw(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=600;b.appendChild(cv);var c=cv.getContext('2d');drawBg(c,q.bg);var cols=q.cols||[['Red','#E0312A'],['Black','#111418'],['Blue','#1F5FD1']];var col=cols[0][1],down=false,last=null,marks=0,done=false;
+ var tools=el('div','tools');var tb=[];
+ for(var i=0;i<cols.length;i++){(function(i){var t=el('button','chip'+(i===0?' sel':''),cols[i][0]);t.onclick=function(){col=cols[i][1];for(var k=0;k<tb.length;k++)tb[k].className='chip'+(k===i?' sel':'');};tb.push(t);tools.appendChild(t);})(i);}
+ var clr=el('button','chip','Clear');clr.onclick=function(){if(done)return;drawBg(c,q.bg);marks=0;};tools.appendChild(clr);b.appendChild(tools);
+ function st(e){e.preventDefault();if(done)return;down=true;last=cpos(cv,e);c.fillStyle=col;circ(c,last.x,last.y,2.5);}
+ function mv(e){if(!down||done)return;e.preventDefault();var p=cpos(cv,e);c.strokeStyle=col;c.lineWidth=5;c.lineCap='round';c.beginPath();c.moveTo(last.x,last.y);c.lineTo(p.x,p.y);c.stroke();last=p;marks++;}
+ function en(){down=false;}
+ cv.addEventListener('touchstart',st,false);cv.addEventListener('touchmove',mv,false);cv.addEventListener('touchend',en,false);cv.addEventListener('mousedown',st,false);cv.addEventListener('mousemove',mv,false);window.addEventListener('mouseup',en,false);
+ var m=el('p','msg','');var d=el('button','big','Done drawing');d.onclick=function(){if(marks<15){m.textContent='Add your drawing first.';sfx.bad();return;}done=true;d.style.display='none';tools.style.display='none';m.textContent='';sfx.good();Q.items.push({t:'draw',q:q.q,ans:'(drawing)',ok:null,img:cv.toDataURL('image/jpeg',0.75)});b.appendChild(el('div','why','Saved. Your drawing will be in your PDF for your teacher.'));nextBtn(b);};
+ b.appendChild(d);b.appendChild(m);}
+function finishQuiz(){var sc=0,tot=0;for(var i=0;i<Q.items.length;i++){var it=Q.items[i];if(it.t==='mc'){tot++;if(it.ok)sc++;}else if(it.t==='label'){tot+=it.max;sc+=it.pts;}}
+ S.res[Q.ch]={title:chTitle(Q.ch),items:Q.items,score:sc,total:tot,when:new Date().toLocaleString()};save();
+ var b=$('quizBody');b.innerHTML='';b.appendChild(el('h2',null,chTitle(Q.ch)+' complete!'));b.appendChild(el('div','score',sc+' / '+tot));b.appendChild(el('p','lead','Auto-scored questions. Your written answer and drawing go into your PDF for your teacher to grade.'));
+ var p=el('button','big','Make my PDF report');p.onclick=function(){sfx.click();openReport();};b.appendChild(p);var m=el('button','big alt','Back to chapters');m.onclick=function(){sfx.click();openMenu();};b.appendChild(m);sfx.good();say('Great work! You scored '+sc+' out of '+tot+'.',1.05);}
+
+/* ================= CHAPTER 2: SUNLIGHT AND SEASONS ================= */
+var TILT=23.44,RAD=Math.PI/180,DEG='\u00B0';
+var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var MDAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
+var TH_PERI=13/365.25*2*Math.PI;
+function norm(a){a=a%(2*Math.PI);if(a<0)a+=2*Math.PI;return a;}
+function angDiff(a,b){var d=Math.abs(norm(a)-norm(b));return Math.min(d,2*Math.PI-d);}
+function decl(th){return -TILT*Math.cos(th);}
+function dayOf(th){return (354+norm(th)/(2*Math.PI)*365.25)%365;}
+function thOfDay(d){return norm((d-354)/365.25*2*Math.PI);}
+function dateStr(th){var d=Math.floor(dayOf(th)),m=0;while(m<11&&d>=MDAYS[m]){d-=MDAYS[m];m++;}return MONTHS[m]+' '+(d+1);}
+function seasons(th){var q=Math.floor(norm(th)/(Math.PI/2))%4;return [['Winter','Summer'],['Spring','Fall'],['Summer','Winter'],['Fall','Spring']][q];}
+function daylight(lat,dl){var x=-Math.tan(lat*RAD)*Math.tan(dl*RAD);if(x>=1)return 0;if(x<=-1)return 24;return 2*Math.acos(x)/RAD/15;}
+function hm(h){var H=Math.floor(h),M=Math.round((h-H)*60);if(M===60){H++;M=0;}return H+' h '+M+' m';}
+function noonH(lat,dl){return 90-Math.abs(lat-dl);}
+function latStr(v){if(Math.abs(v)<0.3)return '0'+DEG+' (the equator)';var s=Math.abs(v).toFixed(1)+DEG+(v>0?' N':' S');if(v>23.2)s+=' (Tropic of Cancer)';if(v<-23.2)s+=' (Tropic of Capricorn)';return s;}
+
+function space(c,w,h,t){c.fillStyle='#0B1424';c.fillRect(0,0,w,h);for(var i=0;i<60;i++){var a=0.35+0.45*Math.abs(Math.sin(t*0.8+i));c.fillStyle='rgba(255,255,255,'+a.toFixed(2)+')';circ(c,rnd(i+300)*w,rnd(i+600)*h,0.6+rnd(i+900)*0.9);}}
+function sunGlow(c,x,y,r){var g=c.createRadialGradient(x,y,r*0.2,x,y,r*2.2);g.addColorStop(0,'rgba(255,214,90,0.9)');g.addColorStop(0.45,'rgba(255,170,40,0.25)');g.addColorStop(1,'rgba(255,170,40,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,r*2.2,0,6.2832);c.fill();var g2=c.createRadialGradient(x-r*0.3,y-r*0.3,r*0.1,x,y,r);g2.addColorStop(0,'#FFF6C8');g2.addColorStop(1,'#FFB21E');c.fillStyle=g2;circ(c,x,y,r);}
+function star5(c,x,y,r){c.beginPath();for(var i=0;i<10;i++){var a=-Math.PI/2+i*Math.PI/5,rr2=(i%2===0)?r:r*0.45;if(i===0)c.moveTo(x+Math.cos(a)*rr2,y+Math.sin(a)*rr2);else c.lineTo(x+Math.cos(a)*rr2,y+Math.sin(a)*rr2);}c.closePath();c.fill();}
+function pill(c,s,x,y,fs,col,align){c.font='700 '+fs+'px '+FONT;var w=c.measureText(s).width+12,h=fs+8,x0=x;if(align==='right')x0=x-w;else if(align==='center')x0=x-w/2;c.fillStyle='rgba(10,21,34,0.85)';rr(c,x0,y-h+4,w,h,6);c.fill();c.fillStyle=col||'#FFFFFF';c.fillText(s,x0+6,y);}
+
+function miniEarth(c,x,y,r,sx,sy){
+ c.save();c.beginPath();c.arc(x,y,r,0,6.2832);c.clip();
+ c.fillStyle='#2F7FD1';c.fillRect(x-r,y-r,2*r,2*r);
+ c.fillStyle='#46A35A';CE(c,x-r*0.3,y-r*0.15,r*0.35,r*0.25);c.fill();CE(c,x+r*0.35,y+r*0.3,r*0.25,r*0.35);c.fill();
+ var a=Math.atan2(sy-y,sx-x);c.fillStyle='rgba(4,8,20,0.65)';c.beginPath();c.moveTo(x,y);c.arc(x,y,r+1,a+Math.PI/2,a+3*Math.PI/2);c.closePath();c.fill();
+ c.restore();
+ var ax=Math.sin(TILT*RAD),ay=-Math.cos(TILT*RAD);c.strokeStyle='#FFFFFF';c.lineWidth=1.6;c.beginPath();c.moveTo(x-ax*r*1.6,y-ay*r*1.6);c.lineTo(x+ax*r*1.6,y+ay*r*1.6);c.stroke();
+ txt(c,'N',x+ax*r*1.6+3,y+ay*r*1.6+2,'800 9px '+FONT,'#FFFFFF');
+}
+function drawOrbit(c,W,H,th,t,o){
+ o=o||{};var cx=W/2,cy=H/2,R=W*0.4,ry=H*0.32,i;
+ space(c,W,H,t);
+ c.strokeStyle='rgba(191,230,245,0.5)';c.lineWidth=1.2;c.setLineDash([4,5]);CE(c,cx,cy,R,ry);c.stroke();c.setLineDash([]);
+ var keys=[[0,'Dec 21',0,28],[Math.PI/2,'Mar 20',0,-12],[Math.PI,'Jun 21',0,-26],[3*Math.PI/2,'Sep 22',0,24]];
+ for(i=0;i<4;i++){var px=cx+R*Math.cos(keys[i][0]),py=cy-ry*Math.sin(keys[i][0]);c.fillStyle='#BFE6F5';circ(c,px,py,2.5);txt(c,keys[i][1],px+keys[i][2],py+keys[i][3],'700 11px '+FONT,'#BFE6F5','center');}
+ if(o.dist){var a1=TH_PERI,a2=TH_PERI+Math.PI;var p1x=cx+R*Math.cos(a1),p1y=cy-ry*Math.sin(a1),p2x=cx+R*Math.cos(a2),p2y=cy-ry*Math.sin(a2);
+  c.fillStyle='#FF7A2F';circ(c,p1x,p1y,3.5);circ(c,p2x,p2y,3.5);
+  txt(c,'closest (early Jan)',p1x-6,p1y-12,'700 10px '+FONT,'#FFB27E','right');txt(c,'farthest (early Jul)',p2x+6,p2y+20,'700 10px '+FONT,'#FFB27E');}
+ sunGlow(c,cx,cy,R*0.17);
+ var ex=cx+R*Math.cos(th),ey=cy-ry*Math.sin(th);
+ miniEarth(c,ex,ey,W*0.042,cx,cy);
+ if(o.star){var sx=W-58,sy=40,ax=Math.sin(TILT*RAD),ay=-Math.cos(TILT*RAD);c.fillStyle='#FFFFFF';star5(c,sx+ax*16,sy+ay*16,5);c.strokeStyle='rgba(255,255,255,0.7)';c.lineWidth=1.2;c.beginPath();c.moveTo(sx-ax*10,sy-ay*10);c.lineTo(sx+ax*10,sy+ay*10);c.stroke();txt(c,'North Star',sx-16,sy+24,'600 9px '+FONT,'#FFFFFF');}
+ return {cx:cx,cy:cy,R:R,ry:ry};
+}
+
+/* Side view of Earth at noon with sunlight from the left. dl = latitude of the direct rays */
+var LATS=[[0,'Equator','#FFFFFF',[]],[23.44,'Tropic of Cancer','#FFD45A',[5,4]],[-23.44,'Tropic of Capricorn','#FFD45A',[5,4]],[66.56,'Arctic Circle','#BFE6F5',[3,4]],[-66.56,'Antarctic Circle','#BFE6F5',[3,4]]];
+function drawSide(c,cx,cy,R,dl,o){
+ o=o||{};var s=Math.sin(dl*RAD),co=Math.cos(dl*RAD),ux=-s,uy=-co,vx=co,vy=-s,i,y,fs=o.fs||9;
+ if(o.rays){c.strokeStyle='rgba(255,214,90,0.9)';c.fillStyle='rgba(255,214,90,0.95)';c.lineWidth=2;
+  for(i=-4;i<=4;i++){y=cy+i*R*0.23;var dy=y-cy;var xe=cx-Math.sqrt(R*R-dy*dy)-1;if(xe<o.rayX+14)continue;c.beginPath();c.moveTo(o.rayX,y);c.lineTo(xe-7,y);c.stroke();c.beginPath();c.moveTo(xe,y);c.lineTo(xe-8,y-4);c.lineTo(xe-8,y+4);c.closePath();c.fill();}}
+ c.save();c.beginPath();c.arc(cx,cy,R,0,6.2832);c.clip();
+ var g=c.createRadialGradient(cx-R*0.4,cy-R*0.3,R*0.1,cx,cy,R*1.1);g.addColorStop(0,'#5FA8E8');g.addColorStop(1,'#1F5FA8');c.fillStyle=g;c.fillRect(cx-R,cy-R,2*R,2*R);
+ c.fillStyle='rgba(70,163,90,0.85)';CE(c,cx-R*0.25,cy-R*0.22,R*0.22,R*0.15);c.fill();CE(c,cx+R*0.2,cy+R*0.32,R*0.17,R*0.24);c.fill();CE(c,cx+R*0.45,cy-R*0.38,R*0.2,R*0.12);c.fill();
+ function cap(sg){var k=Math.sin(68*RAD)*sg,bx=cx+ux*R*k,by=cy+uy*R*k;c.fillStyle='rgba(245,250,255,0.92)';c.beginPath();c.moveTo(bx-vx*R*1.3,by-vy*R*1.3);c.lineTo(bx+vx*R*1.3,by+vy*R*1.3);c.lineTo(bx+vx*R*1.3+ux*R*sg*1.5,by+vy*R*1.3+uy*R*sg*1.5);c.lineTo(bx-vx*R*1.3+ux*R*sg*1.5,by-vy*R*1.3+uy*R*sg*1.5);c.closePath();c.fill();}
+ cap(1);cap(-1);
+ for(i=0;i<LATS.length;i++){var sp=Math.sin(LATS[i][0]*RAD),hl=R*Math.cos(LATS[i][0]*RAD),mx=cx+ux*R*sp,my=cy+uy*R*sp;c.strokeStyle=LATS[i][2];c.lineWidth=i===0?2:1.5;c.setLineDash(LATS[i][3]);c.beginPath();c.moveTo(mx-vx*hl,my-vy*hl);c.lineTo(mx+vx*hl,my+vy*hl);c.stroke();}
+ c.setLineDash([]);
+ if(o.night!==false){c.fillStyle='rgba(4,8,20,0.55)';c.fillRect(cx,cy-R,R,2*R);}
+ c.restore();
+ c.strokeStyle='rgba(255,255,255,0.6)';c.lineWidth=1;c.beginPath();c.arc(cx,cy,R,0,6.2832);c.stroke();
+ c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.moveTo(cx-ux*R*1.22,cy-uy*R*1.22);c.lineTo(cx+ux*R*1.22,cy+uy*R*1.22);c.stroke();
+ txt(c,'N',cx+ux*R*1.3,cy+uy*R*1.3+(uy<0?0:8),'800 '+(fs+2)+'px '+FONT,'#FFFFFF','center');txt(c,'S',cx-ux*R*1.3,cy-uy*R*1.3+(uy<0?10:0),'800 '+(fs+2)+'px '+FONT,'#FFFFFF','center');
+ if(o.labels){for(i=0;i<LATS.length;i++){var sp2=Math.sin(LATS[i][0]*RAD),hl2=R*Math.cos(LATS[i][0]*RAD);txt(c,LATS[i][1],cx+ux*R*sp2+vx*hl2+4,cy+uy*R*sp2+vy*hl2+3,'700 '+fs+'px '+FONT,LATS[i][2]);}}
+ if(o.star){c.fillStyle='#FFD45A';star5(c,cx-R,cy,R*0.08+3);c.strokeStyle='#0B1424';c.lineWidth=1;}
+ if(o.cities){var C=[[28.5,'Orlando','#FF7A2F'],[-27.5,'Brisbane','#6FE3A4']];for(i=0;i<2;i++){var a=(C[i][0]-dl)*RAD,px=cx-R*Math.cos(a),py=cy-R*Math.sin(a);c.fillStyle=C[i][2];circ(c,px,py,4.5);c.strokeStyle='#FFFFFF';c.lineWidth=1.5;c.beginPath();c.arc(px,py,4.5,0,6.2832);c.stroke();pill(c,C[i][1],px-9,py+(C[i][0]>0?-6:14),fs+1,C[i][2],'right');}}
+}
+function drawBeams(c,hs,names){
+ for(var k=0;k<2;k++){var ox=k*200,h=hs[k],gy=92,w=24;c.save();c.beginPath();c.rect(ox,0,200,120);c.clip();
+  c.fillStyle='#0B1424';c.fillRect(ox,0,200,120);c.fillStyle='#3E6B3E';c.fillRect(ox,gy,200,10);
+  c.strokeStyle='rgba(255,255,255,0.18)';c.lineWidth=1;for(var x=ox;x<ox+200;x+=12){c.beginPath();c.moveTo(x,gy);c.lineTo(x,gy+10);c.stroke();}
+  var sn=Math.sin(h*RAD),L=w/Math.max(sn,0.05),dx=Math.cos(h*RAD),dy=sn,gx=ox+120;
+  c.fillStyle='rgba(255,214,90,0.5)';c.beginPath();c.moveTo(gx-L/2,gy);c.lineTo(gx+L/2,gy);c.lineTo(gx+L/2-dx*120,gy-dy*120);c.lineTo(gx-L/2-dx*120,gy-dy*120);c.closePath();c.fill();
+  c.fillStyle='rgba(255,230,120,'+(0.25+0.75*sn).toFixed(2)+')';c.fillRect(gx-L/2,gy-2,L,6);
+  txt(c,names[k],ox+8,15,'800 12px '+FONT,k===0?'#FF9A5C':'#6FE3A4');
+  txt(c,'Noon Sun: '+Math.round(h)+DEG+' high',ox+8,30,'600 10.5px '+FONT,'#DDEFF8');
+  txt(c,'Sunlight strength: '+Math.round(sn*100)+'%',ox+8,116,'700 10.5px '+FONT,'#FFFFFF');
+  c.restore();}
+ c.fillStyle='#27425F';c.fillRect(199,0,2,120);
+}
+
+/* ---- story scenes ---- */
+function sceneTilt(c,t){space(c,400,300,t);var cx=200,cy=168,R=88;
+ c.strokeStyle='rgba(191,230,245,0.5)';c.setLineDash([4,5]);c.lineWidth=1;c.beginPath();c.moveTo(20,cy);c.lineTo(380,cy);c.moveTo(cx,cy-R*1.45);c.lineTo(cx,cy+R*1.3);c.stroke();c.setLineDash([]);
+ txt(c,'orbit plane',372,cy-6,'600 10px '+FONT,'#BFE6F5','right');
+ drawSide(c,cx,cy,R,TILT,{night:false});
+ var ax=Math.sin(TILT*RAD),ay=-Math.cos(TILT*RAD);
+ c.strokeStyle='#FFD45A';c.lineWidth=2;c.beginPath();c.arc(cx,cy,R*1.12,-Math.PI/2-TILT*RAD,-Math.PI/2);c.stroke();
+ pill(c,'23.4'+DEG,cx+12,cy-R*1.18,13,'#FFD45A','left');
+ c.fillStyle='#FFFFFF';star5(c,cx-ax*R*1.62,cy+ay*R*1.62,6);
+ pill(c,'North Star',cx-ax*R*1.62-10,cy+ay*R*1.62+4,10,'#FFFFFF','right');
+ txt(c,'The axis always points toward the North Star',200,292,'700 12px '+FONT,'#BFE6F5','center');}
+function flashlight(c,x,y,ang){c.save();c.translate(x,y);c.rotate(ang);c.fillStyle='#3E4A5A';rr(c,-9,-46,18,40,5);c.fill();c.fillStyle='#FF7A2F';rr(c,-13,-8,26,12,4);c.fill();c.fillStyle='#FFF2B0';c.fillRect(-11,3,22,3);c.restore();}
+function sceneBeam(c,t){c.fillStyle='#16283E';c.fillRect(0,0,400,300);c.fillStyle='#22384F';c.fillRect(0,214,400,86);
+ c.strokeStyle='rgba(191,230,245,0.25)';c.lineWidth=1;for(var x=0;x<=400;x+=20){c.beginPath();c.moveTo(x,214);c.lineTo(x,300);c.stroke();}for(var y=214;y<=300;y+=14){c.beginPath();c.moveTo(0,y);c.lineTo(400,y);c.stroke();}
+ var p=0.85+Math.sin(t*3)*0.05;
+ c.fillStyle='rgba(255,230,120,'+(0.35*p).toFixed(2)+')';c.beginPath();c.moveTo(89,62);c.lineTo(111,62);c.lineTo(126,232);c.lineTo(74,232);c.closePath();c.fill();
+ c.fillStyle='rgba(255,236,140,'+(0.95*p).toFixed(2)+')';CE(c,100,232,27,7);c.fill();
+ flashlight(c,100,58,0);
+ c.fillStyle='rgba(255,230,120,'+(0.22*p).toFixed(2)+')';c.beginPath();c.moveTo(214,82);c.lineTo(228,70);c.lineTo(370,232);c.lineTo(250,232);c.closePath();c.fill();
+ c.fillStyle='rgba(255,236,140,'+(0.4*p).toFixed(2)+')';CE(c,310,232,60,9);c.fill();
+ flashlight(c,220,76,-0.72);
+ txt(c,'Direct',100,26,'800 14px '+FONT,'#FFD45A','center');txt(c,'Slanted',300,26,'800 14px '+FONT,'#FFD45A','center');
+ txt(c,'small, bright spot',100,264,'700 12px '+FONT,'#FFFFFF','center');txt(c,'= more heating',100,281,'600 11px '+FONT,'#BFE6F5','center');
+ txt(c,'same light, spread out',310,264,'700 12px '+FONT,'#FFFFFF','center');txt(c,'= less heating',310,281,'600 11px '+FONT,'#BFE6F5','center');}
+function sceneSolstice(c,t){space(c,400,300,t);sunGlow(c,-30,150,46);drawSide(c,216,152,96,TILT,{rays:true,rayX:22,labels:true,star:true});
+ txt(c,'June solstice (about June 21)',10,20,'800 13px '+FONT,'#FFFFFF');pill(c,'Most direct rays',112,140,10,'#FFD45A','right');}
+function sceneEquinox(c,t){space(c,400,300,t);sunGlow(c,-30,150,46);drawSide(c,216,152,96,0,{rays:true,rayX:22,labels:true,star:true});
+ txt(c,'Equinox (about Mar 20 and Sep 22)',10,20,'800 13px '+FONT,'#FFFFFF');pill(c,'Direct rays on the equator',112,140,10,'#FFD45A','right');}
+function sceneHemis(c,t){space(c,400,300,t);
+ drawSide(c,108,150,64,TILT,{rays:true,rayX:8,star:true});drawSide(c,300,150,64,-TILT,{rays:true,rayX:205,star:true});
+ c.fillStyle='#27425F';c.fillRect(199,30,2,240);
+ txt(c,'June',108,30,'800 15px '+FONT,'#FFFFFF','center');txt(c,'December',300,30,'800 15px '+FONT,'#FFFFFF','center');
+ txt(c,'North: summer',108,252,'700 11.5px '+FONT,'#FF9A5C','center');txt(c,'South: winter',108,268,'700 11.5px '+FONT,'#8FC9E3','center');
+ txt(c,'North: winter',300,252,'700 11.5px '+FONT,'#8FC9E3','center');txt(c,'South: summer',300,268,'700 11.5px '+FONT,'#FF9A5C','center');}
+function sceneScale(c,t){space(c,400,300,t);sunGlow(c,-170,150,260);
+ var ex=292,ey=160;c.fillStyle='#5FA8E8';circ(c,ex,ey,2.4);c.strokeStyle='#FFFFFF';c.lineWidth=1;c.beginPath();c.arc(ex,ey,7,0,6.2832);c.stroke();
+ pill(c,'Earth (tiny!)',ex+12,ey+4,11,'#5FA8E8','left');pill(c,'The Sun',112,60,13,'#FFD45A','left');
+ txt(c,'Sizes to scale: the Sun is about',250,226,'700 12px '+FONT,'#FFFFFF','center');txt(c,'109 times wider than Earth.',250,242,'700 12px '+FONT,'#FFFFFF','center');
+ txt(c,'Distance NOT to scale: the real Earth would be',250,266,'600 11px '+FONT,'#BFE6F5','center');txt(c,'about 108 Sun-widths away, far off this screen!',250,281,'600 11px '+FONT,'#BFE6F5','center');}
+function drawScene2(c,name,t){
+ if(name==='orbit')drawOrbit(c,400,300,norm(t*0.55),t,{star:true});
+ else if(name==='distance'){drawOrbit(c,400,300,norm(t*0.55),t,{dist:true});txt(c,'Closest: about 147 million km',8,16,'700 10.5px '+FONT,'#FFFFFF');txt(c,'Farthest: about 152 million km',8,30,'700 10.5px '+FONT,'#FFFFFF');txt(c,'Only about 3% different!',392,16,'700 10.5px '+FONT,'#FFD45A','right');}
+ else if(name==='tilt')sceneTilt(c,t);else if(name==='beam')sceneBeam(c,t);else if(name==='solstice')sceneSolstice(c,t);
+ else if(name==='equinox')sceneEquinox(c,t);else if(name==='hemis')sceneHemis(c,t);else if(name==='scale')sceneScale(c,t);}
+
+var CH2_STEPS=[
+ {sc:'orbit',who:'frost',tx:"Great work on those ice cores! To understand Earth's climate, we start with the Sun. Earth travels around the Sun once a year, and that trip gives us our seasons."},
+ {sc:'orbit',who:'sam',tx:"So is it summer when Earth gets closer to the Sun?"},
+ {sc:'distance',who:'frost',tx:"Lots of people think that, but no! Earth's orbit is almost a perfect circle. We are actually closest to the Sun in early January, during winter in Florida, and farthest in early July."},
+ {sc:'tilt',who:'frost',tx:"The real reason is tilt. Earth's axis is tilted about 23.4 degrees. As Earth orbits, the axis keeps pointing in the same direction in space, toward the North Star."},
+ {sc:'beam',who:'frost',tx:"Tilt changes how direct the sunlight is. Direct light hits the ground straight on and packs its energy into a small area. Slanted light spreads the same energy over a bigger area, so it heats the ground less."},
+ {sc:'beam',who:'rosa',tx:"Like a flashlight! Pointing it straight down makes a small, bright spot. Tilting it makes a bigger, dimmer oval."},
+ {sc:'solstice',who:'frost',tx:"Exactly. In June, the Northern Hemisphere tilts toward the Sun. The most direct rays hit the Tropic of Cancer, 23.4 degrees north. Days are long and sunlight is direct, so it is summer up north."},
+ {sc:'hemis',who:'frost',tx:"At the same time, the Southern Hemisphere tilts away, so it is winter there. Here in Antarctica, the Sun does not rise at all for months! In December it flips: summer in the south and winter in the north."},
+ {sc:'equinox',who:'frost',tx:"In March and September, neither hemisphere tilts toward the Sun. The direct rays hit the equator, and day and night are about 12 hours each almost everywhere. Those are the equinoxes."},
+ {sc:'scale',who:'frost',tx:"One warning about our model: it is not to scale. The real Sun is about 109 times wider than Earth and about 150 million kilometers away. If we drew the distance to scale, Earth would be way off the screen!"},
+ {sc:'orbit',who:'frost',tx:"Now it's your turn. Drag Earth around its orbit, watch how the sunlight changes, and complete five missions."}
+];
+
+/* ---- orbit activity ---- */
+var MIS=[
+ {tx:'Move Earth to the June solstice, the longest day of the year in the Northern Hemisphere.',hint:'Watch "Direct rays hit." You want them as far north as they go: the Tropic of Cancer.',ok:function(th,dl){return dl>22.5;},yes:'Yes! The North Pole tilts toward the Sun. The direct rays hit the Tropic of Cancer, and Orlando gets almost 14 hours of daylight.'},
+ {tx:'Move Earth to the peak of summer in the Southern Hemisphere, when Brisbane, Australia has its longest day.',hint:'Now you want the direct rays as far SOUTH as they go: the Tropic of Capricorn.',ok:function(th,dl){return dl<-22.5;},yes:'Right! In December the Southern Hemisphere tilts toward the Sun. Brisbane has summer while Florida has winter.'},
+ {tx:'Find an equinox, when the Sun\'s direct rays hit the equator.',hint:'Look for "Direct rays hit: 0 degrees (the equator)." There are two equinoxes, so either one works.',ok:function(th,dl){return Math.abs(dl)<2;},yes:'Equinox! Neither hemisphere tilts toward the Sun, so day and night are about 12 hours each in Orlando and Brisbane.'},
+ {tx:'Earth is CLOSEST to the Sun in early January. Move Earth there. Then look at the season in Orlando.',hint:'Find the orange dot labeled "closest (early Jan)" on the orbit and drag Earth onto it.',ok:function(th,dl){return angDiff(th,TH_PERI)<0.17;},yes:'It is winter in Orlando, even though Earth is closest to the Sun! Distance barely matters. Tilt is what causes the seasons.'},
+ {tx:'Move Earth to when Antarctica is in its long, dark winter and the South Pole gets no sunlight at all.',hint:'The South Pole is dark when the Southern Hemisphere tilts AWAY from the Sun.',ok:function(th,dl){return dl>15;},yes:'That\'s around June! The South Pole tilts away from the Sun, so the Sun stays below the horizon for months.'}
+];
+var SE={th:0,play:false,mi:0,drag:false,wait:false,done:false,cO:null,cS:null,cB:null,last:''};
+function lpos(cv,e,lw){var r=cv.getBoundingClientRect();var p=(e.touches&&e.touches.length)?e.touches[0]:((e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e);return {x:(p.clientX-r.left)*lw/r.width,y:(p.clientY-r.top)*lw/r.width};}
+function startSeasons(){show('scrSeason');SE.mi=0;SE.play=false;SE.wait=false;SE.done=false;SE.th=thOfDay(105);SE.last='';
+ SE.cO=setupCanvas($('orbCv'),400,300,0.36);SE.cS=setupCanvas($('sideCv'),400,260,0.32);SE.cB=setupCanvas($('beamCv'),400,120,0.2);
+ $('btnPlay').textContent='Play a year';renderMission();startLoop(seasonLoop);say(MIS[0].tx,1.05);}
+function seasonLoop(dt,t){if(SE.play){SE.th=norm(SE.th+dt*2*Math.PI/14);}
+ var dl=decl(SE.th);drawOrbit(SE.cO,400,300,SE.th,t,{dist:true,star:true});
+ var c=SE.cS;space(c,400,260,t);drawSide(c,214,134,92,dl,{rays:true,rayX:10,labels:true,star:true,cities:true});txt(c,'Side view at noon',8,16,'800 11px '+FONT,'#FFFFFF');txt(c,'Sunlight',10,250,'700 10px '+FONT,'#FFD45A');
+ drawBeams(SE.cB,[noonH(28.5,dl),noonH(-27.5,dl)],['Orlando, FL (28.5'+DEG+'N)','Brisbane (27.5'+DEG+'S)']);
+ var se=seasons(SE.th),key=dateStr(SE.th)+'|'+dl.toFixed(1);
+ if(key!==SE.last){SE.last=key;$('sDate').textContent='Date: about '+dateStr(SE.th);$('sNH').textContent=se[0];$('sSH').textContent=se[1];$('sRays').textContent=latStr(dl);
+  $('sOrl').textContent=hm(daylight(28.5,dl))+' of daylight';$('sBri').textContent=hm(daylight(-27.5,dl))+' of daylight';$('sPole').textContent=dl>0.3?'Dark all day':(dl<-0.3?'Sun up all day':'Sun on the horizon');}}
+function renderMission(){var m=MIS[SE.mi];$('misHead').textContent='Mission '+(SE.mi+1)+' of '+MIS.length;$('misText').textContent=m.tx;$('misMsg').textContent='';$('btnCheck').textContent='Check';SE.wait=false;}
+function orbDrag(e){if(!SE.drag)return;e.preventDefault();var p=lpos($('orbCv'),e,400);SE.th=norm(Math.atan2(-(p.y-150)/96,(p.x-200)/160));}
+function orbStart(e){e.preventDefault();ac();SE.drag=true;SE.play=false;$('btnPlay').textContent='Play a year';orbDrag(e);}
+function orbEnd(){SE.drag=false;}
+function seasonCheck(){
+ if(SE.done){sfx.click();startQuiz('ch2',CH2_QUIZ);return;}
+ if(SE.wait){sfx.click();SE.mi++;renderMission();say(MIS[SE.mi].tx,1.05);return;}
+ var m=MIS[SE.mi];if(m.ok(SE.th,decl(SE.th))){sfx.good();SE.play=false;$('btnPlay').textContent='Play a year';$('misMsg').style.color='#6FE3A4';$('misMsg').textContent=m.yes;say(m.yes,1.05);
+  if(SE.mi>=MIS.length-1){SE.done=true;$('misHead').textContent='All missions complete!';$('btnCheck').textContent='Take the quiz';}else{SE.wait=true;$('btnCheck').textContent='Next mission';}}
+ else{sfx.bad();$('misMsg').style.color='#FFD2B8';$('misMsg').textContent='Not yet. '+m.hint;}}
+
+/* ---- quiz backgrounds ---- */
+function bgSideJune(c){space(c,600,620,1);sunGlow(c,-60,330,80);drawSide(c,340,330,180,TILT,{rays:true,rayX:40});}
+function bgSideDec(c){space(c,600,600,1);sunGlow(c,-60,300,80);txt(c,'Sun',20,30,'800 20px '+FONT,'#FFD45A');txt(c,'December',580,34,'800 22px '+FONT,'#FFFFFF','right');drawSide(c,285,310,160,-TILT,{labels:true,fs:15});}
+
+var CH2_QUIZ=[
+ {t:'mc',q:'What is the main cause of Earth\'s seasons?',o:['Earth\'s distance from the Sun changes','The tilt of Earth\'s axis','The Sun gets hotter in summer','The Moon blocks sunlight in winter'],a:1,why:'Earth\'s 23.4 degree tilt changes how directly sunlight hits each hemisphere and how long the days are.'},
+ {t:'mc',q:'When is Earth closest to the Sun?',o:['Early January','Early April','Early July','Early October'],a:0,why:'Earth is closest in early January, which is winter in the Northern Hemisphere. That proves distance is not what causes the seasons.'},
+ {t:'mc',q:'Why does direct sunlight heat the ground more than slanted sunlight?',o:['Direct light is a different color','Direct light packs its energy into a smaller area','Slanted light moves faster','Direct light comes from a closer Sun'],a:1,why:'Direct light concentrates the same energy on a smaller area. Slanted light spreads it out, like a tilted flashlight beam.'},
+ {t:'mc',q:'In June, which statement is true?',o:['Northern Hemisphere summer, Southern Hemisphere winter','Both hemispheres have summer','Northern Hemisphere winter, Southern Hemisphere summer','Both hemispheres have winter'],a:0,why:'In June the Northern Hemisphere tilts toward the Sun and the Southern Hemisphere tilts away, so their seasons are opposite.'},
+ {t:'mc',q:'On an equinox, where do the Sun\'s most direct rays hit?',o:['The Tropic of Cancer','The equator','The Tropic of Capricorn','The North Pole'],a:1,why:'On the equinoxes neither hemisphere tilts toward the Sun, so the direct rays hit the equator.'},
+ {t:'mc',q:'Our orbit model is NOT drawn to scale. Which statement is true?',o:['The Sun is about 109 times wider than Earth','The Sun and Earth are the same size','Earth is bigger than the Sun','The Sun is only 150 km away'],a:0,why:'The Sun is about 109 times wider than Earth and about 150 million km away. A model drawn to scale would not fit on a screen.'},
+ {t:'label',q:'This is Earth in June. Tap a label, then tap where it belongs.',bg:'sideJune',labels:[{s:'North Pole',x:268,y:165,r:50},{s:'Equator',x:340,y:330,seg:[183,398,497,262],tol:30},{s:'Most direct sunlight',x:160,y:330,r:55},{s:'Night side',x:450,y:330,r:90}]},
+ {t:'draw',q:'This is Earth in DECEMBER. Draw the Sun\'s rays reaching Earth. Then draw a star where the sunlight hits most directly.',bg:'sideDec',cols:[['Yellow','#FFD45A'],['White','#FFFFFF'],['Red','#FF5A4A']]},
+ {t:'text',q:'Earth is farther from the Sun in July than in January. Explain why Florida is still warmer in July.'}
+];
+
+/* ---------- menu ---------- */
+function openMenu(){show('scrMenu');$('hello').textContent='Hi, '+S.name+' (Period '+S.period+'). Pick a chapter.';var L=$('chList');L.innerHTML='';
+ for(var i=0;i<CH.length;i++){(function(i){var ch=CH[i];var r=S.res[ch.id];var bt=el('button','ch'+(ch.ready?'':' off'));bt.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,ch.title));tx.appendChild(el('small',null,ch.desc));bt.appendChild(tx);
+  bt.appendChild(el('span','pill'+(r?' done':''),r?('Score '+r.score+'/'+r.total):(ch.ready?'Start':'Soon')));
+  bt.onclick=function(){sfx.click();ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=ch.title;return;}if(ch.id==='ch1')startStory(CH1_STEPS,startDrillGame,'Start drilling');else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');};L.appendChild(bt);})(i);}}
+
+/* ---------- report + PDF ---------- */
+var pdfBlob=null,pdfName='';
+function openReport(){show('scrReport');var n=0;for(var i=0;i<CH.length;i++){if(S.res[CH[i].id])n++;}$('repInfo').textContent=n?('Chapters finished: '+n+'. Your PDF will include every finished chapter.'):'Finish at least one chapter quiz first.';$('btnMakePdf').style.display=n?'block':'none';$('btnShare').style.display='none';$('repStatus').textContent='';$('repPreview').innerHTML='';pdfBlob=null;}
+function wrapLines(c,t,maxW){var out=[],ps=String(t).split('\n');for(var p=0;p<ps.length;p++){var ws=ps[p].split(' '),line='';for(var i=0;i<ws.length;i++){var test=line?line+' '+ws[i]:ws[i];if(c.measureText(test).width>maxW&&line){out.push(line);line=ws[i];}else{line=test;}}out.push(line);}return out;}
+function loadImgs(cb){var list=[],i,j;for(i=0;i<CH.length;i++){var r=S.res[CH[i].id];if(!r)continue;for(j=0;j<r.items.length;j++){if(r.items[j].img)list.push(r.items[j]);}}var left=list.length;if(!left){cb();return;}for(i=0;i<list.length;i++){(function(it){var im=new Image();im.onload=im.onerror=function(){it._im=im;left--;if(left===0)cb();};im.src=it.img;})(list[i]);}}
+function buildPages(){var W=1224,H=1584,M=90,pages=[],cv,c,y;
+ function newPage(){cv=document.createElement('canvas');cv.width=W;cv.height=H;c=cv.getContext('2d');c.fillStyle='#FFFFFF';c.fillRect(0,0,W,H);c.fillStyle='#0E1B2C';c.fillRect(0,0,W,140);
+  txt(c,'Climate Quest: Student Report',M,66,'800 44px '+FONT,'#BFE6F5');txt(c,clean(S.name)+'   |   Period '+S.period+'   |   Page '+(pages.length+1),M,112,'600 24px '+FONT,'#FFFFFF');pages.push(cv);y=210;}
+ function need(h){if(y+h>H-M)newPage();}
+ function para(t,font,col,lh,ind){c.font=font;var ls=wrapLines(c,clean(t),W-2*M-(ind||0));for(var i=0;i<ls.length;i++){need(lh);c.font=font;c.fillStyle=col;c.fillText(ls[i],M+(ind||0),y);y+=lh;}}
+ newPage();
+ para('Name: '+S.name,'800 34px '+FONT,'#0E1B2C',46);para('Period: '+S.period+'      Date: '+new Date().toLocaleDateString(),'600 28px '+FONT,'#2C4A63',44);y+=14;
+ for(var i=0;i<CH.length;i++){var r=S.res[CH[i].id];if(!r)continue;need(140);y+=20;c.fillStyle='#BFE6F5';c.fillRect(M,y-40,W-2*M,58);txt(c,'Chapter '+(i+1)+': '+r.title,M+18,y,'800 32px '+FONT,'#0E1B2C');txt(c,'Score: '+r.score+' / '+r.total,W-M-18,y,'800 28px '+FONT,'#0E1B2C','right');y+=60;
+  for(var j=0;j<r.items.length;j++){var it=r.items[j];para((j+1)+'. '+it.q,'700 26px '+FONT,'#0E1B2C',36);
+   if(it.t==='mc'){para('Answer: '+it.ans+(it.ok?'   (correct)':'   (incorrect - correct answer: '+it.right+')'),'600 24px '+FONT,it.ok?'#1F7A45':'#B3261E',34,30);}
+   else if(it.t==='text'){para(it.ans,'500 24px '+FONT,'#1C2B3A',34,30);}
+   else if(it.t==='label'){para(it.ans,'600 24px '+FONT,'#1C2B3A',34,30);}
+   if(it._im&&it._im.width){var iw=520,ih=iw*it._im.height/it._im.width;need(ih+20);c.drawImage(it._im,M+30,y,iw,ih);c.strokeStyle='#9FB8CC';c.lineWidth=2;c.strokeRect(M+30,y,iw,ih);y+=ih+14;}
+   y+=16;}}
+ return pages;}
+function buildPDF(jpgs){var n=jpgs.length,out='%PDF-1.4\n%'+String.fromCharCode(226,227,207,211)+'\n',off=[],kids=[],k;
+ function add(num,body){off[num]=out.length;out+=num+' 0 obj\n'+body+'\nendobj\n';}
+ for(k=0;k<n;k++)kids.push((3+3*k)+' 0 R');
+ add(1,'<< /Type /Catalog /Pages 2 0 R >>');add(2,'<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+n+' >>');
+ for(k=0;k<n;k++){var j=jpgs[k];add(3+3*k,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im'+k+' '+(4+3*k)+' 0 R >> >> /Contents '+(5+3*k)+' 0 R >>');
+  add(4+3*k,'<< /Type /XObject /Subtype /Image /Width '+j.w+' /Height '+j.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+j.d.length+' >>\nstream\n'+j.d+'\nendstream');
+  var cs='q 612 0 0 792 0 0 cm /Im'+k+' Do Q';add(5+3*k,'<< /Length '+cs.length+' >>\nstream\n'+cs+'\nendstream');}
+ var size=3+3*n,xref=out.length;out+='xref\n0 '+size+'\n0000000000 65535 f \n';for(k=1;k<size;k++){var s=String(off[k]);while(s.length<10)s='0'+s;out+=s+' 00000 n \n';}
+ out+='trailer\n<< /Size '+size+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
+ var u=new Uint8Array(out.length);for(k=0;k<out.length;k++)u[k]=out.charCodeAt(k)&255;return u;}
+function makePdf(){$('repStatus').textContent='Building your PDF...';$('btnMakePdf').style.display='none';
+ loadImgs(function(){try{var pages=buildPages(),jpgs=[],pv=$('repPreview');pv.innerHTML='';
+  for(var i=0;i<pages.length;i++){var url=pages[i].toDataURL('image/jpeg',0.85);jpgs.push({w:pages[i].width,h:pages[i].height,d:atob(url.split(',')[1])});var im=el('img');im.src=url;im.alt='Report page '+(i+1);pv.appendChild(im);}
+  pdfBlob=new Blob([buildPDF(jpgs)],{type:'application/pdf'});pdfName='ClimateQuest_'+clean(S.name).replace(/[^A-Za-z0-9]+/g,'_')+'_P'+S.period+'.pdf';
+  $('btnShare').style.display='block';$('repStatus').textContent='Your PDF is ready ('+pages.length+' page'+(pages.length>1?'s':'')+').';sfx.good();}
+ catch(e){$('repStatus').textContent='The PDF could not be built on this device. Save the page images below instead.';$('btnMakePdf').style.display='block';}});}
+function sharePdf(){if(!pdfBlob)return;var file=null;try{file=new File([pdfBlob],pdfName,{type:'application/pdf'});}catch(e){file=null;}
+ if(file&&navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Climate Quest report'}).then(function(){$('repStatus').textContent='Shared!';},function(){});return;}
+ var url=URL.createObjectURL(pdfBlob);var a=document.createElement('a');a.href=url;a.download=pdfName;document.body.appendChild(a);a.click();document.body.removeChild(a);
+ setTimeout(function(){$('repStatus').textContent='If no download appeared, save the page images below instead.';},1200);}
+
+/* ---------- sign in ---------- */
+function openSign(){show('scrSign');$('inName').value=S.name;$('inPeriod').value=S.period;var c=setupCanvas($('heroCv'),400,300,0.32);startLoop(function(dt,t){sceneCamp(c,t);});}
+function startApp(){ac();var n=clean($('inName').value).replace(/^\s+|\s+$/g,''),p=$('inPeriod').value;if(n.length<2){$('signMsg').textContent='Type your first and last name.';return;}if(!p){$('signMsg').textContent='Choose your class period.';return;}
+ if(S.name&&S.name!==n){S.res={};}S.name=n;S.period=p;save();sfx.good();openMenu();}
+
+/* ---------- wire up ---------- */
+$('btnStart').onclick=startApp;
+$('btnHome').onclick=function(){sfx.click();openMenu();};
+$('btnSound').onclick=function(){V.on=!V.on;this.textContent='Sound: '+(V.on?'On':'Off');if(!V.on){hush();stopDrillSnd();}else{ac();sfx.click();}};
+$('btnSwitch').onclick=function(){sfx.click();openSign();};
+$('btnSoonBack').onclick=function(){sfx.click();openMenu();};
+$('btnReport').onclick=function(){sfx.click();openReport();};
+$('btnNext').onclick=function(){sfx.click();if(sIdx>=story.steps.length-1){story.done();}else{sIdx++;renderStep();}};
+$('btnPrev').onclick=function(){sfx.click();if(sIdx>0){sIdx--;renderStep();}};
+$('btnReplay').onclick=function(){var st=story.steps[sIdx];say(st.tx,WHO[st.who].pitch);};
+$('btnSkip').onclick=function(){sfx.click();story.done();};
+var hb=$('btnHold');hb.addEventListener('touchstart',holdOn,false);hb.addEventListener('touchend',holdOff,false);hb.addEventListener('touchcancel',holdOff,false);hb.addEventListener('mousedown',holdOn,false);hb.addEventListener('mouseup',holdOff,false);hb.addEventListener('mouseleave',function(){if(D.hold)holdOff();},false);
+hb.addEventListener('contextmenu',function(e){e.preventDefault();},false);
+$('btnPull').onclick=function(){if(D.phase!=='reached')return;D.phase='pull';D.pull=0;sfx.winch();$('btnPull').style.display='none';$('dMsg').textContent='Pulling up the core...';};
+$('ccNext').onclick=nextCore;
+$('btnCheck').onclick=seasonCheck;
+$('btnHint').onclick=function(){sfx.click();if(SE.done||SE.wait)return;$('misMsg').style.color='#FFD2B8';$('misMsg').textContent='Hint: '+MIS[SE.mi].hint;};
+$('btnPlay').onclick=function(){sfx.click();ac();SE.play=!SE.play;this.textContent=SE.play?'Pause':'Play a year';};
+var oc=$('orbCv');oc.addEventListener('touchstart',orbStart,false);oc.addEventListener('touchmove',orbDrag,false);oc.addEventListener('touchend',orbEnd,false);oc.addEventListener('mousedown',orbStart,false);oc.addEventListener('mousemove',orbDrag,false);window.addEventListener('mouseup',orbEnd,false);
+$('btnMakePdf').onclick=makePdf;
+$('btnShare').onclick=sharePdf;
+
+load();
+if(S.name&&S.period){openMenu();}else{openSign();}
+})();
+</script>
+</body>
+</html>
