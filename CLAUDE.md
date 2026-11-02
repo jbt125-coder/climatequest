@@ -8,7 +8,7 @@ The whole game lives in `index.html` at the repo root.
 ## Hard technical rules (the game runs in Koder/WKWebView on iPhone)
 - One self-contained HTML file. No libraries, CDNs, web fonts, image files, or network calls at runtime. Embed all data in the file.
 - ES5 only: var and function. No arrow functions, template literals, let/const, classes, default parameters, for...of, spread, or destructuring.
-- The whole file is ASCII only. Use '°' in JS and &deg; in HTML. No smart quotes, en dashes, or em dashes.
+- The whole file is ASCII only. Use '\u00B0' in JS and &deg; in HTML. No smart quotes, en dashes, or em dashes.
 - No CSS custom properties (var(--x)). Use literal hex colors.
 - Never call ctx.ellipse(). Use the CE(c,x,y,rx,ry) helper.
 - No emoji in canvas fillText. Pass any user text drawn on canvas through clean().
