@@ -103,6 +103,12 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
 .dcard .dcf{color:#F4FAFD;font-size:14px;line-height:1.4;}
 .chip.okc{background:#1F5C3E;border-color:#6FE3A4;}
 .chip.badc{background:#5C2626;border-color:#FF8A80;}
+.client{display:flex;align-items:center;margin-bottom:6px;}
+.clav{width:60px;flex:0 0 60px;margin-right:10px;}
+.clav canvas{display:block;border-radius:10px;}
+.client b{color:#FFD45A;font-size:15px;}
+.plsrc{font-size:12px;color:#9FC3D8;margin-top:6px;line-height:1.35;}
+#plStats div{margin-bottom:3px;}
 #abPal .chip{font-size:13px;padding:7px 10px;}
 </style>
 </head>
@@ -338,6 +344,25 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     <p class="note">Example air parcel: 25&deg;C at sea level with a dew point of 17&deg;C, and a mountain about 3 km high. The cooling and warming rates are real: about 10&deg;C per km for dry air and about 5 to 6&deg;C per km inside clouds.</p>
   </div>
 
+  <div id="scrPlan" class="scr">
+    <div class="mis">
+      <div class="client"><div class="clav"><canvas id="plCl"></canvas></div><b id="plClName"></b></div>
+      <b id="plHead"></b>
+      <p id="plText"></p>
+      <div class="row"><button id="plHint" class="sbtn">Hint</button><button id="plCheck" class="big">Check</button></div>
+      <p id="plMsg" class="msg"></p>
+    </div>
+    <div id="plBlkBox">
+      <div class="cvwrap"><canvas id="plBlk"></canvas></div>
+      <div id="plPal" class="tools"></div>
+    </div>
+    <div class="cvwrap"><canvas id="plMap"></canvas></div>
+    <p class="note ctr">Drag the star. It snaps to the nearest city. Tap a month on the climograph for details.</p>
+    <div class="cvwrap"><canvas id="plClim"></canvas></div>
+    <div id="plStats" class="stats"></div>
+    <p class="note">Climographs: red line = average temperature, shaded band = average low to average high, blue bars = precipitation. Climate groups use the textbook Koppen rules applied to each city's data.</p>
+  </div>
+
   <div id="scrQuiz" class="scr"><div id="quizBody"></div></div>
 
   <div id="scrReport" class="scr">
@@ -399,7 +424,7 @@ var CH=[
  {id:'ch4',title:'Orbit Cycles and Ice Ages',desc:'How changes in Earth\'s orbit bring ice ages.',ready:true},
  {id:'ch5',title:'Moving Air',desc:'Convection, the Coriolis effect, and air masses.',ready:true},
  {id:'ch6',title:'Mountains and Rain Shadows',desc:'Push a cloud over a mountain.',ready:true},
- {id:'ch7',title:'City Planner',desc:'Match each city to the right climate.'},
+ {id:'ch7',title:'City Planner',desc:'Match each city to the right climate.',ready:true},
  {id:'ch8',title:'Climate Spiral',desc:'1880 to today in one minute.'}
 ];
 
@@ -436,7 +461,7 @@ function say(t,pitch,who){if(!window.speechSynthesis)return;speechSynthesis.canc
 function hush(){if(window.speechSynthesis){speechSynthesis.cancel();}}
 
 /* ---------- screens + loop ---------- */
-var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','scrLab','scrAlbedo','scrOrbit','scrGraph','scrConv','scrCor','scrAm','scrFc','scrDc','scrQuiz','scrReport'];
+var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','scrLab','scrAlbedo','scrOrbit','scrGraph','scrConv','scrCor','scrAm','scrFc','scrDc','scrPlan','scrQuiz','scrReport'];
 var raf=null,loopFn=null;
 function stopLoops(){loopFn=null;if(raf){cancelAnimationFrame(raf);}raf=null;stopDrillSnd();}
 function startLoop(fn){stopLoops();loopFn=fn;var last=0;function f(ts){if(loopFn!==fn)return;var dt=last?Math.min(0.05,(ts-last)/1000):0.016;last=ts;fn(dt,ts/1000);raf=requestAnimationFrame(f);}raf=requestAnimationFrame(f);}
@@ -723,7 +748,7 @@ function renderMC(b,q){var btns=[];for(var i=0;i<q.o.length;i++){(function(i){va
  Q.items.push({t:'mc',q:q.q,ans:q.o[i],ok:ok,right:q.o[q.a]});b.appendChild(el('div','why',(ok?'Correct! ':'Not quite. ')+q.why));nextBtn(b);};btns.push(o);b.appendChild(o);})(i);}}
 function renderText(b,q){var ta=el('textarea');ta.placeholder='Type your answer here. Use complete sentences.';b.appendChild(ta);var m=el('p','msg','');var s=el('button','big','Save my answer');s.onclick=function(){var v=clean(ta.value).replace(/^\s+|\s+$/g,'');if(v.split(/\s+/).length<8){m.textContent='Write at least one full sentence (8 or more words).';sfx.bad();return;}ta.disabled=true;s.style.display='none';m.textContent='';sfx.good();Q.items.push({t:'text',q:q.q,ans:v,ok:null});b.appendChild(el('div','why','Saved. Your teacher will read this answer in your PDF.'));nextBtn(b);};b.appendChild(s);b.appendChild(m);}
 function cpos(cv,e){var r=cv.getBoundingClientRect();var p=(e.touches&&e.touches.length)?e.touches[0]:((e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e);return {x:(p.clientX-r.left)*cv.width/r.width,y:(p.clientY-r.top)*cv.height/r.height};}
-function drawBg(c,name){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);if(name==='sheet')bgSheet(c);else if(name==='draw')bgDraw(c);else if(name==='sideJune')bgSideJune(c);else if(name==='sideDec')bgSideDec(c);else if(name==='energy')bgEnergy(c);else if(name==='gh')bgGH(c);else if(name==='cycles')bgCycles(c);else if(name==='iceaxis')bgIceAxis(c);else if(name==='cells')bgCells(c);else if(name==='breeze')bgBreeze(c);else if(name==='mtn')bgMtn(c);else if(name==='mtndraw')bgMtnDraw(c);}
+function drawBg(c,name){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);if(name==='sheet')bgSheet(c);else if(name==='draw')bgDraw(c);else if(name==='sideJune')bgSideJune(c);else if(name==='sideDec')bgSideDec(c);else if(name==='energy')bgEnergy(c);else if(name==='gh')bgGH(c);else if(name==='cycles')bgCycles(c);else if(name==='iceaxis')bgIceAxis(c);else if(name==='cells')bgCells(c);else if(name==='breeze')bgBreeze(c);else if(name==='mtn')bgMtn(c);else if(name==='mtndraw')bgMtnDraw(c);else if(name==='climolbl')bgClimoLbl(c);else if(name==='climodraw')bgClimoDraw(c);}
 function lblOk(lb,p){if(lb.seg){var x1=lb.seg[0],y1=lb.seg[1],x2=lb.seg[2],y2=lb.seg[3],dx=x2-x1,dy=y2-y1,u=((p.x-x1)*dx+(p.y-y1)*dy)/(dx*dx+dy*dy);u=Math.max(0,Math.min(1,u));var ex=x1+u*dx-p.x,ey=y1+u*dy-p.y;return Math.sqrt(ex*ex+ey*ey)<(lb.tol||35);}var ddx=p.x-lb.x,ddy=p.y-lb.y;return Math.sqrt(ddx*ddx+ddy*ddy)<(lb.r||50);}
 function renderLabel(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=620;b.appendChild(cv);var c=cv.getContext('2d');var place=[],sel=-1,checked=false,chips=[];var i;for(i=0;i<q.labels.length;i++)place.push(null);
  function tag(s,x,y,col){c.font='700 20px '+FONT;var w=mtext(c,s)+20;var tx=Math.max(4,Math.min(596-w,x-w/2)),ty=y-44,above=true;if(ty<4){ty=y+14;above=false;}c.strokeStyle=col;c.lineWidth=2;c.beginPath();c.moveTo(x,y);c.lineTo(tx+w/2,above?ty+30:ty);c.stroke();c.fillStyle='rgba(14,27,44,0.9)';rr(c,tx,ty,w,30,9);c.fill();c.strokeStyle=col;c.lineWidth=2.5;rr(c,tx,ty,w,30,9);c.stroke();c.font='700 20px '+FONT;c.fillStyle='#FFFFFF';ftext(c,s,tx+10,ty+21);c.fillStyle=col;circ(c,x,y,7);c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.arc(x,y,7,0,6.2832);c.stroke();}
@@ -1758,7 +1783,7 @@ function sceneSlide(c,name,t){var r,i;
    if(name==='sl_hawaii')slideLabel(c,'Mount Waialeale: one of the wettest spots on Earth',200,226,'#1F5FA8');
    if(name==='sl_andes')slideLabel(c,'A cold ocean current also helps keep it dry',200,226,'#1F5FA8');}
   else{slideFrame(c,t,'sl_end','Your turn!');r=crossSec(c,14,40,372,200,t,{wet:0.5,dry:0.5,seaR:true});rainCloud(c,60+((t*30)%120),110,1,0.2,0,t);slideLabel(c,'Drag the cloud over the mountain',200,262,'#0E1B2C');}}}
-function drawScene6(c,name,t){sceneSlide(c,name,t);}
+function drawScene6(c,name,t){if(name.indexOf('sl_')===0)sceneSlide(c,name,t);else drawScene7(c,name,t);}
 
 var CH6_STEPS=[
  {sc:'sl_intro',who:'frost',tx:"Welcome to today's presentation! We're going to find out why one side of a mountain can be a rainforest while the other side is a desert."},
@@ -1858,11 +1883,211 @@ var CH6_QUIZ=[
  {t:'text',q:'Explain why one side of a mountain can be a rainforest while the other side is a desert.'}
 ];
 
+/* ================= CHAPTER 7: CITY PLANNER ================= */
+/* City climate normals (monthly). hi/lo/av in degrees C, pr in mm. Sources in src. */
+var CITY=[
+ {n:'Miami',p:'Florida, USA',lat:25.8,lon:-80.3,el:9,hl:0,hi:[24.6,25.7,27,28.7,30.4,31.8,32.6,32.6,31.7,29.9,27.4,25.7],lo:[16.1,17.3,18.7,21,23,24.6,25.3,25.4,24.9,23.4,20.2,17.9],av:[20.3,21.5,22.8,24.8,26.7,28.2,28.9,29,28.3,26.7,23.8,21.8],pr:[46.5,54.6,62.5,85.3,160.5,267,186.9,243.3,259.6,194.3,89.7,62],src:'NOAA NCEI 1991-2020 normals (Miami Intl Airport)'},
+ {n:'Singapore',p:'Singapore',lat:1.3,lon:103.8,el:null,hl:0,hi:[30.6,31.5,32.2,32.4,32.3,31.9,31.4,31.4,31.6,31.8,31.2,30.5],lo:[24.3,24.6,24.9,25.3,25.7,25.7,25.4,25.3,25.2,25,24.6,24.3],av:[26.8,27.3,27.8,28.2,28.6,28.5,28.2,28.1,28,27.9,27.2,26.8],pr:[221.6,105.1,151.7,164.3,164.3,135.3,146.6,146.9,124.9,168.3,252.3,331.9],src:'National Environment Agency (Singapore), 1991-2020 normals (via Wikipedia)'},
+ {n:'Phoenix',p:'Arizona, USA',lat:33.4,lon:-112,el:337,hl:0,hi:[19.8,21.6,25.6,29.7,34.7,40.1,41.4,40.6,38,31.8,24.7,19],lo:[7.8,9.4,12.5,16,20.8,25.9,29.2,28.7,25.6,18.7,12.1,7.4],av:[13.8,15.5,19.1,22.9,27.8,33,35.3,34.7,31.8,25.2,18.4,13.2],pr:[22.1,22.1,21.1,5.6,3.3,0.5,23.1,23.6,14.5,14.2,14.5,18.8],src:'NOAA NCEI 1991-2020 normals (Phoenix Sky Harbor Intl Airport)'},
+ {n:'Orlando',p:'Florida, USA',lat:28.4,lon:-81.3,el:27,hl:0,hi:[22.1,23.8,26.1,28.7,31.3,32.7,33.3,33.1,32,29.3,25.7,23.2],lo:[9.7,11.3,13.2,15.9,19.1,22,22.9,23.2,22.4,19,14.6,11.6],av:[15.9,17.6,19.6,22.3,25.2,27.3,28.1,28.1,27.2,24.2,20.1,17.4],pr:[63,51.8,77,65.5,102.1,204.5,189.5,195.3,161.8,87.9,45.5,63],src:'NOAA NCEI 1991-2020 normals (Orlando Intl Airport)'},
+ {n:'San Francisco',p:'California, USA',lat:37.8,lon:-122.4,el:46,hl:0,hi:[14.3,15.8,16.7,17.2,17.8,19.2,19.1,19.9,21.2,21,17.6,14.4],lo:[8.1,8.8,9.4,9.8,10.8,11.7,12.4,13.1,13.1,12.4,10.4,8.3],av:[11.2,12.3,13.1,13.6,14.3,15.4,15.7,16.5,17.2,16.7,14,11.4],pr:[111.8,111,80,40.6,17.8,5.1,0.3,1.5,2.5,23.9,66,120.9],src:'NOAA NCEI 1991-2020 normals (San Francisco Dwtn)'},
+ {n:'London',p:'United Kingdom',lat:51.5,lon:-0.3,el:6,hl:0,hi:[8.6,9.2,11.9,15.1,18.4,21.4,23.8,23.4,20.3,16,11.6,8.9],lo:[2,2,3.5,5.1,8.2,11,13.2,13,10.5,7.8,4.3,2.3],av:[5.3,5.6,7.7,10.1,13.3,16.2,18.5,18.2,15.4,11.9,8,5.6],pr:[59.9,45.4,39,43.6,44.6,49.7,45.2,55.1,51.9,67.9,66,59.2],src:'Met Office, Kew Gardens (WMO 99095), 1991-2020 normals (via Wikipedia)'},
+ {n:'Chicago',p:'Illinois, USA',lat:42,lon:-87.9,el:201,hl:0,hi:[-0.2,2.1,8.3,15,21.4,26.9,29.2,28.1,24.2,17.1,9.1,2.6],lo:[-7.3,-5.7,-0.6,4.6,10.3,16,19.1,18.4,13.9,7.4,1.2,-4.2],av:[-3.8,-1.8,3.9,9.8,15.9,21.4,24.1,23.2,19.1,12.2,5.2,-0.8],pr:[50.5,50,62.2,95.2,114,104.1,94.2,107.9,81,87.1,61.5,53.6],src:'NOAA NCEI 1991-2020 normals (Chicago Ohare Intl Airport)'},
+ {n:'Fairbanks',p:'Alaska, USA',lat:64.8,lon:-147.9,el:132,hl:0,hi:[-17.4,-11.3,-3.9,7.6,16.7,22.1,22.6,19.1,12.9,1.2,-10.9,-15.4],lo:[-27.3,-24,-19.7,-5.7,3.7,10.1,11.7,8.7,2.3,-7.6,-20.1,-25],av:[-22.4,-17.7,-11.8,0.9,10.2,16.1,17.2,13.9,7.7,-3.2,-15.5,-20.2],pr:[15.5,13.2,10.2,8.6,13.7,37.6,57.4,53.3,34.3,19.3,18.8,14.5],src:'NOAA NCEI 1991-2020 normals (Fairbanks Intl Airport)'},
+ {n:'Utqiagvik',p:'Alaska, USA',lat:71.3,lon:-156.8,el:9,hl:0,hi:[-20.7,-20.8,-19.9,-11.9,-2.8,4.9,8.7,6.9,2.8,-3.6,-11.4,-18],lo:[-27.7,-27.9,-27.3,-19.2,-7.5,-0.5,2,1.7,-0.9,-8.4,-17.8,-24.6],av:[-24.2,-24.4,-23.6,-15.6,-5.2,2.2,5.4,4.3,0.9,-6,-14.6,-21.3],pr:[3.6,5.3,4.6,4.6,7.1,10.9,24.9,27.7,19.6,13.7,9.4,5.6],src:'NOAA NCEI 1991-2020 normals (Barrow Post Rogers Airport)'},
+ {n:'Quito',p:'Ecuador',lat:-0.2,lon:-78.5,el:2800,hl:1,hi:[21.2,21,20.8,20.9,21,21.1,21.5,22.2,22.3,21.8,21.3,21.3],lo:[9.8,10.1,10.1,10.2,10.1,9.8,9.4,9.6,9.4,9.5,9.6,9.7],av:[15.5,15.6,15.5,15.6,15.6,15.5,15.5,15.9,15.9,15.7,15.5,15.5],pr:[82.5,111,146.6,171.2,105.5,39.5,21.5,27.7,68.9,114.9,108.5,100.4],src:'World Meteorological Organization averages, older period (via Wikipedia)'}
+];
+/* Hand-drawn, approximate world outlines (lon, lat) */
+var WM_POLY=[
+ NA_LAND,NA_ISL,
+ [-73,78,-60,82,-30,83,-20,81,-18,76,-22,70,-32,68,-40,65,-43,60,-50,62,-54,67,-56,72,-66,76],
+ [-80,10,-75,11,-62,10.5,-50,0,-35,-5,-35,-9,-39,-15,-40,-22,-48,-26,-53,-34,-58,-38,-65,-41,-68,-50,-70,-55,-74,-50,-75,-40,-73,-30,-71,-18,-76,-14,-81,-6,-80,-1,-78,2,-77,8],
+ [-9,37,-9,43,-2,43.5,-4,48,0,49.5,5,53,8,54,10,57,5,58,5,62,15,69,25,71,40,68,60,70,70,73,80,73,100,77,115,73,130,71,140,72,160,70,180,68,180,65,170,60,160,59,163,55,156,51,155,59,143,59,140,54,141,47,135,43,130,42,128,35,121,31,122,25,115,22,108,21,106,10,104,1,100,6,98,16,95,16,92,22,88,22,80,15,78,8,73,20,67,24,57,25,56,27,50,30,48,29,56,22,58,17,52,16,43,12,43,15,39,21,35,28,33,31,35,36,28,37,26,40,23,40,24,37,22,37,20,40,16,40,12,44,13,46,14,42,16,38,10,44,7,44,3,43,-1,37,-6,36,-9,37],
+ [-17,21,-16,28,-10,31,-6,35,10,37,11,33,20,31,25,32,32,31,34,28,37,22,40,15,43,12,51,12,48,5,40,-3,39,-10,35,-17,35,-24,33,-28,28,-33,20,-35,18,-32,15,-27,12,-17,13,-11,9,-1,9,4,4,6,-5,5,-8,4,-13,8,-17,13],
+ [114,-22,114,-34,118,-35,124,-33,131,-31,138,-35,141,-38,146,-39,150,-37,153,-30,153,-25,146,-19,143,-11,141,-12,136,-12,131,-11,125,-14,122,-18],
+ [-5,50,1.5,51,1.7,52.8,0,53.5,-1.6,55,-2,56,-3,58.6,-5,58.6,-6,56.5,-5,55,-3,54.5,-3,53.5,-4.5,53,-5,51.7],[-10,51.5,-6,52,-6,55,-8,55.3,-10,54],
+ [130,31,132,34,135,34,140,35,141,38,142,40,141,43,145,43,141,45,140,42,139,38,136,36,133,35,130,34],
+ [95,5,98,4,106,-6,104,-6,100,-1],[109,1,110,-3,116,-4,118,1,117,7,113,3],[131,-1,141,-3,150,-10,143,-9,138,-8,132,-4],
+ [172,-34,178,-38,175,-41,171,-45,167,-46,170,-43],[44,-25,47,-25,50,-15,49,-12,44,-17],[-24,64,-14,64.5,-15,66.4,-22,66.5],[-85,22,-74,20,-77,21,-82,23]];
+function wmXY(lo,la,x0,y0,w,h){return [x0+(lo+180)/360*w,y0+(80-la)/140*h];}
+function worldMap(c,x0,y0,w,h,o){o=o||{};var i,j;c.save();c.beginPath();c.rect(x0,y0,w,h);c.clip();c.fillStyle='#1D4E8C';c.fillRect(x0,y0,w,h);
+ if(o.bands){for(j=0;j<14;j++){var la1=80-j*10,f=1-Math.abs(la1-5)/80;c.fillStyle=mix('#4FA3E0','#FF7A2F',Math.max(0,Math.min(1,f)));c.globalAlpha=0.35;var p1=wmXY(0,la1,x0,y0,w,h);c.fillRect(x0,p1[1],w,h/14+1);}c.globalAlpha=1;}
+ c.fillStyle=o.land||'#5E9E5A';for(i=0;i<WM_POLY.length;i++){var P=WM_POLY[i];c.beginPath();for(j=0;j<P.length;j+=2){var q=wmXY(P[j],P[j+1],x0,y0,w,h);if(j===0)c.moveTo(q[0],q[1]);else c.lineTo(q[0],q[1]);}c.closePath();c.fill();}
+ c.fillStyle='#1D4E8C';naPoly(c,NA_HUD,function(lo){return wmXY(lo,0,x0,y0,w,h)[0];},function(la){return wmXY(0,la,x0,y0,w,h)[1];});c.fill();
+ var L=[[0,'Equator','#FFFFFF',[]],[23.4,'Tropic of Cancer','#FFD45A',[5,4]],[-23.4,'Tropic of Capricorn','#FFD45A',[5,4]],[66.6,'Arctic Circle','#BFE6F5',[3,4]]];
+ for(i=0;i<L.length;i++){var y=wmXY(0,L[i][0],x0,y0,w,h)[1];c.strokeStyle=L[i][2];c.lineWidth=i===0?1.6:1.1;c.setLineDash(L[i][3]);c.beginPath();c.moveTo(x0,y);c.lineTo(x0+w,y);c.stroke();}c.setLineDash([]);c.restore();
+ if(o.lbl!==false){for(i=0;i<L.length;i++){var yy=wmXY(0,L[i][0],x0,y0,w,h)[1];txt(c,L[i][1],x0+w-3,yy-3,'700 '+(o.fs||8.5)+'px '+FONT,L[i][2],'right');}}}
+/* Textbook Koppen group from the data (H is marked for mountain cities) */
+function kop(c){var T=0,P=0,ps=0,mn=99,mx=-99,i,sm=c.lat>=0?[3,4,5,6,7,8]:[9,10,11,0,1,2];for(i=0;i<12;i++){T+=c.av[i];P+=c.pr[i];mn=Math.min(mn,c.av[i]);mx=Math.max(mx,c.av[i]);}for(i=0;i<6;i++)ps+=c.pr[sm[i]];T/=12;
+ var th=20*T+(ps>=0.7*P?280:(ps<=0.3*P?0:140));var g=c.hl?'H':(P<th?'B':(mn>=18?'A':(mx<10?'E':(mn>-3?'C':'D'))));
+ var dsMin=99,wwMax=0,wm=c.lat>=0?[9,10,11,0,1,2]:[3,4,5,6,7,8];for(i=0;i<6;i++){dsMin=Math.min(dsMin,c.pr[sm[i]]);wwMax=Math.max(wwMax,c.pr[wm[i]]);}
+ return {g:g,T:T,P:P,mn:mn,mx:mx,th:th,drySummer:dsMin<40&&dsMin<wwMax/3};}
+function tF(x){return Math.round(x)+DEG+'C ('+Math.round(x*9/5+32)+DEG+'F)';}
+function mmIn(x){return fmt(x)+' mm ('+(x/25.4).toFixed(1)+' in)';}
+var KNAME={A:'A, Tropical',B:'B, Dry',C:'C, Temperate',D:'D, Continental',E:'E, Polar',H:'H, Highland'};
+function kopWhy(c){var k=kop(c);
+ if(k.g==='A')return 'Every month averages at least 18'+DEG+'C. Even the coolest month is about '+tF(k.mn)+'.';
+ if(k.g==='B')return 'It gets only about '+mmIn(k.P)+' of rain a year, below the dry-climate cutoff for its heat (about '+fmt(k.th)+' mm). More water evaporates than falls.';
+ if(k.g==='C')return 'Mild winters: the coldest month averages about '+tF(k.mn)+', above -3'+DEG+'C.'+(k.drySummer?' Most rain falls in winter, and summers are dry.':'');
+ if(k.g==='D')return 'Cold winters and warm summers: the coldest month averages about '+tF(k.mn)+' and the warmest about '+tF(k.mx)+'.';
+ if(k.g==='E')return 'Even the warmest month averages only about '+tF(k.mx)+', below 10'+DEG+'C.';
+ return 'It sits about 2,800 m up in the Andes. Elevation keeps it cool, about '+tF(k.mn)+' every month, even though it is almost on the equator.';}
+/* Climograph: bars = precipitation, line = average temperature, light band = average low to average high */
+function climoGeom(x0,y0,w,h,tR,pR){var L=x0+36,R=x0+w-36,T=y0+18,B=y0+h-20;return {L:L,R:R,T:T,B:B,X:function(i){return L+(i+0.5)*(R-L)/12;},YT:function(v){return B-(v-tR[0])/(tR[1]-tR[0])*(B-T);},YP:function(p){return B-p/pR*(B-T);},bw:(R-L)/12*0.62};}
+function climo(c,x0,y0,w,h,ct,o){o=o||{};var fs=o.fs||9,tR=o.tR||[-30,40],pR=o.pR||350,G=climoGeom(x0,y0,w,h,tR,pR),i;
+ c.fillStyle=o.bg||'#FFFFFF';c.fillRect(x0,y0,w,h);c.strokeStyle='#DDE6EE';c.lineWidth=1;
+ for(var v=tR[0];v<=tR[1];v+=10){var y=G.YT(v);c.beginPath();c.moveTo(G.L,y);c.lineTo(G.R,y);c.stroke();txt(c,String(v),G.L-4,y+fs*0.35,'700 '+fs+'px '+FONT,'#B3261E','right');}
+ for(i=0;i<=pR;i+=pR/7){txt(c,String(Math.round(i)),G.R+4,G.YP(i)+fs*0.35,'700 '+fs+'px '+FONT,'#1F5FD1');}
+ txt(c,DEG+'C',G.L-4,G.T-6,'800 '+fs+'px '+FONT,'#B3261E','right');txt(c,'mm',G.R+4,G.T-6,'800 '+fs+'px '+FONT,'#1F5FD1');
+ for(i=0;i<12;i++)txt(c,'JFMAMJJASOND'.charAt(i),G.X(i),G.B+fs+4,'700 '+fs+'px '+FONT,'#2C4A63','center');
+ if(ct){for(i=0;i<12;i++){c.fillStyle=o.sel===i?'#1F5FD1':'#7FB2E8';c.fillRect(G.X(i)-G.bw/2,G.YP(Math.min(pR,ct.pr[i])),G.bw,G.B-G.YP(Math.min(pR,ct.pr[i])));}
+  if(o.band!==false){c.fillStyle='rgba(224,49,42,0.14)';c.beginPath();for(i=0;i<12;i++){var a=G.YT(ct.hi[i]);if(i===0)c.moveTo(G.X(i),a);else c.lineTo(G.X(i),a);}for(i=11;i>=0;i--)c.lineTo(G.X(i),G.YT(ct.lo[i]));c.closePath();c.fill();}
+  c.strokeStyle='#E0312A';c.lineWidth=o.lw||2.5;c.beginPath();for(i=0;i<12;i++){var yv=G.YT(ct.av[i]);if(i===0)c.moveTo(G.X(i),yv);else c.lineTo(G.X(i),yv);}c.stroke();
+  c.fillStyle='#E0312A';for(i=0;i<12;i++)circ(c,G.X(i),G.YT(ct.av[i]),o.sel===i?4.5:2.5);}
+ c.strokeStyle='#2C4A63';c.lineWidth=1.5;c.beginPath();c.moveTo(G.L,G.T);c.lineTo(G.L,G.B);c.lineTo(G.R,G.B);c.lineTo(G.R,G.T);c.stroke();return G;}
+function cityBy(n){for(var i=0;i<CITY.length;i++)if(CITY[i].n===n)return CITY[i];return null;}
+
+/* ---- story scenes ---- */
+function sceneLatMap(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);worldMap(c,0,26,400,230,{bands:true});
+ txt(c,'Farther from the equator: usually colder',200,18,'800 13px '+FONT,'#FFFFFF','center');
+ pill(c,'warm',40,148,11,'#FF9A5C','center');pill(c,'cold',40,46,11,'#8FC9E3','center');txt(c,'Map is approximate and not to scale',200,286,'600 10px '+FONT,'#9FC3D8','center');}
+function sceneElev(c,t){sky(c,400,300,'#8EC5EE','#E4F2FB');var Q=cityBy('Quito'),S=cityBy('Singapore');
+ c.fillStyle='#5E9E5A';c.beginPath();c.moveTo(0,250);c.lineTo(120,250);c.lineTo(200,90);c.lineTo(240,110);c.lineTo(280,96);c.lineTo(360,250);c.lineTo(400,250);c.lineTo(400,300);c.lineTo(0,300);c.closePath();c.fill();
+ c.fillStyle='#F4FBFF';c.beginPath();c.moveTo(200,90);c.lineTo(186,118);c.lineTo(214,118);c.closePath();c.fill();
+ c.fillStyle='#FF7A2F';circ(c,240,112,5);pill(c,'Quito: about 2,800 m',240,82,11,'#FFFFFF','center');pill(c,'about '+tF(kop(Q).T),240,62,10.5,'#8FC9E3','center');
+ c.fillStyle='#FF7A2F';circ(c,50,248,5);pill(c,'Singapore: sea level',70,226,11,'#FFFFFF','center');pill(c,'about '+tF(kop(S).T),70,206,10.5,'#FF9A5C','center');
+ txt(c,'Both are close to the equator. Higher = colder.',200,24,'800 12.5px '+FONT,'#0E1B2C','center');txt(c,'(yearly average temperatures)',200,40,'600 10px '+FONT,'#2C4A63','center');}
+function sceneCoast(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);var A=cityBy('San Francisco'),B=cityBy('Chicago'),G=climoGeom(10,30,380,230,[-10,30],1),i;
+ txt(c,'Monthly average temperature',200,18,'800 13px '+FONT,'#FFFFFF','center');c.fillStyle='#132539';c.fillRect(G.L,G.T,G.R-G.L,G.B-G.T);
+ for(var v=-10;v<=30;v+=10){var y=G.YT(v);c.strokeStyle='#27425F';c.beginPath();c.moveTo(G.L,y);c.lineTo(G.R,y);c.stroke();txt(c,v+DEG,G.L-4,y+3,'600 9px '+FONT,'#9FC3D8','right');}
+ var S=[[A,'#4FA3E0'],[B,'#FF7A2F']];for(var k=0;k<2;k++){c.strokeStyle=S[k][1];c.lineWidth=3;c.beginPath();for(i=0;i<12;i++){var yv=G.YT(S[k][0].av[i]);if(i===0)c.moveTo(G.X(i),yv);else c.lineTo(G.X(i),yv);}c.stroke();}
+ for(i=0;i<12;i++)txt(c,'JFMAMJJASOND'.charAt(i),G.X(i),G.B+13,'700 9px '+FONT,'#9FC3D8','center');
+ pill(c,'San Francisco (coast)',G.X(6),G.YT(A.av[6])+22,10,'#4FA3E0','center');pill(c,'Chicago (inland)',G.X(6),G.YT(B.av[6])-10,10,'#FF9A5C','center');
+ txt(c,'The ocean keeps the coast mild',200,292,'700 11px '+FONT,'#BFE6F5','center');}
+function sceneCurrent(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);var x0=-260,w=1200,h=650,y0=-90;
+ c.save();c.beginPath();c.rect(0,26,400,250);c.clip();worldMap(c,x0,y0,w,h,{lbl:false});c.restore();
+ var L=cityBy('London'),p=wmXY(L.lon,L.lat,x0,y0,w,h);c.fillStyle='#FF7A2F';circ(c,p[0],p[1],5);
+ var f=(t*0.3)%1;c.strokeStyle='rgba(255,122,47,0.85)';c.lineWidth=5;c.lineCap='round';c.beginPath();var a=wmXY(-80,28,x0,y0,w,h),b=wmXY(-45,42,x0,y0,w,h),d=wmXY(-15,52,x0,y0,w,h);c.moveTo(a[0],a[1]);c.quadraticCurveTo(b[0],b[1]-20,d[0],d[1]);c.stroke();
+ arw(c,d[0]-14,d[1]+4,d[0]+4,d[1]-2,'rgba(255,122,47,0.95)',5,14);
+ pill(c,'London: about 51.5'+DEG+'N',p[0]-8,p[1]-8,10.5,'#FFFFFF','right');pill(c,'coldest month about '+tF(Math.min.apply(null,L.av)),p[0]-40,p[1]+30,10,'#8FC9E3','center');
+ pill(c,'warm North Atlantic Current',150,150,10.5,'#FF9A5C','center');txt(c,'Ocean currents carry warm or cool water',200,18,'800 12.5px '+FONT,'#FFFFFF','center');txt(c,'Map is approximate',200,292,'600 10px '+FONT,'#9FC3D8','center');}
+function sceneClimo(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);var O=cityBy('Orlando');var G=climo(c,8,24,384,250,O,{tR:[0,40],pR:250,fs:9});
+ txt(c,'Climograph: Orlando, FL (1991-2020)',200,16,'800 12.5px '+FONT,'#FFFFFF','center');pill(c,'line = temperature',G.X(2),G.YT(30),10,'#FF8A80','center');pill(c,'bars = precipitation',G.X(7),G.YT(36),10,'#8FD3F0','center');
+ txt(c,'shaded band: average low to high',200,294,'600 9.5px '+FONT,'#9FC3D8','center');}
+function sceneKop(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);txt(c,'Koppen climate groups',200,22,'800 14px '+FONT,'#FFFFFF','center');
+ var R=[['A','Tropical','every month at least 18'+DEG+'C','#FF7A2F'],['B','Dry','evaporation beats precipitation','#E6C88A'],['C','Temperate','mild winters','#6FE3A4'],['D','Continental','cold winters, warm summers','#4FA3E0'],['E','Polar','warmest month below 10'+DEG+'C','#BFE6F5'],['H','Highland','mountains (textbook addition)','#C9B6FF']];
+ for(var i=0;i<R.length;i++){var y=46+i*39;c.fillStyle='#16283E';rr(c,20,y,360,32,8);c.fill();c.fillStyle=R[i][3];circ(c,42,y+16,12);txt(c,R[i][0],42,y+21,'800 14px '+FONT,'#0E1B2C','center');
+  txt(c,R[i][1],64,y+14,'800 12px '+FONT,R[i][3]);txt(c,R[i][2],64,y+27,'600 10.5px '+FONT,'#FFFFFF');}}
+function sceneUHI(c,t){sky(c,400,300,'#1A2D4A','#3D5B7E');for(var i=0;i<30;i++){c.fillStyle='rgba(255,255,255,0.6)';circ(c,rnd(i+40)*400,rnd(i+70)*120,0.8);}
+ c.fillStyle='#4E8F55';c.fillRect(0,230,400,70);for(i=0;i<9;i++){var x=130+i*16,hh=40+rnd(i+5)*60;c.fillStyle='#3A3F4B';c.fillRect(x,230-hh,14,hh);c.fillStyle='rgba(255,214,90,0.7)';for(var k=0;k<4;k++)c.fillRect(x+3,230-hh+6+k*10,3,4);}
+ c.fillStyle='#2A6B38';for(i=0;i<5;i++){circ(c,30+i*18,224,9);circ(c,300+i*20,224,9);}
+ c.strokeStyle='#FF7A2F';c.lineWidth=3;c.beginPath();for(x=0;x<=400;x+=4){var y=110-38*Math.exp(-Math.pow((x-200)/80,2));if(x===0)c.moveTo(x,y);else c.lineTo(x,y);}c.stroke();
+ pill(c,'Night temperature (shape not to scale)',200,46,10.5,'#FF9A5C','center');pill(c,'City: about 2 to 5'+DEG+'F warmer at night (EPA)',200,150,10.5,'#FFFFFF','center');
+ txt(c,'countryside',50,272,'700 11px '+FONT,'#FFFFFF','center');txt(c,'city',200,272,'700 11px '+FONT,'#FFFFFF','center');txt(c,'countryside',350,272,'700 11px '+FONT,'#FFFFFF','center');}
+function sceneTeam7(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);worldMap(c,0,0,400,230,{lbl:false});
+ person(c,90,292,0.6,'#2A9DB5',{glasses:true,clip:true,skin:'#E8B48F',wave:true},t);person(c,210,292,0.55,'#FF7A2F',{goggles:true,skin:'#C68A5E'},t);person(c,330,292,0.55,'#F2C230',{skin:'#F2C9A5'},t);
+ c.fillStyle='#FFD45A';star5(c,120+Math.sin(t*2)*6,90,10);pill(c,'Next: City Planner',200,140,13,'#FFD45A','center');}
+function drawScene7(c,name,t){
+ if(name==='latmap')sceneLatMap(c,t);else if(name==='elev')sceneElev(c,t);else if(name==='coast')sceneCoast(c,t);else if(name==='current')sceneCurrent(c,t);
+ else if(name==='climo')sceneClimo(c,t);else if(name==='kop')sceneKop(c,t);else if(name==='uhi')sceneUHI(c,t);else sceneTeam7(c,t);}
+
+var CH7_STEPS=[
+ {sc:'latmap',who:'frost',tx:"Welcome, city planners! Remember Chapter 2? Sunlight is most direct near the equator. So, in general, the farther a place is from the equator, the colder its average temperature."},
+ {sc:'latmap',who:'sam',tx:"So every city at the same latitude has the same climate?"},
+ {sc:'elev',who:'frost',tx:"Not quite! There are exceptions. First, elevation: higher places are colder. Quito and Singapore are both close to the equator, but Quito sits about 2,800 meters up in the Andes, so it is much cooler."},
+ {sc:'coast',who:'frost',tx:"Second, oceans. Water heats up and cools down slowly, so coastal cities have milder temperatures than places far inland. Look at San Francisco on the coast compared with Chicago, far from the ocean."},
+ {sc:'current',who:'frost',tx:"Third, ocean currents carry warm or cool water around the world. Winds off the Atlantic, warmed by the North Atlantic Current, help keep London mild, even though it is farther north than any city in the lower 48 states."},
+ {sc:'current',who:'rosa',tx:"And rain shadows from Chapter 6 can make places dry, right?"},
+ {sc:'climo',who:'frost',tx:"Exactly! To compare climates, scientists use a climograph. The line shows the average temperature each month, and the bars show how much precipitation falls. In Orlando, the tallest bars come in summer."},
+ {sc:'kop',who:'frost',tx:"Climates are sorted into groups. A is tropical: every month averages at least 18 degrees Celsius. B is dry: more water evaporates than falls. C is temperate, with mild winters. D is continental, with cold winters and warm summers. E is polar: even the warmest month averages below 10 degrees."},
+ {sc:'kop',who:'frost',tx:"Many textbooks add H for highland, for mountain climates that change with elevation. H is a textbook addition. It was not part of Koppen's original system."},
+ {sc:'uhi',who:'frost',tx:"Cities make their own climate too. This is the urban heat island. Pavement and roofs have low albedo, like you saw in Chapter 3, so they absorb and hold heat. Cities also have fewer plants, and machines add waste heat."},
+ {sc:'uhi',who:'frost',tx:"The EPA estimates that cities are about 1 to 7 degrees Fahrenheit warmer than the countryside during the day, and about 2 to 5 degrees warmer at night."},
+ {sc:'uhi',who:'sam',tx:"Can we cool a city down?"},
+ {sc:'uhi',who:'frost',tx:"Yes! Parks, trees, and cool, light-colored roofs all help. Shade and plants cool the air, and light roofs reflect more sunlight."},
+ {sc:'team7',who:'frost',tx:"Now you are the City Planner. Clients will ask for a climate. Drag the star to the city that fits, and use the climograph to prove it."}
+];
+
+/* ---- Activity: City Planner ---- */
+var PL={c:null,cm:null,cb:null,sel:-1,touch:null,mon:-1,ms:null,drag:false,blk:[],bsel:'tree',last:''};
+var PL_W=400,PL_H=250;
+function plXY(ct){return wmXY(ct.lon,ct.lat,0,0,PL_W,PL_H);}
+function plNear(x,y){var b=-1,bd=1e9;for(var i=0;i<CITY.length;i++){var p=plXY(CITY[i]),d=(p[0]-x)*(p[0]-x)+(p[1]-y)*(p[1]-y);if(d<bd){bd=d;b=i;}}return b;}
+function plDrawMap(t){var c=PL.c,i;c.fillStyle='#0E1B2C';c.fillRect(0,0,PL_W,PL_H);worldMap(c,0,0,PL_W,PL_H,{});
+ for(i=0;i<CITY.length;i++){var p=plXY(CITY[i]);c.fillStyle=i===PL.sel?'#FFD45A':'#FFFFFF';circ(c,p[0],p[1],i===PL.sel?5:3.5);c.strokeStyle='#0E1B2C';c.lineWidth=1;c.beginPath();c.arc(p[0],p[1],i===PL.sel?5:3.5,0,6.2832);c.stroke();}
+ if(PL.touch&&PL.sel>=0){var q=plXY(CITY[PL.sel]);c.strokeStyle='rgba(255,214,90,0.7)';c.setLineDash([4,4]);c.lineWidth=1.5;c.beginPath();c.moveTo(PL.touch.x,PL.touch.y);c.lineTo(q[0],q[1]);c.stroke();c.setLineDash([]);}
+ if(PL.sel>=0){var s=plXY(CITY[PL.sel]);c.fillStyle='#FFD45A';star5(c,s[0],s[1]-12,9+Math.sin(t*4)*1.2);c.strokeStyle='#7A5A00';c.lineWidth=1;pill(c,CITY[PL.sel].n,Math.max(40,Math.min(360,s[0])),s[1]-24,10,'#FFD45A','center');}
+ else{c.fillStyle='#FFD45A';star5(c,30,PL_H-20,10);txt(c,'drag the star',46,PL_H-16,'700 10px '+FONT,'#FFD45A');}
+ txt(c,'Map approximate, not to scale',4,PL_H-4,'600 8px '+FONT,'#BFE6F5');}
+function plDrawClimo(){var c=PL.cm;c.fillStyle='#0E1B2C';c.fillRect(0,0,400,240);
+ if(PL.sel<0){climo(c,0,0,400,240,null,{});txt(c,'Pick a city to see its climograph',200,120,'800 13px '+FONT,'#4A6B85','center');return;}
+ var ct=CITY[PL.sel];climo(c,0,0,400,240,ct,{sel:PL.mon});txt(c,ct.n,200,13,'800 11px '+FONT,'#0E1B2C','center');}
+function plStats(){var B=$('plStats');B.innerHTML='';if(PL.sel<0){B.appendChild(el('div',null,'Drag the star onto the map. It snaps to the nearest city.'));return;}
+ var ct=CITY[PL.sel],k=kop(ct),hi=Math.max.apply(null,ct.hi),lo=Math.min.apply(null,ct.lo);
+ function row(a,b){var d=el('div');d.appendChild(document.createTextNode(a+': '));d.appendChild(el('b',null,b));B.appendChild(d);}
+ row('City',ct.n+', '+ct.p);row('Climate group',KNAME[k.g]+(k.g==='C'&&k.drySummer?' (dry summer, Mediterranean)':''));row('Why',kopWhy(ct));
+ row('Yearly precipitation','about '+mmIn(k.P));row('Hottest average high','about '+tF(hi));row('Coldest average low','about '+tF(lo));
+ if(PL.mon>=0)row(MON[PL.mon],'high '+tF(ct.hi[PL.mon])+', low '+tF(ct.lo[PL.mon])+', precipitation '+mmIn(ct.pr[PL.mon]));
+ var s=el('div','plsrc','Data: '+ct.src);B.appendChild(s);}
+function plTouch(e){e.preventDefault();ac();var p=lpos($('plMap'),e,PL_W);PL.touch=p;var n=plNear(p.x,p.y);if(n!==PL.sel){PL.sel=n;PL.mon=-1;tone(600,0.04,'triangle',0.05);plDrawClimo();plStats();}PL.drag=true;}
+function plMove(e){if(!PL.drag)return;plTouch(e);}
+function plEnd(){PL.drag=false;PL.touch=null;}
+function plClimoTap(e){e.preventDefault();if(PL.sel<0)return;var p=lpos($('plClim'),e,400),G=climoGeom(0,0,400,240,[-30,40],350),m=Math.floor((p.x-G.L)/((G.R-G.L)/12));if(m>=0&&m<12){PL.mon=m;sfx.click();plDrawClimo();plStats();}}
+/* Heat island block: 6 x 4 tiles. r = road (fixed), h = dark roof, k = parking, t = tree, p = park, w = cool roof */
+var PL_BLK0='hhrhhh hkrkhh rrrrrr hhrhkh'.replace(/ /g,'');
+function plExtra(){var hot=0;for(var i=0;i<PL.blk.length;i++){if(PL.blk[i]==='h'||PL.blk[i]==='k'||PL.blk[i]==='r')hot++;}return 5*hot/PL.blk.length;}
+function plDrawBlk(t){var c=PL.cb,i;c.fillStyle='#0E1B2C';c.fillRect(0,0,400,220);var S=60,x0=20,y0=8;
+ for(i=0;i<24;i++){var x=x0+(i%6)*S,y=y0+Math.floor(i/6)*S*0.75,w=S,h=S*0.75,k=PL.blk[i];
+  if(k==='r'){c.fillStyle='#4A4F59';c.fillRect(x,y,w,h);c.strokeStyle='#E8C547';c.setLineDash([5,5]);c.lineWidth=1.5;c.beginPath();if(i%6===2){c.moveTo(x+w/2,y);c.lineTo(x+w/2,y+h);}else{c.moveTo(x,y+h/2);c.lineTo(x+w,y+h/2);}c.stroke();c.setLineDash([]);}
+  else if(k==='h'){c.fillStyle='#2B2F38';c.fillRect(x+2,y+2,w-4,h-4);c.fillStyle='#3A3F4B';c.fillRect(x+8,y+8,w-16,h-16);}
+  else if(k==='k'){c.fillStyle='#3C4048';c.fillRect(x+2,y+2,w-4,h-4);c.strokeStyle='#E8E8E8';c.lineWidth=1;for(var j=1;j<5;j++){c.beginPath();c.moveTo(x+j*w/5,y+4);c.lineTo(x+j*w/5,y+h/2);c.stroke();}}
+  else if(k==='t'){c.fillStyle='#5E9E5A';c.fillRect(x+2,y+2,w-4,h-4);c.fillStyle='#2A6B38';circ(c,x+18,y+18,11);circ(c,x+40,y+26,12);circ(c,x+22,y+34,9);}
+  else if(k==='p'){c.fillStyle='#7CC26A';c.fillRect(x+2,y+2,w-4,h-4);c.fillStyle='#2F7FD1';CE(c,x+w/2,y+h/2,12,7);c.fill();}
+  else{c.fillStyle='#EEF4F8';c.fillRect(x+2,y+2,w-4,h-4);c.strokeStyle='#BFD3E0';c.lineWidth=1;c.strokeRect(x+8,y+8,w-16,h-16);}}
+ var ex=plExtra();txt(c,'Night: about '+(ex*5/9).toFixed(1)+DEG+'C ('+ex.toFixed(1)+DEG+'F) warmer than the countryside',200,200,'800 11.5px '+FONT,ex<=3?'#6FE3A4':'#FF9A5C','center');
+ txt(c,'simplified model',200,214,'600 9.5px '+FONT,'#9FC3D8','center');}
+function plBlkTap(e){e.preventDefault();var p=lpos($('plBlk'),e,400),S=60,cI=Math.floor((p.x-20)/S),r=Math.floor((p.y-8)/(S*0.75));if(cI<0||cI>5||r<0||r>3)return;var i=r*6+cI;if(PL.blk[i]==='r'){$('plMsg').style.color='#FFD2B8';$('plMsg').textContent='Roads stay roads. Change the roofs and parking lots.';return;}PL.blk[i]={tree:'t',park:'p',cool:'w'}[PL.bsel];tone(520,0.05,'triangle',0.05);}
+function plPal(){var B=$('plPal'),L=[['tree','Trees'],['park','Park'],['cool','Cool roof']];B.innerHTML='';for(var i=0;i<L.length;i++){(function(k,n){var b=el('button','chip'+(PL.bsel===k?' sel':''),n);b.onclick=function(){sfx.click();PL.bsel=k;plPal();};B.appendChild(b);})(L[i][0],L[i][1]);}}
+function plLoop(dt,t){plDrawMap(t);if($('plBlkBox').style.display==='block')plDrawBlk(t);}
+function plClient(name,col,skin,o){var c=PL.cc;c.fillStyle='#16283E';c.fillRect(0,0,80,80);o=o||{};o.skin=skin;o.wave=true;person(c,40,80,1.1,col,o,0);$('plClName').textContent=name;}
+function plMis(name,col,skin,o,tx,want,okHint){return {tx:tx,hint:'Drag the star to a city, then tap Check.',start:function(){plClient(name,col,skin,o);$('plBlkBox').style.display='none';},
+ ok:function(){var me=this;if(PL.sel<0){me.hint='Drag the star to a city first.';return false;}var ct=CITY[PL.sel],k=kop(ct),good=want(ct,k);
+  if(good){me.yes=ct.n+' works! It is group '+KNAME[k.g]+'. '+kopWhy(ct);return true;}me.hint=ct.n+' is group '+KNAME[k.g]+'. '+kopWhy(ct)+' '+okHint;return false;}};}
+var PL_MIS=[
+ plMis('Kai, surf instructor','#2F9E8F','#C68A5E',{goggles:true},'Client Kai wants a city that is warm all year with a rainy season. Drag the star to a city, then tap Check.',function(c,k){return k.g==='A';},'Kai needs every month to average at least 18'+DEG+'C.'),
+ plMis('Dez, cactus farmer','#D98B2B','#E8B48F',{},'Client Dez wants a hot desert city.',function(c,k){return k.g==='B';},'Look for a climograph with very short bars and a hot temperature line.'),
+ plMis('Mira, olive grower','#7A5CC2','#F2C9A5',{},'Client Mira wants mild, wet winters and dry summers.',function(c,k){return k.g==='C'&&k.drySummer;},'Look for tall bars in winter and almost no bars in summer.'),
+ plMis('Sven, snowboarder','#3B7DDD','#F2C9A5',{goggles:true},'Client Sven wants four seasons with snowy winters.',function(c,k){return k.g==='D';},'Look for a temperature line that drops well below 0'+DEG+'C in winter and climbs high in summer.'),
+ plMis('Ana, mountain guide','#B3261E','#C68A5E',{},'Client Ana wants a cool mountain city near the equator.',function(c,k){return k.g==='H';},'Look near the equator for a flat temperature line that stays cool all year.'),
+ plMis('Professor Ice, scientist','#BFE6F5','#E8B48F',{glasses:true,clip:true},'Client Professor Ice needs a research base where it is cold all year.',function(c,k){return k.g==='E';},'Look for a place where even the summer stays below 10'+DEG+'C.'),
+ {tx:'Bonus: Mayor Rosa wants a cooler city block at night. Pick Trees, Park, or Cool roof, then tap roofs and parking lots to change them. Get the extra night heat down to 3'+DEG+'F or less.',hint:'Each dark roof or parking lot you change lowers the extra heat a little. Roads stay as they are.',start:function(){plClient('Mayor Rosa','#F2C230','#F2C9A5',{});PL.blk=PL_BLK0.split('');PL.bsel='tree';plPal();$('plBlkBox').style.display='block';},ok:function(){return plExtra()<=3;},yes:'Cooler! Trees and parks shade the ground and cool the air, and light roofs reflect sunlight instead of soaking it up, just like the albedo you saw in Chapter 3.'}
+];
+function startPlan(){show('scrPlan');PL.sel=-1;PL.mon=-1;PL.touch=null;PL.blk=PL_BLK0.split('');$('plBlkBox').style.display='none';
+ PL.c=setupCanvas($('plMap'),PL_W,PL_H,0.36);PL.cm=setupCanvas($('plClim'),400,240,0.34);PL.cc=setupCanvas($('plCl'),80,80,0.2);PL.cb=setupCanvas($('plBlk'),400,220,0.32);
+ plDrawClimo();plStats();PL.ms=misRun('pl',PL_MIS,'Take the quiz',function(){startQuiz('ch7',CH7_QUIZ);});startLoop(plLoop);}
+
+/* ---- quiz backgrounds ---- */
+var CL_G=climoGeom(10,60,580,540,[-10,30],120);
+function bgClimoLbl(c){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);climo(c,10,60,580,540,cityBy('Chicago'),{tR:[-10,30],pR:120,fs:15,band:false,lw:4});txt(c,'Climograph: Chicago, IL (1991-2020)',300,36,'800 22px '+FONT,'#0E1B2C','center');}
+function bgClimoDraw(c){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,600);climo(c,10,60,580,520,null,{tR:[0,40],pR:120,fs:15});txt(c,'Climograph: a hot desert city',300,36,'800 22px '+FONT,'#0E1B2C','center');}
+var CHI=cityBy('Chicago');
+var CH7_QUIZ=[
+ {t:'mc',q:'In general, what happens to average temperature as you move away from the equator?',o:['It gets colder, because sunlight is less direct','It gets warmer, because you are closer to the Sun','It stays exactly the same','It gets warmer, because days are always longer'],a:0,why:'Near the equator, sunlight hits more directly. Farther away, the same sunlight is spread out, so average temperatures are usually colder.'},
+ {t:'mc',q:'On a climograph, what do the bars usually show?',o:['Monthly precipitation','Monthly temperature','Wind speed','Hours of sunlight'],a:0,why:'The bars show how much precipitation falls each month. The line shows the average temperature each month.'},
+ {t:'mc',q:'A city where every month averages at least 18'+DEG+'C belongs to which group?',o:['A, Tropical','B, Dry','D, Continental','E, Polar'],a:0,why:'Group A, Tropical, means every month averages at least 18'+DEG+'C, like Miami and Singapore.'},
+ {t:'mc',q:'Quito is almost on the equator, but it is cool all year. Why?',o:['It is high in the mountains, and higher places are colder','It is near the North Pole','It is in a rain shadow','It is cooled by an ice sheet'],a:0,why:'Quito is about 2,800 m up in the Andes. Elevation makes it much cooler than sea-level cities near the equator, like Singapore.'},
+ {t:'mc',q:'Which climate group has a warmest month that averages below 10'+DEG+'C?',o:['E, Polar','A, Tropical','C, Temperate','B, Dry'],a:0,why:'In group E, Polar, even the warmest month averages below 10'+DEG+'C, like Utqiagvik, Alaska.'},
+ {t:'mc',q:'Why are cities often warmer than the countryside at night?',o:['Pavement and roofs absorb heat during the day and release it at night','Cities are closer to the Sun','Cities have more trees','Cars make it rain less at night'],a:0,why:'Dark pavement and roofs have low albedo, absorb heat during the day, and give it off at night. Fewer plants and waste heat from machines add to it.'},
+ {t:'label',q:'Label the climograph. Tap a label, then tap the dashed circle where it belongs.',bg:'climolbl',guide:true,labels:[{s:'Temperature line',x:Math.round(CL_G.X(9)),y:Math.round(CL_G.YT(CHI.av[9])),r:42},{s:'Precipitation bars',x:Math.round(CL_G.X(1)),y:Math.round((CL_G.YP(CHI.pr[1])+CL_G.B)/2),r:42},{s:'Warmest month',x:Math.round(CL_G.X(6)),y:Math.round(CL_G.YT(CHI.av[6])),r:36},{s:'Wettest month',x:Math.round(CL_G.X(4)),y:Math.round(CL_G.YP(CHI.pr[4])+14),r:36}]},
+ {t:'draw',q:'Sketch a climograph for a hot desert city. Draw a red temperature line for each month and blue precipitation bars.',bg:'climodraw',cols:[['Red (temperature)','#E0312A'],['Blue (precipitation)','#1F5FD1'],['Black','#111418']]},
+ {t:'text',q:'Two cities are at the same latitude but one is much colder. Give two reasons why.'}
+];
+
 /* ---------- menu ---------- */
 function openMenu(){show('scrMenu');$('hello').textContent='Hi, '+S.name+' (Period '+S.period+'). Pick a chapter.';var L=$('chList');L.innerHTML='';
  for(var i=0;i<CH.length;i++){(function(i){var ch=CH[i];var r=S.res[ch.id];var bt=el('button','ch'+(ch.ready?'':' off'));bt.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,ch.title));tx.appendChild(el('small',null,ch.desc));bt.appendChild(tx);
   bt.appendChild(el('span','pill'+(r?' done':''),r?('Score '+r.score+'/'+r.total):(ch.ready?'Start':'Soon')));
-  bt.onclick=function(){sfx.click();ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=ch.title;return;}if(ch.id==='ch1')startStory(CH1_STEPS,startDrillGame,'Start drilling');else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');};L.appendChild(bt);})(i);}}
+  bt.onclick=function(){sfx.click();ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=ch.title;return;}if(ch.id==='ch1')startStory(CH1_STEPS,startDrillGame,'Start drilling');else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');};L.appendChild(bt);})(i);}}
 
 /* ---------- report + PDF ---------- */
 var pdfBlob=null,pdfName='';
@@ -2000,6 +2225,10 @@ var amc=$('amCv');amc.addEventListener('touchstart',amTouch,false);amc.addEventL
 $('fcCheck').onclick=function(){misCheck(FC.ms);};$('fcHint').onclick=function(){misHint(FC.ms);};
 $('dcCheck').onclick=function(){misCheck(DC.ms);};$('dcHint').onclick=function(){misHint(DC.ms);};$('dcFlip').onclick=dcFlip;
 var dcc=$('dcCv');dcc.addEventListener('touchstart',dcTouch,false);dcc.addEventListener('touchmove',dcMove,false);dcc.addEventListener('touchend',dcEnd,false);dcc.addEventListener('mousedown',dcTouch,false);dcc.addEventListener('mousemove',dcMove,false);window.addEventListener('mouseup',dcEnd,false);
+$('plCheck').onclick=function(){misCheck(PL.ms);};$('plHint').onclick=function(){misHint(PL.ms);};
+var plm=$('plMap');plm.addEventListener('touchstart',plTouch,false);plm.addEventListener('touchmove',plMove,false);plm.addEventListener('touchend',plEnd,false);plm.addEventListener('mousedown',plTouch,false);plm.addEventListener('mousemove',plMove,false);window.addEventListener('mouseup',plEnd,false);
+var plcl=$('plClim');plcl.addEventListener('touchstart',plClimoTap,false);plcl.addEventListener('mousedown',plClimoTap,false);
+var plb=$('plBlk');plb.addEventListener('touchstart',plBlkTap,false);plb.addEventListener('mousedown',plBlkTap,false);
 $('grCheck').onclick=function(){misCheck(GR.ms);};$('grHint').onclick=function(){misHint(GR.ms);};
 var grc=$('grCv');grc.addEventListener('touchstart',grTouch,false);grc.addEventListener('touchmove',grTouch,false);grc.addEventListener('mousedown',function(e){GR_DRAG=true;grTouch(e);},false);grc.addEventListener('mousemove',function(e){if(GR_DRAG)grTouch(e);},false);window.addEventListener('mouseup',function(){GR_DRAG=false;},false);
 $('btnShare').onclick=sharePdf;
