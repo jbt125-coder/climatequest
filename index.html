@@ -79,6 +79,7 @@ textarea{min-height:130px;resize:vertical;}
 .chip.placed{border-color:#6FE3A4;}
 .tools{display:flex;flex-wrap:wrap;margin:10px 0 0 0;}
 .score{font-size:56px;font-weight:800;color:#6FE3A4;margin:10px 0 0 0;}
+.ch.on{border-color:#FF7A2F;background:#1D3350;}
 #repPreview img{display:block;width:100%;border-radius:8px;margin-top:12px;background:#FFFFFF;}
 .note{color:#9FC3D8;font-size:14px;line-height:1.45;}
 .mis{background:#16283E;border:1px solid #27425F;border-radius:14px;padding:12px;margin-bottom:10px;}
@@ -125,7 +126,7 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
   <div id="scrMenu" class="scr">
     <p id="hello" class="hello"></p>
     <div id="chList"></div>
-    <button id="btnReport" class="big alt">Make my PDF report</button>
+    <button id="btnReport" class="big alt">My results (PDF)</button>
     <button id="btnSwitch" class="link">Not you? Change name</button>
   </div>
 
@@ -223,13 +224,17 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
   <div id="scrQuiz" class="scr"><div id="quizBody"></div></div>
 
   <div id="scrReport" class="scr">
-    <h2>My PDF report</h2>
+    <h2>My results</h2>
     <p id="repInfo" class="lead"></p>
-    <button id="btnMakePdf" class="big">Create my PDF</button>
-    <button id="btnShare" class="big alt">Share or save the PDF</button>
-    <p id="repStatus" class="msg"></p>
-    <p class="note">Send the PDF to your teacher in Canvas. If sharing does not work on your device, press and hold each page below to save it, or take screenshots.</p>
-    <div id="repPreview"></div>
+    <div id="repList"></div>
+    <div id="repOut">
+      <h2 id="repTitle"></h2>
+      <p id="repStatus" class="msg"></p>
+      <button id="btnShare" class="big">Save or share as PDF</button>
+      <button id="btnShareImg" class="big alt">Save or share as a picture</button>
+      <p class="note">Turn in the PDF or the picture in Canvas. You can also press and hold the page below to save it to Photos. Taking a screenshot works too, but the text will be small.</p>
+      <div id="repPreview"></div>
+    </div>
   </div>
 </div>
 
@@ -580,7 +585,7 @@ var CH1_QUIZ=[
  {t:'mc',q:'What turns snow into solid ice in an ice sheet?',o:['The Sun melts it every day','The weight of new snow squeezes it','Seawater freezes into it','Wind blows it into blocks'],a:1,why:'The weight of the snow above packs the old snow into firn, and then into solid ice.'},
  {t:'mc',q:'Compared to the 800,000-year ice core record, how much CO\u2082 is in the air today?',o:['Lower than ever','About average','Higher than at any time in the record','Exactly the same'],a:2,why:'In the ice core record, CO\u2082 stayed between about 180 and 300 ppm. Today it is over 420 ppm.'},
  {t:'mc',q:'Which clue in the ice tells scientists how warm or cold it was?',o:['The color of the drill','Isotopes of hydrogen and oxygen in the ice','How loud the drill is','The size of the ice core'],a:1,why:'Special forms of hydrogen and oxygen atoms, called isotopes, change with temperature, so they work like an ancient thermometer.'},
- {t:'label',q:'Label the ice sheet. Tap a label, then tap where it belongs on the picture.',bg:'sheet',labels:[{s:'Snow',x:300,y:75},{s:'Newest ice',x:300,y:145},{s:'Oldest ice',x:300,y:525},{s:'Air bubble',x:470,y:330}]},
+ {t:'label',q:'Label the ice sheet. Tap a label, then tap the dashed circle where it belongs.',bg:'sheet',guide:true,labels:[{s:'Snow',x:300,y:75,seg:[0,75,600,75],tol:36},{s:'Newest ice',x:300,y:150,seg:[0,150,600,150],tol:40},{s:'Oldest ice',x:300,y:510,seg:[0,510,600,510],tol:42},{s:'Air bubble',x:470,y:330,r:64}]},
  {t:'draw',q:'Draw the drill going down into the ice. Then circle where you would find the OLDEST air bubbles.',bg:'draw'},
  {t:'text',q:'In your own words, explain how an ice core tells scientists about Earth\'s ancient atmosphere.'}
 ];
@@ -603,7 +608,7 @@ function drawBg(c,name){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);if(name===
 function lblOk(lb,p){if(lb.seg){var x1=lb.seg[0],y1=lb.seg[1],x2=lb.seg[2],y2=lb.seg[3],dx=x2-x1,dy=y2-y1,u=((p.x-x1)*dx+(p.y-y1)*dy)/(dx*dx+dy*dy);u=Math.max(0,Math.min(1,u));var ex=x1+u*dx-p.x,ey=y1+u*dy-p.y;return Math.sqrt(ex*ex+ey*ey)<(lb.tol||35);}var ddx=p.x-lb.x,ddy=p.y-lb.y;return Math.sqrt(ddx*ddx+ddy*ddy)<(lb.r||50);}
 function renderLabel(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=620;b.appendChild(cv);var c=cv.getContext('2d');var place=[],sel=-1,checked=false,chips=[];var i;for(i=0;i<q.labels.length;i++)place.push(null);
  function tag(s,x,y,col){c.font='700 20px '+FONT;var w=mtext(c,s)+20;var tx=Math.max(4,Math.min(596-w,x-w/2)),ty=y-44,above=true;if(ty<4){ty=y+14;above=false;}c.strokeStyle=col;c.lineWidth=2;c.beginPath();c.moveTo(x,y);c.lineTo(tx+w/2,above?ty+30:ty);c.stroke();c.fillStyle='rgba(14,27,44,0.9)';rr(c,tx,ty,w,30,9);c.fill();c.strokeStyle=col;c.lineWidth=2.5;rr(c,tx,ty,w,30,9);c.stroke();c.font='700 20px '+FONT;c.fillStyle='#FFFFFF';ftext(c,s,tx+10,ty+21);c.fillStyle=col;circ(c,x,y,7);c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.arc(x,y,7,0,6.2832);c.stroke();}
- function redraw(res){drawBg(c,q.bg);var k;for(k=0;k<place.length;k++){if(place[k]){var col='#FF7A2F';if(res)col=res[k]?'#2E9E5B':'#E0312A';tag(q.labels[k].s,place[k].x,place[k].y,col);}}
+ function redraw(res){drawBg(c,q.bg);var k;if(q.guide&&!res){c.setLineDash([7,6]);c.lineWidth=3;for(k=0;k<q.labels.length;k++){c.strokeStyle='rgba(255,122,47,0.9)';c.beginPath();c.arc(q.labels[k].x,q.labels[k].y,20,0,6.2832);c.stroke();}c.setLineDash([]);}for(k=0;k<place.length;k++){if(place[k]){var col='#FF7A2F';if(res)col=res[k]?'#2E9E5B':'#E0312A';tag(q.labels[k].s,place[k].x,place[k].y,col);}}
   if(res){for(k=0;k<place.length;k++){if(!res[k]){var lb=q.labels[k];if(lb.seg){c.setLineDash([8,6]);c.strokeStyle='#FF5A4A';c.lineWidth=4;c.beginPath();c.moveTo(lb.seg[0],lb.seg[1]);c.lineTo(lb.seg[2],lb.seg[3]);c.stroke();}c.setLineDash([5,4]);c.strokeStyle='#E0312A';c.lineWidth=3;c.beginPath();c.arc(q.labels[k].x,q.labels[k].y,22,0,6.2832);c.stroke();c.setLineDash([]);txt(c,q.labels[k].s+' goes here',q.labels[k].x,q.labels[k].y+40,'700 16px '+FONT,'#E0312A','center');}}}}
  redraw(null);
  function chipCls(){for(var k=0;k<chips.length;k++){chips[k].className='chip'+(place[k]?' placed':'')+(k===sel?' sel':'');}}
@@ -629,7 +634,7 @@ function renderDraw(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=600;b.
 function finishQuiz(){var sc=0,tot=0;for(var i=0;i<Q.items.length;i++){var it=Q.items[i];if(it.t==='mc'){tot++;if(it.ok)sc++;}else if(it.t==='label'){tot+=it.max;sc+=it.pts;}}
  S.res[Q.ch]={title:chTitle(Q.ch),items:Q.items,score:sc,total:tot,when:new Date().toLocaleString()};save();
  var b=$('quizBody');b.innerHTML='';b.appendChild(el('h2',null,chTitle(Q.ch)+' complete!'));b.appendChild(el('div','score',sc+' / '+tot));b.appendChild(el('p','lead','Auto-scored questions. Your written answer and drawing go into your PDF for your teacher to grade.'));
- var p=el('button','big','Make my PDF report');p.onclick=function(){sfx.click();openReport();};b.appendChild(p);var m=el('button','big alt','Back to chapters');m.onclick=function(){sfx.click();openMenu();};b.appendChild(m);sfx.good();say('Great work! You scored '+sc+' out of '+tot+'.',1.05);}
+ var ci=0;for(var q2=0;q2<CH.length;q2++){if(CH[q2].id===Q.ch)ci=q2;}var p=el('button','big','Get my Chapter '+(ci+1)+' results PDF');p.onclick=function(){sfx.click();openReport(ci);};b.appendChild(p);var m=el('button','big alt','Back to chapters');m.onclick=function(){sfx.click();openMenu();};b.appendChild(m);sfx.good();say('Great work! You scored '+sc+' out of '+tot+'.',1.05);}
 
 /* ================= CHAPTER 2: SUNLIGHT AND SEASONS ================= */
 var TILT=23.44,RAD=Math.PI/180,DEG='\u00B0';
@@ -1099,17 +1104,23 @@ function openMenu(){show('scrMenu');$('hello').textContent='Hi, '+S.name+' (Peri
 
 /* ---------- report + PDF ---------- */
 var pdfBlob=null,pdfName='';
-function openReport(){show('scrReport');var n=0;for(var i=0;i<CH.length;i++){if(S.res[CH[i].id])n++;}$('repInfo').textContent=n?('Chapters finished: '+n+'. Your PDF will include every finished chapter.'):'Finish at least one chapter quiz first.';$('btnMakePdf').style.display=n?'block':'none';$('btnShare').style.display='none';$('repStatus').textContent='';$('repPreview').innerHTML='';pdfBlob=null;}
+function openReport(pick){show('scrReport');var L=$('repList'),done=[],i;L.innerHTML='';$('repOut').style.display='none';pdfBlob=null;
+ for(i=0;i<CH.length;i++){if(S.res[CH[i].id])done.push(i);}
+ $('repInfo').textContent=done.length?'Tap a chapter to make its results page. Then save it as a PDF or a picture and turn it in on Canvas.':'Finish at least one chapter quiz first. Your results will show up here.';
+ for(i=0;i<done.length;i++){(function(a){var r=S.res[CH[a].id],bt=el('button','ch');bt.appendChild(el('span','num',String(a+1)));var tx=el('span','tx');tx.appendChild(el('b',null,'Chapter '+(a+1)+' - '+CH[a].title+' PDF Results'));tx.appendChild(el('small',null,'Score '+r.score+' / '+r.total+(r.when?'   |   '+r.when:'')));bt.appendChild(tx);
+  bt.onclick=function(){sfx.click();selRep(bt);makePdf([a],1,'Chapter '+(a+1)+': '+CH[a].title,'Ch'+(a+1));};L.appendChild(bt);if(pick===a){selRep(bt);makePdf([a],1,'Chapter '+(a+1)+': '+CH[a].title,'Ch'+(a+1));}})(done[i]);}
+ if(done.length>1){var all=el('button','ch');all.appendChild(el('span','num','All'));var t2=el('span','tx');t2.appendChild(el('b',null,'All finished chapters in one PDF'));t2.appendChild(el('small',null,'Fits on 2 pages'));all.appendChild(t2);all.onclick=function(){sfx.click();selRep(all);makePdf(null,2,'Climate Quest: Student Report','All');};L.appendChild(all);}}
+function selRep(bt){var bs=$('repList').children;for(var i=0;i<bs.length;i++)bs[i].className='ch';bt.className='ch on';}
 function wrapLines(c,t,maxW){var out=[],ps=String(t).split('\n');for(var p=0;p<ps.length;p++){var ws=ps[p].split(' '),line='';for(var i=0;i<ws.length;i++){var test=line?line+' '+ws[i]:ws[i];if(mtext(c,test)>maxW&&line){out.push(line);line=ws[i];}else{line=test;}}out.push(line);}return out;}
 function loadImgs(cb){var list=[],i,j;for(i=0;i<CH.length;i++){var r=S.res[CH[i].id];if(!r)continue;for(j=0;j<r.items.length;j++){if(r.items[j].img)list.push(r.items[j]);}}var left=list.length;if(!left){cb();return;}for(i=0;i<list.length;i++){(function(it){var im=new Image();im.onload=im.onerror=function(){it._im=im;left--;if(left===0)cb();};im.src=it.img;})(list[i]);}}
-/* Report layout: two columns per page. Tries full size first, then shrinks text and pictures
-   step by step until everything fits on 2 pages. Below the smallest readable size it adds pages instead. */
-function buildPages(){var W=1224,H=1584,K=2,M=46,G=34,HEAD=100,TOP=HEAD+22,CW=(W-2*M-G)/2,colH=H-M-TOP,mc=document.createElement('canvas').getContext('2d'),s,i,j,best=null;
+/* Report layout: two columns per page. Tries large text first (160%), then shrinks text and pictures
+   step by step until everything fits on maxP pages (1 for a chapter, 2 for all chapters). Below the smallest readable size it adds pages instead. */
+function buildPages(only,maxP,title){var W=1224,H=1584,K=2,M=46,G=34,HEAD=100,TOP=HEAD+22,CW=(W-2*M-G)/2,colH=H-M-TOP,mc=document.createElement('canvas').getContext('2d'),s,i,j,best=null;
  function F(sz,wt){return wt+' '+sz.toFixed(1)+'px '+FONT;}
  function blocks(s){var B=[],gap=Math.round(9*s),pend=[];
   function textB(t,font,col,lh,ind,keep,after){mc.font=font;var ls=wrapLines(mc,clean(t),CW-ind);for(var k=0;k<ls.length;k++){B.push({k:'line',t:ls[k],font:font,col:col,ind:ind,h:lh+(k===ls.length-1?(after||0):0),keep:keep||k<ls.length-1});}}
   function flush(){if(!pend.length)return;var iw=Math.min((CW-14)/2,262*s),ih=0,k;for(k=0;k<pend.length;k++){ih=Math.max(ih,iw*pend[k].im.height/pend[k].im.width);}B.push({k:'imgs',list:pend,iw:iw,ih:ih,cap:Math.round(13*s),h:ih+Math.round(20*s)+gap});pend=[];}
-  for(var a=0;a<CH.length;a++){var r=S.res[CH[a].id];if(!r)continue;
+  for(var a=0;a<CH.length;a++){var r=S.res[CH[a].id];if(!r||(only&&only.indexOf(a)<0))continue;
    B.push({k:'head',t:'Chapter '+(a+1)+': '+r.title,sc:'Score: '+r.score+' / '+r.total,fs:19*s,h:Math.round(34*s)+gap,keep:true});
    for(var b=0;b<r.items.length;b++){var it=r.items[b],qf=F(15.5*s,700),af=F(14*s,600),lq=Math.round(20*s),la=Math.round(18.5*s),ind=Math.round(16*s);
     if(!(it._im&&it._im.width))flush();
@@ -1125,14 +1136,14 @@ function buildPages(){var W=1224,H=1584,K=2,M=46,G=34,HEAD=100,TOP=HEAD+22,CW=(W
   for(k=0;k<B.length;k++){var need=B[k].h,q=k;while(B[q].keep&&q+1<B.length&&need<colH*0.5){q++;need+=B[q].h;}
    if(y>0&&y+Math.min(need,colH)>colH){col++;y=0;}P.push({b:B[k],col:col,y:y});y+=B[k].h;}
   return {P:P,pages:Math.floor(col/2)+1};}
- for(s=1;s>=0.699;s-=0.05){best=pack(blocks(s));best.s=s;if(best.pages<=2)break;}
+ for(s=1.6;s>=0.699;s-=0.05){best=pack(blocks(s));best.s=s;if(best.pages<=(maxP||2))break;}
  var n=best.pages,pages=[],cvs=[];
  for(i=0;i<n;i++){var cv=document.createElement('canvas');cv.width=W*K;cv.height=H*K;var c=cv.getContext('2d');c.setTransform(K,0,0,K,0,0);c.fillStyle='#FFFFFF';c.fillRect(0,0,W,H);
-  c.fillStyle='#0E1B2C';c.fillRect(0,0,W,HEAD);txt(c,'Climate Quest: Student Report',M,44,'800 30px '+FONT,'#BFE6F5');
+  c.fillStyle='#0E1B2C';c.fillRect(0,0,W,HEAD);txt(c,title||'Climate Quest: Student Report',M,44,'800 30px '+FONT,'#BFE6F5');
   txt(c,'Name: '+clean(S.name)+'    |    Period '+S.period+'    |    '+new Date().toLocaleDateString(),M,80,'600 19px '+FONT,'#FFFFFF');txt(c,'Page '+(i+1)+' of '+n,W-M,80,'600 19px '+FONT,'#BFE6F5','right');
   c.fillStyle='#D5E3EC';c.fillRect(M+CW+G/2-1,TOP,2,colH);pages.push(cv);cvs.push(c);}
  for(i=0;i<best.P.length;i++){var p=best.P[i],b=p.b,cx=cvs[Math.floor(p.col/2)],x=M+(p.col%2)*(CW+G),y=TOP+p.y;
-  if(b.k==='head'){var hh=b.h-Math.round(9*best.s);cx.fillStyle='#BFE6F5';rr(cx,x,y,CW,hh,6);cx.fill();txt(cx,b.t,x+10,y+hh*0.68,F(b.fs,800),'#0E1B2C');txt(cx,b.sc,x+CW-10,y+hh*0.68,F(b.fs*0.9,800),'#0E1B2C','right');}
+  if(b.k==='head'){var hh=b.h-Math.round(9*best.s),fz=b.fs;cx.font=F(fz,800);while(fz>10&&mtext(cx,b.t)+mtext(cx,b.sc)*0.9+36>CW){fz-=0.5;cx.font=F(fz,800);}cx.fillStyle='#BFE6F5';rr(cx,x,y,CW,hh,6);cx.fill();txt(cx,b.t,x+10,y+hh*0.68,F(fz,800),'#0E1B2C');txt(cx,b.sc,x+CW-10,y+hh*0.68,F(fz*0.9,800),'#0E1B2C','right');}
   else if(b.k==='line'){txt(cx,b.t,x+b.ind,y+b.h*0.0+Math.round(15*best.s),b.font,b.col);}
   else{for(j=0;j<b.list.length;j++){var im=b.list[j].im,ix=x+j*(b.iw+14),ih=b.iw*im.height/im.width;cx.drawImage(im,ix,y,b.iw,ih);cx.strokeStyle='#9FB8CC';cx.lineWidth=1.5;cx.strokeRect(ix,y,b.iw,ih);txt(cx,b.list[j].cap,ix+b.iw/2,y+b.ih+b.cap+3,F(b.cap,700),'#4A6B85','center');}}}
  return pages;}
@@ -1146,12 +1157,20 @@ function buildPDF(jpgs){var n=jpgs.length,out='%PDF-1.4\n%'+String.fromCharCode(
  var size=3+3*n,xref=out.length;out+='xref\n0 '+size+'\n0000000000 65535 f \n';for(k=1;k<size;k++){var s=String(off[k]);while(s.length<10)s='0'+s;out+=s+' 00000 n \n';}
  out+='trailer\n<< /Size '+size+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
  var u=new Uint8Array(out.length);for(k=0;k<out.length;k++)u[k]=out.charCodeAt(k)&255;return u;}
-function makePdf(){$('repStatus').textContent='Building your PDF...';$('btnMakePdf').style.display='none';
- loadImgs(function(){try{var pages=buildPages(),jpgs=[],pv=$('repPreview');pv.innerHTML='';
-  for(var i=0;i<pages.length;i++){var url=pages[i].toDataURL('image/jpeg',0.85);jpgs.push({w:pages[i].width,h:pages[i].height,d:atob(url.split(',')[1])});var im=el('img');im.src=url;im.alt='Report page '+(i+1);pv.appendChild(im);}
-  pdfBlob=new Blob([buildPDF(jpgs)],{type:'application/pdf'});pdfName='ClimateQuest_'+clean(S.name).replace(/[^A-Za-z0-9]+/g,'_')+'_P'+S.period+'.pdf';
-  $('btnShare').style.display='block';$('repStatus').textContent='Your PDF is ready ('+pages.length+' page'+(pages.length>1?'s':'')+').';sfx.good();}
- catch(e){$('repStatus').textContent='The PDF could not be built on this device. Save the page images below instead.';$('btnMakePdf').style.display='block';}});}
+var pageUrls=[];
+function makePdf(only,maxP,title,tag){$('repOut').style.display='block';$('repTitle').textContent=title;$('repStatus').textContent='Building your results page...';$('btnShare').style.display='none';$('btnShareImg').style.display='none';$('repPreview').innerHTML='';pdfBlob=null;pageUrls=[];
+ loadImgs(function(){try{var pages=buildPages(only,maxP,title),jpgs=[],pv=$('repPreview');pv.innerHTML='';
+  for(var i=0;i<pages.length;i++){var url=pages[i].toDataURL('image/jpeg',0.85);pageUrls.push(url);jpgs.push({w:pages[i].width,h:pages[i].height,d:atob(url.split(',')[1])});var im=el('img');im.src=url;im.alt='Results page '+(i+1);pv.appendChild(im);}
+  pdfBlob=new Blob([buildPDF(jpgs)],{type:'application/pdf'});pdfName='ClimateQuest_'+clean(S.name).replace(/[^A-Za-z0-9]+/g,'_')+'_P'+S.period+'_'+tag+'.pdf';
+  $('btnShare').style.display='block';$('btnShareImg').style.display='block';$('repStatus').textContent='Ready! ('+pages.length+' page'+(pages.length>1?'s':'')+')';sfx.good();
+  setTimeout(function(){var o=$('repOut');$('scrReport').scrollTop=o.offsetTop-10;},50);}
+ catch(e){$('repStatus').textContent='The PDF could not be built on this device. Press and hold the page below to save it instead.';}});}
+function durlBlob(u){var b=atob(u.split(',')[1]),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return new Blob([a],{type:'image/jpeg'});}
+function shareImg(){if(!pageUrls.length)return;var files=[],i,base=pdfName.replace(/\.pdf$/,'');
+ try{for(i=0;i<pageUrls.length;i++)files.push(new File([durlBlob(pageUrls[i])],base+(pageUrls.length>1?'_page'+(i+1):'')+'.jpg',{type:'image/jpeg'}));}catch(e){files=[];}
+ if(files.length&&navigator.canShare&&navigator.share&&navigator.canShare({files:files})){navigator.share({files:files,title:'Climate Quest results'}).then(function(){$('repStatus').textContent='Shared!';},function(){});return;}
+ for(i=0;i<pageUrls.length;i++){var a=document.createElement('a');a.href=pageUrls[i];a.download=base+(pageUrls.length>1?'_page'+(i+1):'')+'.jpg';document.body.appendChild(a);a.click();document.body.removeChild(a);}
+ setTimeout(function(){$('repStatus').textContent='If nothing saved, press and hold the page below and choose Save to Photos.';},1200);}
 function sharePdf(){if(!pdfBlob)return;var file=null;try{file=new File([pdfBlob],pdfName,{type:'application/pdf'});}catch(e){file=null;}
  if(file&&navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Climate Quest report'}).then(function(){$('repStatus').textContent='Shared!';},function(){});return;}
  var url=URL.createObjectURL(pdfBlob);var a=document.createElement('a');a.href=url;a.download=pdfName;document.body.appendChild(a);a.click();document.body.removeChild(a);
@@ -1188,7 +1207,7 @@ $('btnVoiceReset').onclick=function(){VSET.frost='';VSET.sam='';VSET.rosa='';sav
 if(window.speechSynthesis&&'onvoiceschanged' in speechSynthesis){speechSynthesis.onvoiceschanged=function(){if($('setCard').style.display==='block')buildVoiceRows();};}
 $('btnSwitch').onclick=function(){sfx.click();openSign();};
 $('btnSoonBack').onclick=function(){sfx.click();openMenu();};
-$('btnReport').onclick=function(){sfx.click();openReport();};
+$('btnReport').onclick=function(){sfx.click();openReport(-1);};
 $('btnNext').onclick=function(){sfx.click();if(sIdx>=story.steps.length-1){story.done();}else{sIdx++;renderStep();}};
 $('btnPrev').onclick=function(){sfx.click();if(sIdx>0){sIdx--;renderStep();}};
 $('btnReplay').onclick=function(){var st=story.steps[sIdx];say(st.tx,WHO[st.who].pitch,st.who);};
@@ -1209,7 +1228,7 @@ $('abHint').onclick=function(){misHint(AB.ms);};
 $('abHeat').onclick=abHeat;
 $('abFill').onclick=function(){sfx.click();if(AB.fb&&AB.fb.on)return;for(var i=0;i<AB.g.length;i++)AB.g[i]=AB.sel;};
 var abc=$('abCv');abc.addEventListener('touchstart',abStart,false);abc.addEventListener('touchmove',abMove,false);abc.addEventListener('touchend',abEnd,false);abc.addEventListener('mousedown',abStart,false);abc.addEventListener('mousemove',abMove,false);window.addEventListener('mouseup',abEnd,false);
-$('btnMakePdf').onclick=makePdf;
+$('btnShareImg').onclick=shareImg;
 $('btnShare').onclick=sharePdf;
 
 load();loadSet();

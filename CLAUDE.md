@@ -29,7 +29,8 @@ The whole game lives in `index.html` at the repo root.
   - {t:'text', q}
 - Register quiz backgrounds in drawBg(c,name). Every chapter quiz has 6 multiple choice, 1 label, 1 draw, and 1 typed answer.
 - Menu: set ready:true on the chapter's CH entry and add a branch in openMenu's onclick to start it.
-- The report and PDF already include any chapter saved in S.res. Don't change them. buildPages() lays the report out in two columns and shrinks text and pictures (down to a 70% floor) so all chapters fit on 2 pages; below that floor it adds pages instead.
+- Results screen (openReport): one "Chapter N - Title PDF Results" button per finished chapter in S.res, plus "All finished chapters in one PDF". Each chapter becomes 1 page; all chapters fit on 2. Students save it as a PDF or as a picture (JPEG). New chapters appear here automatically; don't change this code when adding a chapter. buildPages(only, maxPages, title) lays results out in two columns, trying 160% size first and shrinking (down to a 70% floor) until it fits; below the floor it adds pages.
+- Label tasks can set guide:true to draw dashed target circles at each label's x,y. Use seg bands for labels that name a whole layer or region so students don't have to hit one exact spot.
 - Missions: misRun(prefix, LIST, 'Last button label', onDone) runs the Check / Next mission flow (added in Chapter 3). It expects elements prefix+Head, Text, Check, Msg and a Hint button wired to misHint. Each mission is {tx, hint, ok:function(){}, yes, start:function(){} (optional)}.
 - Helpers to reuse: circ, rr, txt, pill, star5, mix, sky, space, sunGlow, drawSide, drawOrbit, miniEarth, person, rig, rnd, fmt, lpos, cpos, el, angDiff, norm, mol (co2, ch4, h2o, n2, o2), molS (scaled mol), arw (arrow), wavyArw (infrared arrow), cloud, thermo, ebg (space/air/ground backdrop).
 
