@@ -21,7 +21,7 @@ The whole game lives in `index.html` at the repo root.
 - Screens: div.scr elements listed in the `screens` array. Switch with show(id), which stops loops and speech.
 - Animation: startLoop(function(dt,t){...}). setupCanvas(cv, logicalW, logicalH, maxHeightFraction) returns a context scaled to logical coordinates.
 - Story: startStory(STEPS, onDone, 'Last button label'). Each step is {sc:'sceneName', who:'frost'|'sam'|'rosa', tx:"..."}. Story canvas is 400x300 logical. Scenes chain drawScene -> drawScene2 -> drawScene3; add drawScene4, etc., each called from the previous one's final else.
-- Characters: Dr. Frost is the scientist and narrator. Sam and Rosa are new workers who ask the questions students would ask. Narration uses say(text, WHO[who].pitch, who) so each character speaks in the voice chosen in Settings (the cog, top right). Mission and activity lines use say(text, 1.05), which defaults to Dr. Frost's voice.
+- Characters: Dr. Frost is the scientist and narrator. Sam and Rosa are new workers who ask the questions students would ask. Narration uses say(text, WHO[who].pitch, who) so each character speaks in the voice chosen in Settings (the cog, top right). Voices are limited to Daniel, Samantha, and Karen (VSUG); defaults are Dr. Frost = Daniel, Sam = Samantha, Rosa = Karen (VDEF), and any character can be switched to any of the three. Mission and activity lines use say(text, 1.05), which defaults to Dr. Frost's voice.
 - Quiz: startQuiz('chN', LIST). Question types:
   - {t:'mc', q, o:[4 options], a, why}
   - {t:'label', q, bg, labels:[{s,x,y,r} or {s,x,y,seg:[x1,y1,x2,y2],tol}]} on a 600x620 canvas
