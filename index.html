@@ -110,6 +110,17 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
 .plsrc{font-size:12px;color:#9FC3D8;margin-top:6px;line-height:1.35;}
 #plStats div{margin-bottom:3px;}
 #abPal .chip{font-size:13px;padding:7px 10px;}
+.warn{background:#2A1E14;border:2px solid #FF7A2F;border-radius:12px;padding:10px 12px;margin:14px 0 0 0;color:#FFE3CF;font-size:15px;line-height:1.45;}
+.warn b{color:#FFB27E;}
+.card .warn{background:#FFF1E6;color:#3A2210;}
+.card .warn b{color:#B3470F;}
+.nmShow{font-size:22px;font-weight:800;color:#0E1B2C;text-align:center;margin:10px 0 2px 0;}
+.nmPer{font-size:16px;font-weight:700;color:#4A6B85;text-align:center;margin:0 0 6px 0;}
+.hpIco{display:flex;justify-content:center;margin:4px 0 2px 0;}
+.retry{background:#3A2A12;border:2px solid #FFD45A;border-radius:12px;padding:10px 12px;margin:12px 0 0 0;color:#FFF3D6;font-size:16px;line-height:1.45;}
+.retry b{color:#FFD45A;}
+.passed{background:#123A2A;border:2px solid #6FE3A4;border-radius:12px;padding:10px 12px;margin:12px 0 0 0;color:#DDF8EA;font-size:16px;line-height:1.45;}
+.oldn{color:#FFB27E !important;}
 </style>
 </head>
 <body>
@@ -124,23 +135,27 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     <div class="cvwrap"><canvas id="heroCv"></canvas></div>
     <h1>Climate Quest</h1>
     <p class="lead">Drill into ancient ice, follow the air, and build cities in the right climates.</p>
-    <label for="inName">Your name</label>
-    <input id="inName" type="text" autocomplete="off" placeholder="First and last name">
+    <label for="inFirst">First name</label>
+    <input id="inFirst" type="text" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" maxlength="30" placeholder="First name">
+    <label for="inLast">Last name</label>
+    <input id="inLast" type="text" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" maxlength="30" placeholder="Last name">
     <label for="inPeriod">Class period</label>
     <select id="inPeriod">
       <option value="">Choose your period</option>
       <option>1</option><option>2</option><option>3</option><option>4</option>
       <option>5</option><option>6</option><option>7</option><option>8</option>
     </select>
+    <div class="warn"><b>Spell your name correctly.</b> This is the name your teacher will see on your PDFs. Once you tap Start, your name is locked and you can't change it. If you change it later, your old PDFs will still show your old name, and you will have to complete those chapters again to get fresh PDFs.</div>
     <button id="btnStart" class="big">Start</button>
     <p id="signMsg" class="msg"></p>
+    <button id="btnSignCancel" class="link">Cancel and keep my name</button>
   </div>
 
   <div id="scrMenu" class="scr">
     <p id="hello" class="hello"></p>
     <div id="chList"></div>
     <button id="btnReport" class="big alt">My results (PDF)</button>
-    <button id="btnSwitch" class="link">Not you? Change name</button>
+    <button id="btnSwitch" class="link">Need to change your name?</button>
   </div>
 
   <div id="scrSoon" class="scr">
@@ -406,6 +421,39 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
   </div>
 </div>
 
+<div id="nameCard" class="overlay">
+  <div class="card">
+    <h2>Is this correct?</h2>
+    <p class="nmShow" id="nmName"></p>
+    <p class="nmPer" id="nmPer"></p>
+    <div class="warn">This is the name your teacher will see. Check the spelling of your first and last name. After you tap Yes, your name is locked.</div>
+    <button id="nmYes" class="big">Yes, that's me</button>
+    <button id="nmNo" class="big alt">Go back and fix it</button>
+  </div>
+</div>
+
+<div id="chgCard" class="overlay">
+  <div class="card">
+    <h2>Your name is locked</h2>
+    <p>Your name is <b id="chgName"></b>.</p>
+    <div class="warn"><b>Changing your name will not fix your old PDFs.</b> Chapters you already finished keep the old name. New PDFs are only made when you complete a chapter and its quiz again, so you would have to redo those chapters to get PDFs with your new name.</div>
+    <button id="chgKeep" class="big">Keep my name</button>
+    <button id="chgGo" class="big alt">Change my name anyway</button>
+  </div>
+</div>
+
+<div id="hpCard" class="overlay">
+  <div class="card">
+    <div class="hpIco"><svg width="84" height="76" viewBox="0 0 84 76" fill="none"><path d="M12 48 V40 a30 30 0 0 1 60 0 V48" stroke="#0E1B2C" stroke-width="7" stroke-linecap="round"></path><rect x="5" y="42" width="18" height="30" rx="8" fill="#FF7A2F" stroke="#0E1B2C" stroke-width="3"></rect><rect x="61" y="42" width="18" height="30" rx="8" fill="#FF7A2F" stroke="#0E1B2C" stroke-width="3"></rect></svg></div>
+    <h2 id="hpTitle" style="text-align:center;"></h2>
+    <p><b>Put on your headphones or earbuds and turn up the volume.</b> Dr. Frost, Sam, and Rosa read the story out loud, so you will want to hear it.</p>
+    <p class="vnote">No sound? Make sure your iPhone is not on silent, turn the volume up, and check that Sound is on in Settings (the cog at the top).</p>
+    <button id="hpSound" class="big alt">Sound is off. Tap to turn it on.</button>
+    <button id="hpGo" class="big">I'm ready. Start the story!</button>
+    <button id="hpBack" class="link">Back to chapters</button>
+  </div>
+</div>
+
 <div id="coreCard" class="overlay">
   <div class="card">
     <h2 id="ccTitle"></h2>
@@ -420,12 +468,16 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
 "use strict";
 var FONT='"Avenir Next","Avenir","Trebuchet MS",Helvetica,Arial,sans-serif';
 var KEY='climateQuest_v1';
-var S={name:'',period:'',res:{}};
+var S={name:'',first:'',last:'',period:'',res:{}};
 var V={on:true};
 var cur='';
 var DPR=Math.min(window.devicePixelRatio||1,3);
 function $(id){return document.getElementById(id);}
-function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o){S.name=o.name||'';S.period=o.period||'';S.res=o.res||{};}}}catch(e){}}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o){S.name=o.name||'';S.period=o.period||'';S.res=o.res||{};S.first=o.first||'';S.last=o.last||'';
+ if(S.name&&!S.first&&!S.last){var sp=S.name.indexOf(' ');S.first=sp>0?S.name.substring(0,sp):S.name;S.last=sp>0?S.name.substring(sp+1):'';}
+ for(var k in S.res){if(S.res.hasOwnProperty(k)&&S.res[k]&&!S.res[k].name){S.res[k].name=S.name;S.res[k].period=S.period;}}}}}catch(e){}}
+/* Each result keeps the name and period it was finished under. A later name change does not rewrite old results. */
+function resCur(r){return !!r&&r.name===S.name&&String(r.period)===String(S.period);}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function clean(t){return String(t||'').replace(/[\uD800-\uDFFF]/g,'').replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"');}
 function fmt(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
@@ -480,7 +532,7 @@ var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','sc
 var raf=null,loopFn=null;
 function stopLoops(){loopFn=null;if(raf){cancelAnimationFrame(raf);}raf=null;stopDrillSnd();}
 function startLoop(fn){stopLoops();loopFn=fn;var last=0;function f(ts){if(loopFn!==fn)return;var dt=last?Math.min(0.05,(ts-last)/1000):0.016;last=ts;fn(dt,ts/1000);raf=requestAnimationFrame(f);}raf=requestAnimationFrame(f);}
-function show(id){stopLoops();hush();for(var i=0;i<screens.length;i++){$(screens[i]).style.display=(screens[i]===id)?'block':'none';}cur=id;$('btnHome').style.visibility=(id==='scrSign'||id==='scrMenu')?'hidden':'visible';$('coreCard').style.display='none';$(id).scrollTop=0;}
+function show(id){stopLoops();hush();for(var i=0;i<screens.length;i++){$(screens[i]).style.display=(screens[i]===id)?'block':'none';}cur=id;$('btnHome').style.visibility=(id==='scrSign'||id==='scrMenu')?'hidden':'visible';$('coreCard').style.display='none';$('nameCard').style.display='none';$('chgCard').style.display='none';$('hpCard').style.display='none';$(id).scrollTop=0;}
 function setupCanvas(cv,lw,lh,maxHFrac){var w=cv.parentNode.clientWidth||360;var maxH=window.innerHeight*(maxHFrac||0.5);if(w*lh/lw>maxH){w=maxH*lw/lh;}var h=w*lh/lw;cv.style.width=Math.round(w)+'px';cv.style.height=Math.round(h)+'px';cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);var c=cv.getContext('2d');var k=cv.width/lw;c.setTransform(k,0,0,k,0,0);return c;}
 
 /* ---------- drawing helpers ---------- */
@@ -791,9 +843,16 @@ function renderDraw(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=600;b.
  var m=el('p','msg','');var d=el('button','big','Done drawing');d.onclick=function(){if(marks<15){m.textContent='Add your drawing first.';sfx.bad();return;}done=true;d.style.display='none';tools.style.display='none';m.textContent='';sfx.good();Q.items.push({t:'draw',q:q.q,ans:'(drawing)',ok:null,img:cv.toDataURL('image/jpeg',0.75)});b.appendChild(el('div','why','Saved. Your drawing will be in your PDF for your teacher.'));nextBtn(b);};
  b.appendChild(d);b.appendChild(m);}
 function finishQuiz(){var sc=0,tot=0;for(var i=0;i<Q.items.length;i++){var it=Q.items[i];if(it.t==='mc'){tot++;if(it.ok)sc++;}else if(it.t==='label'){tot+=it.max;sc+=it.pts;}}
- S.res[Q.ch]={title:chTitle(Q.ch),items:Q.items,score:sc,total:tot,when:new Date().toLocaleString()};save();
+ S.res[Q.ch]={title:chTitle(Q.ch),items:Q.items,score:sc,total:tot,when:new Date().toLocaleString(),name:S.name,period:S.period};save();
+ var pct=tot?Math.round(100*sc/tot):100,low=tot>0&&sc/tot<0.7;
  var b=$('quizBody');b.innerHTML='';b.appendChild(el('h2',null,chTitle(Q.ch)+' complete!'));b.appendChild(el('div','score',sc+' / '+tot));b.appendChild(el('p','lead','Auto-scored questions. Your written answer and drawing go into your PDF for your teacher to grade.'));
- var ci=0;for(var q2=0;q2<CH.length;q2++){if(CH[q2].id===Q.ch)ci=q2;}var p=el('button','big','Get my Chapter '+(ci+1)+' results PDF');p.onclick=function(){sfx.click();openReport(ci);};b.appendChild(p);var m=el('button','big alt','Back to chapters');m.onclick=function(){sfx.click();openMenu();};b.appendChild(m);sfx.good();say('Great work! You scored '+sc+' out of '+tot+'.',1.05);}
+ var ci=0;for(var q2=0;q2<CH.length;q2++){if(CH[q2].id===Q.ch)ci=q2;}
+ if(low){var bx=el('div','retry');bx.appendChild(el('b',null,'Try for at least 70%. '));bx.appendChild(document.createTextNode('You got '+pct+'%. You can do better! Play Chapter '+(ci+1)+' again: listen to the story, redo the activity, and retake the quiz. When you finish, your new score makes a fresh PDF.'));b.appendChild(bx);
+  var tr=el('button','big','Try Chapter '+(ci+1)+' again');tr.onclick=function(){sfx.click();startChapter(ci);};b.appendChild(tr);}
+ else{b.appendChild(el('div','passed','Nice work! You scored '+pct+'%, which meets the 70% goal.'));}
+ var p=el('button','big'+(low?' alt':''),'Get my Chapter '+(ci+1)+' results PDF');p.onclick=function(){sfx.click();openReport(ci);};b.appendChild(p);var m=el('button','big alt','Back to chapters');m.onclick=function(){sfx.click();openMenu();};b.appendChild(m);
+ if(low){sfx.bad();say('You scored '+sc+' out of '+tot+'. That is '+pct+' percent. Try for at least 70 percent. Play the chapter again. You can do it!',1.05);}
+ else{sfx.good();say('Great work! You scored '+sc+' out of '+tot+'. That is '+pct+' percent.',1.05);}}
 
 /* ================= CHAPTER 2: SUNLIGHT AND SEASONS ================= */
 var TILT=23.44,RAD=Math.PI/180,DEG='\u00B0';
@@ -2267,25 +2326,36 @@ var CH8_QUIZ=[
 ];
 
 /* ---------- menu ---------- */
-function openMenu(){show('scrMenu');$('hello').textContent='Hi, '+S.name+' (Period '+S.period+'). Pick a chapter.';var L=$('chList');L.innerHTML='';
+function openMenu(){show('scrMenu');$('hello').textContent='Hi, '+S.name+' (Period '+S.period+'). Pick a chapter. Aim for 70% or higher on each quiz.';var L=$('chList');L.innerHTML='';
  for(var i=0;i<CH.length;i++){(function(i){var ch=CH[i];var r=S.res[ch.id];var bt=el('button','ch'+(ch.ready?'':' off'));bt.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,ch.title));tx.appendChild(el('small',null,ch.desc));bt.appendChild(tx);
   bt.appendChild(el('span','pill'+(r?' done':''),r?('Score '+r.score+'/'+r.total):(ch.ready?'Start':'Soon')));
-  bt.onclick=function(){sfx.click();ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=ch.title;return;}if(ch.id==='ch1')startStory(CH1_STEPS,startDrillGame,'Start drilling');else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');};L.appendChild(bt);})(i);}}
+  bt.onclick=function(){sfx.click();ac();startChapter(i);};L.appendChild(bt);})(i);}}
+/* Every chapter start (menu or "Try again") goes through the headphones reminder card. */
+var hpNext=null;
+function startChapter(i){var ch=CH[i];ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=ch.title;return;}
+ openMenu();hpNext=function(){launchChapter(i);};$('hpTitle').textContent='Chapter '+(i+1)+': '+ch.title;hpSoundBtn();$('hpCard').style.display='block';$('hpCard').scrollTop=0;
+ say('Put on your headphones and turn up the volume so you can hear the story.',1.05);}
+function hpSoundBtn(){$('hpSound').style.display=V.on?'none':'block';}
+function launchChapter(i){var ch=CH[i];if(ch.id==='ch1')startStory(CH1_STEPS,startDrillGame,'Start drilling');else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');}
 
 /* ---------- report + PDF ---------- */
 var pdfBlob=null,pdfName='';
 function openReport(pick){show('scrReport');var L=$('repList'),done=[],i;L.innerHTML='';$('repOut').style.display='none';pdfBlob=null;
- for(i=0;i<CH.length;i++){if(S.res[CH[i].id])done.push(i);}
- $('repInfo').textContent=done.length?'Tap a chapter to make its results page. Then save it as a PDF or a picture and turn it in on Canvas.':'Finish at least one chapter quiz first. Your results will show up here.';
- for(i=0;i<done.length;i++){(function(a){var r=S.res[CH[a].id],bt=el('button','ch');bt.appendChild(el('span','num',String(a+1)));var tx=el('span','tx');tx.appendChild(el('b',null,'Chapter '+(a+1)+' - '+CH[a].title+' PDF Results'));tx.appendChild(el('small',null,'Score '+r.score+' / '+r.total+(r.when?'   |   '+r.when:'')));bt.appendChild(tx);
+ var curDone=[];for(i=0;i<CH.length;i++){if(S.res[CH[i].id]){done.push(i);if(resCur(S.res[CH[i].id]))curDone.push(i);}}
+ $('repInfo').textContent=done.length?'Tap a chapter to make its results page. Then save it as a PDF or a picture and turn it in on Canvas. New PDFs are only made when you complete a chapter and its quiz again.':'Finish at least one chapter quiz first. Your results will show up here.';
+ for(i=0;i<done.length;i++){(function(a){var r=S.res[CH[a].id],bt=el('button','ch');bt.appendChild(el('span','num',String(a+1)));var tx=el('span','tx');tx.appendChild(el('b',null,'Chapter '+(a+1)+' - '+CH[a].title+' PDF Results'));tx.appendChild(el('small',null,'Score '+r.score+' / '+r.total+(r.when?'   |   '+r.when:'')));
+  if(r.total&&r.score/r.total<0.7)tx.appendChild(el('small','oldn','Below 70%. Try this chapter again for a better score.'));
+  if(!resCur(r))tx.appendChild(el('small','oldn','Saved under the name '+r.name+' (Period '+r.period+'). This PDF keeps that name. Complete the chapter again for a PDF with your current name.'));bt.appendChild(tx);
   bt.onclick=function(){sfx.click();selRep(bt);makePdf([a],1,'Chapter '+(a+1)+': '+CH[a].title,'Ch'+(a+1));};L.appendChild(bt);if(pick===a){selRep(bt);makePdf([a],1,'Chapter '+(a+1)+': '+CH[a].title,'Ch'+(a+1));}})(done[i]);}
- if(done.length>1){var all=el('button','ch');all.appendChild(el('span','num','All'));var t2=el('span','tx');t2.appendChild(el('b',null,'All finished chapters in one PDF'));t2.appendChild(el('small',null,'Fits on 2 pages'));all.appendChild(t2);all.onclick=function(){sfx.click();selRep(all);makePdf(null,2,'Climate Quest: Student Report','All');};L.appendChild(all);}}
+ if(curDone.length>1){var all=el('button','ch');all.appendChild(el('span','num','All'));var t2=el('span','tx');t2.appendChild(el('b',null,'All finished chapters in one PDF'));t2.appendChild(el('small',null,'Fits on 2 pages'+(curDone.length<done.length?'. Only chapters finished under your current name.':'')));all.appendChild(t2);all.onclick=function(){sfx.click();selRep(all);makePdf(curDone,2,'Climate Quest: Student Report','All');};L.appendChild(all);}}
 function selRep(bt){var bs=$('repList').children;for(var i=0;i<bs.length;i++)bs[i].className='ch';bt.className='ch on';}
 function wrapLines(c,t,maxW){var out=[],ps=String(t).split('\n');for(var p=0;p<ps.length;p++){var ws=ps[p].split(' '),line='';for(var i=0;i<ws.length;i++){var test=line?line+' '+ws[i]:ws[i];if(mtext(c,test)>maxW&&line){out.push(line);line=ws[i];}else{line=test;}}out.push(line);}return out;}
 function loadImgs(cb){var list=[],i,j;for(i=0;i<CH.length;i++){var r=S.res[CH[i].id];if(!r)continue;for(j=0;j<r.items.length;j++){if(r.items[j].img)list.push(r.items[j]);}}var left=list.length;if(!left){cb();return;}for(i=0;i<list.length;i++){(function(it){var im=new Image();im.onload=im.onerror=function(){it._im=im;left--;if(left===0)cb();};im.src=it.img;})(list[i]);}}
 /* Report layout: two columns per page. Tries large text first (160%), then shrinks text and pictures
    step by step until everything fits on maxP pages (1 for a chapter, 2 for all chapters). Below the smallest readable size it adds pages instead. */
-function buildPages(only,maxP,title){var W=1224,H=1584,K=2,M=46,G=34,HEAD=100,TOP=HEAD+22,CW=(W-2*M-G)/2,colH=H-M-TOP,mc=document.createElement('canvas').getContext('2d'),s,i,j,best=null;
+/* Name and period printed on a PDF come from the saved results, not from the current sign-in. */
+function repWho(only){for(var a=0;a<CH.length;a++){var r=S.res[CH[a].id];if(r&&(!only||only.indexOf(a)>=0))return {n:r.name||S.name,p:r.period||S.period};}return {n:S.name,p:S.period};}
+function buildPages(only,maxP,title){var WH=repWho(only);var W=1224,H=1584,K=2,M=46,G=34,HEAD=100,TOP=HEAD+22,CW=(W-2*M-G)/2,colH=H-M-TOP,mc=document.createElement('canvas').getContext('2d'),s,i,j,best=null;
  function F(sz,wt){return wt+' '+sz.toFixed(1)+'px '+FONT;}
  function blocks(s){var B=[],gap=Math.round(9*s),pend=[];
   function textB(t,font,col,lh,ind,keep,after){mc.font=font;var ls=wrapLines(mc,clean(t),CW-ind);for(var k=0;k<ls.length;k++){B.push({k:'line',t:ls[k],font:font,col:col,ind:ind,h:lh+(k===ls.length-1?(after||0):0),keep:keep||k<ls.length-1});}}
@@ -2310,7 +2380,7 @@ function buildPages(only,maxP,title){var W=1224,H=1584,K=2,M=46,G=34,HEAD=100,TO
  var n=best.pages,pages=[],cvs=[];
  for(i=0;i<n;i++){var cv=document.createElement('canvas');cv.width=W*K;cv.height=H*K;var c=cv.getContext('2d');c.setTransform(K,0,0,K,0,0);c.fillStyle='#FFFFFF';c.fillRect(0,0,W,H);
   c.fillStyle='#0E1B2C';c.fillRect(0,0,W,HEAD);txt(c,title||'Climate Quest: Student Report',M,44,'800 30px '+FONT,'#BFE6F5');
-  txt(c,'Name: '+clean(S.name)+'    |    Period '+S.period+'    |    '+new Date().toLocaleDateString(),M,80,'600 19px '+FONT,'#FFFFFF');txt(c,'Page '+(i+1)+' of '+n,W-M,80,'600 19px '+FONT,'#BFE6F5','right');
+  txt(c,'Name: '+clean(WH.n)+'    |    Period '+WH.p+'    |    '+new Date().toLocaleDateString(),M,80,'600 19px '+FONT,'#FFFFFF');txt(c,'Page '+(i+1)+' of '+n,W-M,80,'600 19px '+FONT,'#BFE6F5','right');
   c.fillStyle='#D5E3EC';c.fillRect(M+CW+G/2-1,TOP,2,colH);pages.push(cv);cvs.push(c);}
  for(i=0;i<best.P.length;i++){var p=best.P[i],b=p.b,cx=cvs[Math.floor(p.col/2)],x=M+(p.col%2)*(CW+G),y=TOP+p.y;
   if(b.k==='head'){var hh=b.h-Math.round(9*best.s),fz=b.fs;cx.font=F(fz,800);while(fz>10&&mtext(cx,b.t)+mtext(cx,b.sc)*0.9+36>CW){fz-=0.5;cx.font=F(fz,800);}cx.fillStyle='#BFE6F5';rr(cx,x,y,CW,hh,6);cx.fill();txt(cx,b.t,x+10,y+hh*0.68,F(fz,800),'#0E1B2C');txt(cx,b.sc,x+CW-10,y+hh*0.68,F(fz*0.9,800),'#0E1B2C','right');}
@@ -2331,7 +2401,7 @@ var pageUrls=[];
 function makePdf(only,maxP,title,tag){$('repOut').style.display='block';$('repTitle').textContent=title;$('repStatus').textContent='Building your results page...';$('btnShare').style.display='none';$('btnShareImg').style.display='none';$('repPreview').innerHTML='';pdfBlob=null;pageUrls=[];
  loadImgs(function(){try{var pages=buildPages(only,maxP,title),jpgs=[],pv=$('repPreview');pv.innerHTML='';
   for(var i=0;i<pages.length;i++){var url=pages[i].toDataURL('image/jpeg',0.85);pageUrls.push(url);jpgs.push({w:pages[i].width,h:pages[i].height,d:atob(url.split(',')[1])});var im=el('img');im.src=url;im.alt='Results page '+(i+1);pv.appendChild(im);}
-  pdfBlob=new Blob([buildPDF(jpgs)],{type:'application/pdf'});pdfName='ClimateQuest_'+clean(S.name).replace(/[^A-Za-z0-9]+/g,'_')+'_P'+S.period+'_'+tag+'.pdf';
+  pdfBlob=new Blob([buildPDF(jpgs)],{type:'application/pdf'});var WH=repWho(only);pdfName='ClimateQuest_'+clean(WH.n).replace(/[^A-Za-z0-9]+/g,'_')+'_P'+WH.p+'_'+tag+'.pdf';
   $('btnShare').style.display='block';$('btnShareImg').style.display='block';$('repStatus').textContent='Ready! ('+pages.length+' page'+(pages.length>1?'s':'')+')';sfx.good();
   setTimeout(function(){var o=$('repOut');$('scrReport').scrollTop=o.offsetTop-10;},50);}
  catch(e){$('repStatus').textContent='The PDF could not be built on this device. Press and hold the page below to save it instead.';}});}
@@ -2347,14 +2417,20 @@ function sharePdf(){if(!pdfBlob)return;var file=null;try{file=new File([pdfBlob]
  setTimeout(function(){$('repStatus').textContent='If no download appeared, save the page images below instead.';},1200);}
 
 /* ---------- sign in ---------- */
-function openSign(){show('scrSign');$('inName').value=S.name;$('inPeriod').value=S.period;var c=setupCanvas($('heroCv'),400,300,0.32);startLoop(function(dt,t){sceneCamp(c,t);});}
-function startApp(){ac();var n=clean($('inName').value).replace(/^\s+|\s+$/g,''),p=$('inPeriod').value;if(n.length<2){$('signMsg').textContent='Type your first and last name.';return;}if(!p){$('signMsg').textContent='Choose your class period.';return;}
- if(S.name&&S.name!==n){S.res={};}S.name=n;S.period=p;save();sfx.good();openMenu();}
+function openSign(){show('scrSign');$('inFirst').value=S.first;$('inLast').value=S.last;$('inPeriod').value=S.period;$('signMsg').textContent='';$('btnSignCancel').style.display=S.name?'block':'none';var c=setupCanvas($('heroCv'),400,300,0.32);startLoop(function(dt,t){sceneCamp(c,t);});}
+function nmTidy(v){return clean(v).replace(/\s+/g,' ').replace(/^\s+|\s+$/g,'');}
+var nmPend=null;
+function startApp(){ac();var f=nmTidy($('inFirst').value),l=nmTidy($('inLast').value),p=$('inPeriod').value;
+ if(!/[A-Za-z]/.test(f)){$('signMsg').textContent='Type your first name.';sfx.bad();return;}
+ if(!/[A-Za-z]/.test(l)){$('signMsg').textContent='Type your last name.';sfx.bad();return;}
+ if(!p){$('signMsg').textContent='Choose your class period.';sfx.bad();return;}
+ $('signMsg').textContent='';nmPend={f:f,l:l,p:p};$('nmName').textContent=f+' '+l;$('nmPer').textContent='Period '+p;$('nameCard').style.display='block';sfx.click();}
+function nameYes(){if(!nmPend)return;S.first=nmPend.f;S.last=nmPend.l;S.name=nmPend.f+' '+nmPend.l;S.period=nmPend.p;nmPend=null;save();sfx.good();openMenu();}
 
 /* ---------- wire up ---------- */
 $('btnStart').onclick=startApp;
 $('btnHome').onclick=function(){sfx.click();openMenu();};
-$('btnSound').onclick=function(){V.on=!V.on;this.textContent='Sound: '+(V.on?'On':'Off');saveSet();if(!V.on){hush();stopDrillSnd();}else{ac();sfx.click();}};
+$('btnSound').onclick=function(){V.on=!V.on;this.textContent='Sound: '+(V.on?'On':'Off');saveSet();hpSoundBtn();if(!V.on){hush();stopDrillSnd();}else{ac();sfx.click();}};
 var VSAMPLE={frost:"Hi team, I'm Dr. Frost. Let's find out how Earth's climate works.",sam:"Hi, I'm Sam. I have a lot of questions!",rosa:"Hi, I'm Rosa. This is going to be fun."};
 function buildVoiceRows(){var box=$('voiceRows'),vs=enVoices(),k,i,j;box.innerHTML='';
  var keys=['frost','sam','rosa'];
@@ -2371,7 +2447,15 @@ $('btnGear').onclick=openSettings;
 $('btnSetDone').onclick=function(){sfx.click();hush();$('setCard').style.display='none';};
 $('btnVoiceReset').onclick=function(){VSET.frost=VDEF.frost;VSET.sam=VDEF.sam;VSET.rosa=VDEF.rosa;saveSet();buildVoiceRows();sfx.click();};
 if(window.speechSynthesis&&'onvoiceschanged' in speechSynthesis){speechSynthesis.onvoiceschanged=function(){if($('setCard').style.display==='block')buildVoiceRows();};}
-$('btnSwitch').onclick=function(){sfx.click();openSign();};
+$('btnSwitch').onclick=function(){sfx.click();$('chgName').textContent=S.name+' (Period '+S.period+')';$('chgCard').style.display='block';};
+$('chgKeep').onclick=function(){sfx.click();$('chgCard').style.display='none';};
+$('chgGo').onclick=function(){sfx.click();openSign();};
+$('btnSignCancel').onclick=function(){sfx.click();if(S.name&&S.period)openMenu();};
+$('nmYes').onclick=nameYes;
+$('nmNo').onclick=function(){sfx.click();nmPend=null;$('nameCard').style.display='none';$('inFirst').focus();};
+$('hpGo').onclick=function(){sfx.click();hush();$('hpCard').style.display='none';var f=hpNext;hpNext=null;if(f)f();};
+$('hpBack').onclick=function(){sfx.click();hush();hpNext=null;$('hpCard').style.display='none';};
+$('hpSound').onclick=function(){V.on=true;saveSet();ac();sfx.click();hpSoundBtn();say('Sound is on. Put on your headphones and turn up the volume.',1.05);};
 $('btnSoonBack').onclick=function(){sfx.click();openMenu();};
 $('btnReport').onclick=function(){sfx.click();openReport(-1);};
 $('btnNext').onclick=function(){sfx.click();if(sIdx>=story.steps.length-1){story.done();}else{sIdx++;renderStep();}};
