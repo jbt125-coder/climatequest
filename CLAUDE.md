@@ -1,7 +1,7 @@
 # Climate Quest - project rules
 
 ## What it is
-A single-file, iPhone-optimized HTML game for high school Earth Space Science in Florida. It has 8 chapters reached from an open menu. Chapter 1 (Ice Core Drill), Chapter 2 (Sunlight and Seasons), and Chapter 3 (Earth's Energy Balance) are done. Every chapter follows the same flow: narrated story, then interactive activity, then quiz. Quiz results go into a PDF the student shares to Canvas.
+A single-file, iPhone-optimized HTML game for high school Earth Space Science in Florida. It has 8 chapters reached from an open menu. Chapters 1 to 4 are done: Ice Core Drill, Sunlight and Seasons, Earth's Energy Balance, and Orbit Cycles and Ice Ages. Every chapter follows the same flow: narrated story, then interactive activity, then quiz. Quiz results go into a PDF the student shares to Canvas.
 
 The whole game lives in `index.html` at the repo root.
 
@@ -20,7 +20,7 @@ The whole game lives in `index.html` at the repo root.
 ## Architecture (reuse what exists; don't duplicate)
 - Screens: div.scr elements listed in the `screens` array. Switch with show(id), which stops loops and speech.
 - Animation: startLoop(function(dt,t){...}). setupCanvas(cv, logicalW, logicalH, maxHeightFraction) returns a context scaled to logical coordinates.
-- Story: startStory(STEPS, onDone, 'Last button label'). Each step is {sc:'sceneName', who:'frost'|'sam'|'rosa', tx:"..."}. Story canvas is 400x300 logical. Scenes chain drawScene -> drawScene2 -> drawScene3; add drawScene4, etc., each called from the previous one's final else.
+- Story: startStory(STEPS, onDone, 'Last button label'). Each step is {sc:'sceneName', who:'frost'|'sam'|'rosa', tx:"..."}. Story canvas is 400x300 logical. Scenes chain drawScene -> drawScene2 -> drawScene3 -> drawScene4; add drawScene5, etc., each called from the previous one's final else.
 - Characters: Dr. Frost is the scientist and narrator. Sam and Rosa are new workers who ask the questions students would ask. Narration uses say(text, WHO[who].pitch, who) so each character speaks in the voice chosen in Settings (the cog, top right). Voices are limited to Daniel, Samantha, and Karen (VSUG); defaults are Dr. Frost = Daniel, Sam = Samantha, Rosa = Karen (VDEF), and any character can be switched to any of the three. Mission and activity lines use say(text, 1.05), which defaults to Dr. Frost's voice.
 - Quiz: startQuiz('chN', LIST). Question types:
   - {t:'mc', q, o:[4 options], a, why}
@@ -32,7 +32,9 @@ The whole game lives in `index.html` at the repo root.
 - Results screen (openReport): one "Chapter N - Title PDF Results" button per finished chapter in S.res, plus "All finished chapters in one PDF". Each chapter becomes 1 page; all chapters fit on 2. Students save it as a PDF or as a picture (JPEG). New chapters appear here automatically; don't change this code when adding a chapter. buildPages(only, maxPages, title) lays results out in two columns, trying 160% size first and shrinking (down to a 70% floor) until it fits; below the floor it adds pages.
 - Label tasks can set guide:true to draw dashed target circles at each label's x,y. Use seg bands for labels that name a whole layer or region so students don't have to hit one exact spot.
 - Missions: misRun(prefix, LIST, 'Last button label', onDone) runs the Check / Next mission flow (added in Chapter 3). It expects elements prefix+Head, Text, Check, Msg and a Hint button wired to misHint. Each mission is {tx, hint, ok:function(){}, yes, start:function(){} (optional)}.
-- Helpers to reuse: circ, rr, txt, pill, star5, mix, sky, space, sunGlow, drawSide, drawOrbit, miniEarth, person, rig, rnd, fmt, lpos, cpos, el, angDiff, norm, mol (co2, ch4, h2o, n2, o2), molS (scaled mol), arw (arrow), wavyArw (infrared arrow), cloud, thermo, ebg (space/air/ground backdrop).
+- Helpers to reuse: circ, rr, txt, pill, star5, mix, sky, space, sunGlow, drawSide, drawOrbit, miniEarth, person, rig, rnd, fmt, lpos, cpos, el, angDiff, norm, mol (co2, ch4, h2o, n2, o2), molS (scaled mol), arw (arrow), wavyArw (infrared arrow), cloud, thermo, ebg (space/air/ground backdrop), ovalOrbit (animated elliptical orbit), tGlobe (globe with adjustable tilt and 65 N line), wobTop (precessing axis), naMap (approximate North America map with optional ice sheet), icGraph.
+- Real data already embedded: IC_T (Dome C Antarctic temperature change x10, Jouzel et al. 2007) and IC_C (CO2 ppm, Bereiter et al. 2015), both 800 values of 1,000-year averages from NOAA NCEI, index 0 = most recent, CO2 ending about 1850. Reuse them instead of re-embedding.
+- Data downloads: this environment blocks www.ncei.noaa.gov and data.giss.nasa.gov. If a chapter needs data, ask the user to upload the file in chat.
 
 ## Style and content
 - Visuals: cute round cartoon characters with realistic-ish science visuals. Dark navy UI (#0E1B2C), orange buttons (#FF7A2F), ice blue (#BFE6F5), green for correct (#6FE3A4).

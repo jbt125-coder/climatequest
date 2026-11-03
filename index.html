@@ -221,6 +221,45 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     <p class="note">Yellow dots are sunlight coming in. White dots are reflected back to space. Orange flashes are sunlight absorbed. Albedo values are approximate.</p>
   </div>
 
+  <div id="scrOrbit" class="scr">
+    <div class="mis">
+      <b id="obHead"></b>
+      <p id="obText"></p>
+      <div class="row"><button id="obHint" class="sbtn">Hint</button><button id="obCheck" class="big">Check</button></div>
+      <p id="obMsg" class="msg"></p>
+    </div>
+    <div id="obTabs" class="tools"><button class="chip" data-t="shape">Orbit shape</button><button class="chip" data-t="tilt">Tilt</button><button class="chip" data-t="wobble">Wobble</button><button class="chip" data-t="machine">Ice Age Machine</button></div>
+    <div class="cvwrap"><canvas id="obCv"></canvas></div>
+    <div id="obSE"><div class="row2"><span>Orbit shape: <b id="obEv"></b></span></div>
+      <input id="obE" type="range" min="0" max="60" step="1" value="17">
+      <div class="ticks"><span class="l" style="left:0%">circle</span><span style="left:28.3%">today</span><span class="r" style="left:100%">most oval</span></div></div>
+    <div id="obST"><div class="row2"><span>Tilt: <b id="obTv"></b></span></div>
+      <input id="obT" type="range" min="221" max="245" step="1" value="234">
+      <div class="ticks"><span class="l" style="left:0%">22.1&deg;</span><span style="left:54.2%">today</span><span class="r" style="left:100%">24.5&deg;</span></div></div>
+    <div id="obSP"><div class="row2"><span>Closest to the Sun in: <b id="obPv"></b></span></div>
+      <input id="obP" type="range" min="0" max="11" step="1" value="0">
+      <div class="ticks"><span class="l" style="left:0%">Jan</span><span style="left:54.5%">Jul</span><span class="r" style="left:100%">Dec</span></div></div>
+    <p class="note">The Ice Age Machine is a simplified model. Real ice ages also depend on feedbacks like ice-albedo and CO<sub>2</sub>.</p>
+  </div>
+
+  <div id="scrGraph" class="scr">
+    <div class="mis">
+      <b id="grHead"></b>
+      <p id="grText"></p>
+      <div class="row"><button id="grHint" class="sbtn">Hint</button><button id="grCheck" class="big">Check</button></div>
+      <p id="grMsg" class="msg"></p>
+    </div>
+    <div id="grCount" class="tools"></div>
+    <div class="cvwrap"><canvas id="grCv"></canvas></div>
+    <div class="stats">
+      <div>When: <b id="grAge">-</b></div>
+      <div>Antarctic temperature: <b id="grT">-</b></div>
+      <div>CO<sub>2</sub>: <b id="grC">-</b></div>
+      <div>Your CO<sub>2</sub> dot: <b id="grDot">(tap the CO<sub>2</sub> panel)</b></div>
+    </div>
+    <p class="note">Real data, shown as 1,000-year averages. Temperature: EPICA Dome C, Antarctica (Jouzel et al. 2007), as the change from the average of the last 1,000 years. Antarctic temperatures swing more than the global average. CO<sub>2</sub>: Antarctic ice core composite (Bereiter et al. 2015), ending about 1850. Both from NOAA NCEI Paleoclimatology.</p>
+  </div>
+
   <div id="scrQuiz" class="scr"><div id="quizBody"></div></div>
 
   <div id="scrReport" class="scr">
@@ -279,7 +318,7 @@ var CH=[
  {id:'ch1',title:'Ice Core Drill',desc:'Antarctica: drill into 800,000 years of ice.',ready:true},
  {id:'ch2',title:'Sunlight and Seasons',desc:'Tilt the Earth and move it around the Sun.',ready:true},
  {id:'ch3',title:'Earth\'s Energy Balance',desc:'Greenhouse gases and albedo.',ready:true},
- {id:'ch4',title:'Orbit Cycles and Ice Ages',desc:'How changes in Earth\'s orbit bring ice ages.'},
+ {id:'ch4',title:'Orbit Cycles and Ice Ages',desc:'How changes in Earth\'s orbit bring ice ages.',ready:true},
  {id:'ch5',title:'Moving Air',desc:'Convection, the Coriolis effect, and air masses.'},
  {id:'ch6',title:'Mountains and Rain Shadows',desc:'Push a cloud over a mountain.'},
  {id:'ch7',title:'City Planner',desc:'Match each city to the right climate.'},
@@ -319,7 +358,7 @@ function say(t,pitch,who){if(!window.speechSynthesis)return;speechSynthesis.canc
 function hush(){if(window.speechSynthesis){speechSynthesis.cancel();}}
 
 /* ---------- screens + loop ---------- */
-var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','scrLab','scrAlbedo','scrQuiz','scrReport'];
+var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','scrLab','scrAlbedo','scrOrbit','scrGraph','scrQuiz','scrReport'];
 var raf=null,loopFn=null;
 function stopLoops(){loopFn=null;if(raf){cancelAnimationFrame(raf);}raf=null;stopDrillSnd();}
 function startLoop(fn){stopLoops();loopFn=fn;var last=0;function f(ts){if(loopFn!==fn)return;var dt=last?Math.min(0.05,(ts-last)/1000):0.016;last=ts;fn(dt,ts/1000);raf=requestAnimationFrame(f);}raf=requestAnimationFrame(f);}
@@ -606,7 +645,7 @@ function renderMC(b,q){var btns=[];for(var i=0;i<q.o.length;i++){(function(i){va
  Q.items.push({t:'mc',q:q.q,ans:q.o[i],ok:ok,right:q.o[q.a]});b.appendChild(el('div','why',(ok?'Correct! ':'Not quite. ')+q.why));nextBtn(b);};btns.push(o);b.appendChild(o);})(i);}}
 function renderText(b,q){var ta=el('textarea');ta.placeholder='Type your answer here. Use complete sentences.';b.appendChild(ta);var m=el('p','msg','');var s=el('button','big','Save my answer');s.onclick=function(){var v=clean(ta.value).replace(/^\s+|\s+$/g,'');if(v.split(/\s+/).length<8){m.textContent='Write at least one full sentence (8 or more words).';sfx.bad();return;}ta.disabled=true;s.style.display='none';m.textContent='';sfx.good();Q.items.push({t:'text',q:q.q,ans:v,ok:null});b.appendChild(el('div','why','Saved. Your teacher will read this answer in your PDF.'));nextBtn(b);};b.appendChild(s);b.appendChild(m);}
 function cpos(cv,e){var r=cv.getBoundingClientRect();var p=(e.touches&&e.touches.length)?e.touches[0]:((e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e);return {x:(p.clientX-r.left)*cv.width/r.width,y:(p.clientY-r.top)*cv.height/r.height};}
-function drawBg(c,name){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);if(name==='sheet')bgSheet(c);else if(name==='draw')bgDraw(c);else if(name==='sideJune')bgSideJune(c);else if(name==='sideDec')bgSideDec(c);else if(name==='energy')bgEnergy(c);else if(name==='gh')bgGH(c);}
+function drawBg(c,name){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);if(name==='sheet')bgSheet(c);else if(name==='draw')bgDraw(c);else if(name==='sideJune')bgSideJune(c);else if(name==='sideDec')bgSideDec(c);else if(name==='energy')bgEnergy(c);else if(name==='gh')bgGH(c);else if(name==='cycles')bgCycles(c);else if(name==='iceaxis')bgIceAxis(c);}
 function lblOk(lb,p){if(lb.seg){var x1=lb.seg[0],y1=lb.seg[1],x2=lb.seg[2],y2=lb.seg[3],dx=x2-x1,dy=y2-y1,u=((p.x-x1)*dx+(p.y-y1)*dy)/(dx*dx+dy*dy);u=Math.max(0,Math.min(1,u));var ex=x1+u*dx-p.x,ey=y1+u*dy-p.y;return Math.sqrt(ex*ex+ey*ey)<(lb.tol||35);}var ddx=p.x-lb.x,ddy=p.y-lb.y;return Math.sqrt(ddx*ddx+ddy*ddy)<(lb.r||50);}
 function renderLabel(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=620;b.appendChild(cv);var c=cv.getContext('2d');var place=[],sel=-1,checked=false,chips=[];var i;for(i=0;i<q.labels.length;i++)place.push(null);
  function tag(s,x,y,col){c.font='700 20px '+FONT;var w=mtext(c,s)+20;var tx=Math.max(4,Math.min(596-w,x-w/2)),ty=y-44,above=true;if(ty<4){ty=y+14;above=false;}c.strokeStyle=col;c.lineWidth=2;c.beginPath();c.moveTo(x,y);c.lineTo(tx+w/2,above?ty+30:ty);c.stroke();c.fillStyle='rgba(14,27,44,0.9)';rr(c,tx,ty,w,30,9);c.fill();c.strokeStyle=col;c.lineWidth=2.5;rr(c,tx,ty,w,30,9);c.stroke();c.font='700 20px '+FONT;c.fillStyle='#FFFFFF';ftext(c,s,tx+10,ty+21);c.fillStyle=col;circ(c,x,y,7);c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.arc(x,y,7,0,6.2832);c.stroke();}
@@ -928,7 +967,7 @@ function sceneTeam(c,t){ebg(c,t,true);sunGlow(c,30,22,16);cloud(c,300,90,1);
 function drawScene3(c,name,t){
  if(name==='sunIn')sceneSunIn(c,t);else if(name==='reflect')sceneReflect(c,t);else if(name==='infra')sceneInfra(c,t);else if(name==='gases')sceneGases(c,t);
  else if(name==='noGH')sceneNoGH(c,t);else if(name==='co2')sceneCO2(c,t);else if(name==='shirts')sceneShirts(c,t);else if(name==='albedo')sceneAlbedo(c,t);
- else if(name==='feedback')sceneFeedback(c,t);else sceneTeam(c,t);}
+ else if(name==='feedback')sceneFeedback(c,t);else if(name==='team')sceneTeam(c,t);else drawScene4(c,name,t);}
 
 var CH3_STEPS=[
  {sc:'sunIn',who:'frost',tx:"Welcome back, team! In Chapter 2 we followed sunlight to Earth. Today we follow that energy after it arrives. Sunlight comes in as shortwave radiation, and much of it is visible light."},
@@ -1098,11 +1137,271 @@ var CH3_QUIZ=[
  {t:'text',q:'Explain why melting sea ice can cause even more warming.'}
 ];
 
+/* ================= CHAPTER 4: ORBIT CYCLES AND ICE AGES ================= */
+/* Real ice core data as 1,000-year averages. Index i = i to i+1 thousand years ago (0 = most recent).
+   IC_T: Antarctic temperature change x10 (degrees C, compared with the last 1,000 years), EPICA Dome C,
+         Jouzel et al. 2007, NOAA NCEI Paleoclimatology (edc3deuttemp2007.txt).
+   IC_C: CO\u2082 in ppm, Antarctic composite, Bereiter et al. 2015, NOAA NCEI Paleoclimatology
+         (antarctica2015co2composite.txt), ending about 1850 (pre-industrial). Gaps between samples are linearly filled. */
+var IC_T=[-1,0,-1,-1,0,-2,-6,-9,-12,-4,-3,-8,-40,-42,-37,-55,-73,-90,-94,-94,-94,-93,-94,-92,-96,-98,-97,-89,-89,-86,-89,-90,-87,-84,-84,-80,-82,-68,-67,-81,-83,-81,-79,-75,-81,-63,-58,-68,-75,-75,-70,-67,-62,-58,-67,-72,-69,-61,-55,-61,-69,-75,-85,-84,-87,-90,-91,-88,-87,-82,-63,-66,-77,-63,-51,-67,-67,-64,-58,-53,-49,-45,-36,-32,-41,-47,-56,-66,-60,-54,-56,-57,-52,-48,-44,-48,-47,-46,-46,-49,-44,-43,-51,-64,-54,-49,-42,-55,-68,-59,-52,-51,-46,-37,-26,-20,-13,-4,2,7,13,17,19,20,21,14,17,29,39,33,16,-6,-27,-42,-58,-75,-83,-81,-86,-89,-88,-86,-85,-86,-82,-86,-79,-83,-79,-76,-73,-76,-76,-82,-87,-87,-93,-88,-82,-71,-78,-77,-68,-79,-88,-85,-83,-73,-68,-71,-82,-72,-70,-81,-79,-83,-81,-63,-66,-83,-84,-87,-87,-88,-87,-81,-72,-51,-58,-66,-73,-66,-56,-66,-62,-50,-44,-32,-25,-22,-23,-25,-40,-46,-40,-33,-30,-28,-23,-19,-16,-19,-22,-21,-21,-18,-32,-43,-53,-56,-65,-75,-81,-85,-81,-70,-57,-71,-82,-64,-72,-68,-59,-53,-46,-35,-26,-25,-22,-19,-9,11,21,6,-22,-40,-63,-63,-60,-69,-77,-78,-81,-80,-77,-81,-74,-73,-68,-76,-78,-77,-75,-65,-70,-75,-79,-86,-85,-88,-89,-92,-92,-91,-89,-85,-86,-83,-84,-80,-65,-72,-65,-59,-58,-57,-52,-51,-49,-48,-43,-56,-63,-73,-74,-70,-60,-75,-72,-64,-57,-71,-63,-54,-52,-46,-57,-69,-59,-57,-55,-53,-45,-37,-32,-29,-24,-35,-46,-43,-35,-25,-16,-9,-2,4,5,7,10,5,6,3,25,34,25,2,-22,-33,-50,-64,-77,-92,-93,-88,-88,-85,-85,-80,-80,-74,-77,-78,-78,-76,-85,-89,-86,-89,-86,-84,-81,-79,-76,-70,-79,-74,-76,-72,-79,-72,-68,-64,-55,-62,-75,-75,-69,-65,-64,-57,-50,-44,-50,-57,-54,-46,-35,-49,-57,-63,-53,-48,-40,-30,-23,-14,-9,-2,-2,4,11,15,19,22,20,23,24,25,20,19,16,12,4,5,2,3,4,5,-1,-3,-5,-13,-16,-23,-5,-13,-24,-39,-55,-67,-78,-82,-83,-84,-82,-83,-93,-94,-88,-92,-91,-85,-84,-75,-76,-76,-75,-62,-71,-73,-78,-67,-75,-68,-69,-74,-86,-87,-88,-85,-83,-78,-74,-76,-83,-85,-82,-83,-76,-69,-57,-44,-51,-66,-69,-54,-44,-43,-56,-54,-49,-47,-42,-38,-34,-34,-30,-26,-21,-23,-26,-32,-34,-36,-38,-37,-38,-38,-38,-40,-43,-46,-43,-43,-42,-52,-48,-46,-56,-58,-57,-58,-56,-53,-49,-43,-43,-37,-35,-34,-34,-36,-43,-45,-45,-46,-47,-47,-43,-50,-64,-72,-76,-75,-69,-70,-68,-66,-76,-75,-76,-74,-72,-74,-79,-81,-79,-70,-72,-65,-55,-64,-66,-56,-44,-32,-44,-52,-62,-63,-53,-45,-37,-31,-23,-20,-18,-16,-16,-14,-15,-15,-16,-16,-14,-13,-19,-20,-13,-11,-24,-39,-56,-70,-58,-58,-65,-64,-49,-38,-42,-58,-53,-49,-41,-49,-63,-66,-55,-54,-51,-42,-43,-42,-37,-35,-31,-24,-19,-12,-14,-14,-12,-12,-13,-11,-17,-23,-20,-24,-20,-26,-25,-27,-27,-22,-38,-55,-72,-84,-87,-88,-85,-82,-89,-89,-87,-84,-87,-88,-88,-89,-82,-77,-77,-77,-77,-78,-75,-71,-75,-73,-77,-79,-76,-69,-67,-74,-75,-82,-86,-83,-80,-78,-84,-90,-90,-90,-89,-78,-73,-79,-81,-77,-73,-62,-63,-71,-52,-56,-69,-65,-54,-54,-50,-46,-42,-36,-34,-34,-29,-27,-23,-17,-20,-19,-19,-18,-20,-25,-25,-20,-24,-25,-31,-33,-37,-36,-35,-40,-40,-40,-42,-39,-41,-52,-54,-62,-65,-69,-75,-88,-83,-71,-55,-51,-61,-60,-58,-57,-53,-51,-42,-39,-41,-39,-42,-46,-55,-67,-82,-82,-85,-89,-87,-85,-86,-86,-86,-84,-85,-85,-84,-81,-77,-72,-59,-52,-59,-68,-73,-70,-58,-49,-48,-53,-63,-60,-53,-42,-38,-41,-45,-40,-35,-30,-27,-27,-23,-21,-23,-23,-19,-17,-14,-10,-8,-11,-24,-28,-40,-50,-56,-62,-73,-82,-85,-87,-85,-89];
+var IC_C=[281,279,276,274,271,266,262,260,260,263,266,261,246,239,235,226,215,193,189,192,191,188,188,190,184,183,186,190,192,191,187,191,195,196,198,202,203,210,208,201,198,202,204,203,207,215,217,206,203,203,206,211,219,223,217,213,210,219,224,227,215,209,202,197,202,202,206,202,202,208,220,236,235,232,236,248,239,228,226,232,232,232,242,249,241,232,223,222,221,228,231,232,232,237,242,245,246,241,243,243,247,242,237,241,243,253,242,239,236,244,247,258,260,263,271,275,274,275,278,271,273,278,279,277,279,277,274,276,278,265,251,237,226,223,212,208,204,199,199,193,194,195,197,195,196,195,194,195,196,202,203,202,201,199,196,193,189,189,189,186,188,193,199,204,196,194,191,187,184,197,197,198,198,198,198,196,190,190,199,208,210,213,218,198,200,202,203,207,211,231,229,226,222,218,221,223,225,226,242,245,248,251,239,248,242,236,227,230,235,242,246,249,248,243,251,241,245,251,245,240,214,216,207,209,206,208,210,236,234,224,228,232,238,240,243,245,247,245,239,246,253,261,279,280,258,243,225,222,218,215,207,200,205,197,195,197,199,203,203,204,210,206,212,220,228,214,200,212,188,194,196,199,185,190,194,194,198,193,202,204,211,215,224,228,231,228,226,231,231,229,228,217,208,206,207,213,213,215,217,224,231,236,239,236,240,245,249,245,226,228,230,238,239,242,254,257,247,262,245,233,256,249,253,257,260,260,266,264,268,272,275,265,272,278,289,288,282,270,249,240,234,242,250,201,203,205,205,212,216,220,221,221,219,216,209,209,205,201,197,193,186,186,186,191,196,201,203,205,206,205,203,202,201,200,207,215,220,225,230,229,228,228,227,234,240,240,239,247,246,246,250,254,259,263,267,269,272,274,276,277,283,281,279,278,276,280,280,286,284,275,283,284,279,275,265,274,272,273,275,274,272,269,266,271,268,270,268,254,248,242,231,220,227,212,208,210,209,208,204,200,202,202,201,202,201,199,200,201,204,208,202,201,205,202,198,196,193,196,204,208,202,196,191,194,200,208,208,204,203,205,206,217,231,244,243,233,233,237,239,234,220,224,223,227,231,231,233,232,237,241,248,243,245,240,239,238,238,236,233,231,231,230,231,232,233,234,236,236,238,240,233,236,235,242,239,242,243,247,246,245,247,244,243,242,237,236,232,228,225,223,221,220,216,202,195,192,200,199,205,206,213,211,205,204,208,210,210,210,205,202,211,215,221,223,224,226,237,247,241,231,229,232,234,243,247,252,253,254,253,251,251,251,248,249,252,250,253,251,250,252,241,225,213,209,214,219,224,230,243,250,246,237,228,233,238,233,219,216,219,228,230,232,238,239,242,245,248,255,257,259,258,259,258,256,254,253,253,253,248,247,246,244,244,239,238,235,222,206,204,202,201,200,196,196,195,195,194,195,192,189,190,191,191,193,195,196,190,192,193,196,191,189,187,193,195,200,200,191,184,187,188,193,191,191,190,180,175,174,179,188,192,196,196,201,205,214,223,218,219,231,233,227,220,221,225,221,222,223,227,232,236,239,241,240,240,238,238,239,241,239,237,233,232,232,233,235,237,236,234,231,226,225,224,224,227,225,212,194,193,201,215,219,214,213,212,211,211,210,211,210,211,211,211,208,213,216,215,206,192,186,184,187,189,188,189,187,190,188,188,189,192,192,198,200,200,201,209,214,218,224,225,217,215,217,224,229,231,225,224,224,231,233,243,242,239,242,247,247,252,255,253,254,257,255,261,258,263,268,257,237,227,231,220,216,211,207,199,198,200,200];
+/* Simple North America outline (lon, lat), hand-drawn and approximate */
+var NA_LAND=[-166.5,68.3,-163,69.9,-156.8,71.3,-151,70.4,-141,69.7,-134,69.5,-128,70.2,-117,68.8,-108,68.3,-98,67.9,-95,68.5,-89,68.8,-82.5,67,-82,64.5,-78,64,-72,61.8,-65,60,-62,57,-58,54,-56,52,-59,48,-64.5,49.2,-61,46,-66,44.5,-70,43.5,-70.5,41.8,-74,40.5,-75.5,38.5,-76,36.8,-75.5,35.2,-78,33.8,-81,31.5,-81.4,30,-80.6,28,-80,26.5,-80.4,25.2,-81.2,25.2,-81.8,26.2,-82.7,27.8,-82.8,29,-84,30,-86,30.4,-89,30.3,-90,29.2,-91.5,29.6,-94,29.6,-97,27.8,-97.5,25,-97.7,22,-96.5,19.5,-94.5,18.3,-91.5,18.5,-90.5,20.8,-87.2,21.5,-87.5,19,-88.3,16,-86,15.9,-83.4,15,-83.5,11,-81.5,9,-79,9,-82,8.2,-85.7,10,-87.5,13,-91.4,14,-94.5,16,-97.8,16,-101.5,17.5,-105.3,20,-105.6,22.5,-108.9,25.6,-112.2,29.3,-114.7,31.7,-113.5,29.2,-112,26.8,-109.9,22.9,-112.1,24.8,-114.2,27.8,-115.9,30.4,-117.1,32.5,-118.5,34,-120.6,34.6,-121.9,36.6,-122.5,37.8,-123.8,39.8,-124.2,41.8,-124,46.2,-124.7,48.4,-125.5,50,-127.9,51.5,-130.5,54.5,-133,56.8,-136.5,58.5,-139.8,59.7,-145,60.3,-148,60.6,-151.5,59.2,-154,57.6,-158,56.6,-162,55.1,-164.8,54.4,-161,58.6,-162,60,-165.3,61.2,-164.5,63.2,-161,64.5,-166,65.4,-163.7,66.6];
+var NA_ISL=[-80,73.5,-70,70.5,-62,66.5,-65.5,63,-71,62.8,-77,64.5,-82,69.5,-90,72.5,-100,73,-110,76.5,-122,76,-125,72,-117,71,-105,72,-95,71.5,-88,74];
+var NA_GRN=[-73,78.2,-66,80,-56,82,-50,82,-50,64.5,-52,66,-54,70,-56,74,-66,76.5];
+var NA_HUD=[-95,59,-92,57,-88,56,-82,55,-79,52,-80,57,-77,60,-78,62.5,-85,63.5,-90,63.5,-94,61];
+var NA_FLA=[-80,25.5,-81.3,24.4,-83.2,24.4,-84.6,25.8,-85.3,28,-85.6,29.6,-84,30,-82.8,29,-82.7,27.8,-81.8,26.2,-81.2,25.2];
+/* Ice sheet edge at its largest, about 20,000 years ago (approximate) */
+var NA_ICE=[-145,61,-138,60,-131,55,-126,50,-123,47.2,-120,48.2,-114,48.6,-110,48.5,-104,47.8,-100,46,-97,43.5,-94,41.6,-91,41,-89,39.5,-86,38.8,-84,39.3,-81,40.8,-78,41.8,-75,41,-73,40.6,-69,41.3,-65,43,-60,45,-55,47.5,-53,51,-58,56,-62,60,-65,63,-70,70,-80,75,-100,77,-120,76,-128,71,-134,68,-139,65,-141,62];
+function naPoly(c,P,X,Y,k,cl,ct){c.beginPath();for(var i=0;i<P.length;i+=2){var lo=P[i],la=P[i+1];if(k!==undefined){lo=cl+(lo-cl)*k;la=ct+(la-ct)*k;}var x=X(lo),y=Y(la);if(i===0)c.moveTo(x,y);else c.lineTo(x,y);}c.closePath();}
+function naMap(c,x0,y0,w,h,ice,t){function X(lo){return x0+(lo+170)/120*w;}function Y(la){return y0+(80-la)/72*h;}
+ c.save();c.beginPath();c.rect(x0,y0,w,h);c.clip();c.fillStyle='#1D4E8C';c.fillRect(x0,y0,w,h);
+ c.strokeStyle='rgba(191,230,245,0.18)';c.lineWidth=1;for(var la=20;la<=70;la+=10){c.beginPath();c.moveTo(x0,Y(la));c.lineTo(x0+w,Y(la));c.stroke();}
+ c.fillStyle='#5E9E5A';naPoly(c,NA_LAND,X,Y);c.fill();naPoly(c,NA_ISL,X,Y);c.fill();
+ if(ice>0.02){c.globalAlpha=Math.min(1,ice);naPoly(c,NA_FLA,X,Y);c.fill();c.globalAlpha=1;}
+ c.fillStyle='#1D4E8C';naPoly(c,NA_HUD,X,Y);c.fill();
+ c.fillStyle='#F4FBFF';naPoly(c,NA_GRN,X,Y);c.fill();
+ if(ice>0.01){c.fillStyle='rgba(244,251,255,0.93)';naPoly(c,NA_ICE,X,Y,ice,-88,60);c.fill();c.strokeStyle='#9CC8E0';c.lineWidth=1.5;naPoly(c,NA_ICE,X,Y,ice,-88,60);c.stroke();}
+ c.restore();
+ c.fillStyle='#FF7A2F';circ(c,X(-81.4),Y(28.5),3);txt(c,'Florida',X(-81.4)+6,Y(28.5)+4,'700 10px '+FONT,'#FFFFFF');
+ return {X:X,Y:Y};}
+/* 65 N midsummer sunlight from orbit settings (daily-average insolation at the June solstice).
+   e = eccentricity, tilt in degrees, pm = month Earth is closest to the Sun (0 = January). */
+function q65(e,tilt,pm){var d=tilt*RAD,ph=65*RAD,th=(172-(pm*30.44+3))/365.25*2*Math.PI,rho=(1-e*e)/(1+e*Math.cos(th)),x=-Math.tan(ph)*Math.tan(d),h0=x<=-1?Math.PI:Math.acos(x);
+ return 1361/Math.PI/(rho*rho)*(h0*Math.sin(ph)*Math.sin(d)+Math.cos(ph)*Math.cos(d)*Math.sin(h0));}
+var QLO=1e9,QHI=0;(function(){for(var m=0;m<12;m++){for(var a=0;a<2;a++){for(var b=0;b<2;b++){var q=q65(a*0.06,b?24.5:22.1,m);if(q<QLO)QLO=q;if(q>QHI)QHI=q;}}}})();
+function sun65(e,tilt,pm){return (q65(e,tilt,pm)-QLO)/(QHI-QLO);}
+var MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function tGlobe(c,cx,cy,R,va,hl){var s=Math.sin(va),co=Math.cos(va),ux=-s,uy=-co,vx=co,vy=-s;
+ c.save();c.beginPath();c.arc(cx,cy,R,0,6.2832);c.clip();var g=c.createRadialGradient(cx-R*0.4,cy-R*0.3,R*0.1,cx,cy,R*1.1);g.addColorStop(0,'#5FA8E8');g.addColorStop(1,'#1F5FA8');c.fillStyle=g;c.fillRect(cx-R,cy-R,2*R,2*R);
+ c.fillStyle='rgba(70,163,90,0.85)';CE(c,cx-R*0.25,cy-R*0.2,R*0.24,R*0.16);c.fill();CE(c,cx+R*0.2,cy+R*0.35,R*0.17,R*0.22);c.fill();
+ function lat(la,col,w){var sp=Math.sin(la*RAD),h=R*Math.cos(la*RAD),mx=cx+ux*R*sp,my=cy+uy*R*sp;c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(mx-vx*h,my-vy*h);c.lineTo(mx+vx*h,my+vy*h);c.stroke();return [mx-vx*h,my-vy*h];}
+ lat(0,'#FFFFFF',1.5);var p65=hl?lat(65,'#FFD45A',3):null;
+ c.fillStyle='rgba(4,8,20,0.5)';c.fillRect(cx,cy-R,R,2*R);c.restore();
+ c.strokeStyle='rgba(255,255,255,0.6)';c.lineWidth=1;c.beginPath();c.arc(cx,cy,R,0,6.2832);c.stroke();
+ c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.moveTo(cx-ux*R*1.25,cy-uy*R*1.25);c.lineTo(cx+ux*R*1.25,cy+uy*R*1.25);c.stroke();txt(c,'N',cx+ux*R*1.35,cy+uy*R*1.35,'800 11px '+FONT,'#FFFFFF','center');
+ c.strokeStyle='rgba(191,230,245,0.6)';c.setLineDash([3,4]);c.beginPath();c.moveTo(cx,cy-R*1.3);c.lineTo(cx,cy+R*1.2);c.stroke();c.setLineDash([]);
+ c.strokeStyle='#FFD45A';c.lineWidth=2;c.beginPath();c.arc(cx,cy,R*1.12,-Math.PI/2-va,-Math.PI/2);c.stroke();
+ return p65;}
+function wobTop(c,x,y,t,s){var ph=t*1.2,dx=Math.sin(ph)*11*s,dy=Math.cos(ph)*3.5*s;
+ c.strokeStyle='rgba(191,230,245,0.6)';c.lineWidth=1;c.setLineDash([3,3]);CE(c,x,y-30*s,11*s,3.5*s);c.stroke();CE(c,x,y+30*s,11*s,3.5*s);c.stroke();c.setLineDash([]);
+ var g=c.createRadialGradient(x-5*s,y-5*s,2*s,x,y,16*s);g.addColorStop(0,'#5FA8E8');g.addColorStop(1,'#1F5FA8');c.fillStyle=g;circ(c,x,y,15*s);c.fillStyle='rgba(70,163,90,0.9)';CE(c,x-4*s,y-3*s,5*s,3.5*s);c.fill();
+ c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.moveTo(x-dx,y+30*s-dy);c.lineTo(x+dx,y-30*s+dy);c.stroke();c.fillStyle='#FFD45A';circ(c,x+dx,y-30*s+dy,3*s);}
+function ovalOrbit(c,cx,cy,a,ev,sy,t,o){o=o||{};var b=a*Math.sqrt(1-ev*ev),fx=cx-a*ev;
+ c.strokeStyle='rgba(191,230,245,0.55)';c.lineWidth=1.5;c.setLineDash([5,5]);CE(c,cx,cy,a,b*sy);c.stroke();c.setLineDash([]);
+ sunGlow(c,fx,cy,o.sun||14);
+ var M=t*(o.speed||0.9),E=M;for(var k=0;k<8;k++)E=M+ev*Math.sin(E);var ex=cx-a*Math.cos(E),ey=cy+b*sy*Math.sin(E);
+ c.fillStyle='#FF7A2F';circ(c,cx-a,cy,3.5);circ(c,cx+a,cy,3.5);
+ if(o.labels){txt(c,'closest',cx-a+4,cy+16,'700 10px '+FONT,'#FFB27E');txt(c,'farthest',cx+a-4,cy+16,'700 10px '+FONT,'#FFB27E','right');}
+ var gg=c.createRadialGradient(ex-3,ey-3,1,ex,ey,9);gg.addColorStop(0,'#7FC0F0');gg.addColorStop(1,'#1F5FA8');c.fillStyle=gg;circ(c,ex,ey,o.er||8);}
+
+/* ---- story scenes ---- */
+function icGraph(c,x0,y0,w,h,col,lw){var i;c.strokeStyle=col;c.lineWidth=lw||1.6;c.beginPath();for(i=799;i>=0;i--){var x=x0+(799-i)/799*w,y=y0+h-(IC_T[i]/10+11)/17*h;if(i===799)c.moveTo(x,y);else c.lineTo(x,y);}c.stroke();}
+function sceneIceCyc(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);txt(c,'Antarctic ice core temperature, last 800,000 years',200,24,'800 12.5px '+FONT,'#FFFFFF','center');
+ c.fillStyle='rgba(255,122,47,0.12)';c.fillRect(20,40,360,62);c.fillStyle='rgba(79,163,224,0.12)';c.fillRect(20,150,360,90);
+ var p=Math.min(1,(t%10)/6);c.save();c.beginPath();c.rect(20,30,360*p,230);c.clip();icGraph(c,20,40,360,200,'#FFB27E',1.6);c.restore();
+ txt(c,'warm periods (interglacials)',26,56,'700 10.5px '+FONT,'#FFB27E');txt(c,'ice ages',26,232,'700 10.5px '+FONT,'#8FC9E3');
+ c.strokeStyle='#BFE6F5';c.lineWidth=1;c.beginPath();c.moveTo(20,258);c.lineTo(380,258);c.stroke();
+ txt(c,'800,000 years ago',20,274,'600 10px '+FONT,'#9FC3D8');txt(c,'today',380,274,'600 10px '+FONT,'#9FC3D8','right');
+ arw(c,250,288,295,288,'#FFD45A',2,8);arw(c,295,288,250,288,'#FFD45A',2,8);txt(c,'about 100,000 years',245,292,'700 10px '+FONT,'#FFD45A','right');}
+function sceneMilank(c,t){c.fillStyle='#16283E';c.fillRect(0,0,400,300);c.fillStyle='#22384F';c.fillRect(0,236,400,64);
+ c.fillStyle='#1F3A2E';rr(c,150,36,232,170,8);c.fill();c.strokeStyle='#8A6A4A';c.lineWidth=5;rr(c,150,36,232,170,8);c.stroke();
+ txt(c,'Milankovitch cycles',266,62,'800 15px '+FONT,'#FFFFFF','center');
+ c.save();c.translate(0,0);ovalOrbit(c,200,120,32,0.45,0.9,t,{sun:6,er:4});c.restore();txt(c,'orbit shape',200,170,'700 10px '+FONT,'#BFE6F5','center');
+ tGlobe(c,268,120,20,0.45,false);txt(c,'tilt',268,170,'700 10px '+FONT,'#BFE6F5','center');
+ wobTop(c,338,120,t,0.75);txt(c,'wobble',338,170,'700 10px '+FONT,'#BFE6F5','center');
+ person(c,78,276,1,'#7A5CC2',{glasses:true,skin:'#F2C9A5'},t);
+ pill(c,'Milutin Milankovitch',78,170,11,'#FFFFFF','center');pill(c,'Serbian scientist',78,190,10,'#BFE6F5','center');}
+function sceneEcc(c,t){space(c,400,300,t);txt(c,'1. Orbit shape (eccentricity)',200,24,'800 14px '+FONT,'#FFFFFF','center');
+ ovalOrbit(c,105,135,72,0.02,0.75,t,{sun:10,er:6});ovalOrbit(c,295,135,72,0.5,0.75,t,{sun:10,er:6,labels:true});
+ txt(c,'nearly circular',105,212,'700 12px '+FONT,'#BFE6F5','center');txt(c,'slightly oval',295,212,'700 12px '+FONT,'#BFE6F5','center');
+ pill(c,'shape exaggerated',295,236,10,'#FFB27E','center');
+ txt(c,'Main cycle: about 100,000 years',200,266,'800 12.5px '+FONT,'#FFD45A','center');txt(c,'plus a longer cycle of about 405,000 years',200,284,'600 11px '+FONT,'#FFFFFF','center');}
+function sceneObl(c,t){space(c,400,300,t);txt(c,'2. Tilt (obliquity)',200,24,'800 14px '+FONT,'#FFFFFF','center');
+ tGlobe(c,105,130,58,12*RAD,false);tGlobe(c,295,130,58,36*RAD,false);
+ txt(c,'about 22.1'+DEG,105,222,'800 13px '+FONT,'#FFFFFF','center');txt(c,'weaker seasons',105,239,'700 11px '+FONT,'#8FC9E3','center');
+ txt(c,'about 24.5'+DEG,295,222,'800 13px '+FONT,'#FFFFFF','center');txt(c,'stronger seasons',295,239,'700 11px '+FONT,'#FF9A5C','center');
+ txt(c,'Cycle: about 41,000 years. Today: about 23.4'+DEG+' and slowly shrinking.',200,270,'700 11px '+FONT,'#FFD45A','center');txt(c,'(angles exaggerated)',200,287,'600 10px '+FONT,'#9FC3D8','center');}
+function scenePrec(c,t){space(c,400,300,t);txt(c,'3. Wobble (precession)',200,24,'800 14px '+FONT,'#FFFFFF','center');
+ wobTop(c,90,140,t,2.1);txt(c,'like a spinning top',90,230,'700 11px '+FONT,'#BFE6F5','center');txt(c,'about 26,000 years',90,247,'800 11.5px '+FONT,'#FFD45A','center');
+ ovalOrbit(c,285,135,90,0.35,0.7,t,{sun:11,er:6,labels:true});txt(c,'Today: closest in early January',285,212,'700 11px '+FONT,'#FFFFFF','center');
+ txt(c,'Seasons vs. closest point: about 19,000 to 23,000 years',200,280,'700 11px '+FONT,'#FFD45A','center');}
+function sceneN65(c,t){space(c,400,300,t);sunGlow(c,-20,120,40);var p=tGlobe(c,120,140,82,23.4*RAD,true);pill(c,'65'+DEG+'N',p[0]-6,p[1]-4,11,'#FFD45A','right');
+ var x0=250,y0=230,yrs=Math.floor((t*1.2)%6);txt(c,'Too-cool summers:',318,54,'800 12px '+FONT,'#FFFFFF','center');txt(c,'snow piles up each year',318,70,'700 11px '+FONT,'#BFE6F5','center');
+ c.fillStyle='#6B5440';c.fillRect(x0,y0,136,14);for(var i=0;i<=yrs;i++){c.fillStyle=i%2?'#E2F2FA':'#F7FBFF';c.fillRect(x0,y0-(i+1)*20,136,20);txt(c,'year '+(i+1),x0+68,y0-(i+1)*20+14,'600 9.5px '+FONT,'#2C4A63','center');}
+ txt(c,'Lots of land at 65'+DEG+'N: Canada, Europe, Asia',200,286,'700 11px '+FONT,'#FFD45A','center');}
+function sceneFeed4(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);var cx=200,cy=150,R=90,i;
+ var N=[['A bit less','summer sun','#FFD45A'],['More snow','and ice','#BFE6F5'],['Ice reflects','sunlight (Ch 3)','#FFFFFF'],['Cold oceans','absorb CO\u2082','#4FA3E0']];
+ var P=[[cx,cy-R],[cx+R+40,cy],[cx,cy+R],[cx-R-40,cy]];
+ c.strokeStyle='rgba(191,230,245,0.5)';c.lineWidth=3;c.beginPath();c.arc(cx,cy,R,0,6.2832);c.stroke();
+ for(i=0;i<4;i++){var aa=-Math.PI/2+i*Math.PI/2+Math.PI/4;arw(c,cx+Math.cos(aa-0.2)*R,cy+Math.sin(aa-0.2)*R,cx+Math.cos(aa+0.2)*R,cy+Math.sin(aa+0.2)*R,'#BFE6F5',3,12);}
+ c.fillStyle='#FFFFFF';circ(c,cx+Math.cos(t*0.9-Math.PI/2)*R,cy+Math.sin(t*0.9-Math.PI/2)*R,5);
+ for(i=0;i<4;i++){var w=112,h=40;c.fillStyle='#16283E';rr(c,P[i][0]-w/2,P[i][1]-h/2,w,h,10);c.fill();c.strokeStyle=N[i][2];c.lineWidth=2.5;rr(c,P[i][0]-w/2,P[i][1]-h/2,w,h,10);c.stroke();
+  txt(c,N[i][0],P[i][0],P[i][1]-2,'800 11.5px '+FONT,N[i][2],'center');txt(c,N[i][1],P[i][0],P[i][1]+13,'700 10px '+FONT,'#FFFFFF','center');}
+ txt(c,'Feedbacks',cx,cy-4,'800 14px '+FONT,'#FFFFFF','center');txt(c,'make it colder',cx,cy+13,'700 11px '+FONT,'#BFE6F5','center');}
+function sceneLGM(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);naMap(c,10,30,380,236,1,t);txt(c,'About 20,000 years ago (approximate)',200,20,'800 12.5px '+FONT,'#FFFFFF','center');
+ pill(c,'Ice up to about 3 km thick',150,120,11,'#BFE6F5','center');pill(c,'Sea level about 120 m lower',300,236,10.5,'#FFFFFF','center');pill(c,'Florida much wider',300,256,10.5,'#FFD45A','center');
+ txt(c,'Ice sheet shape and coastline are approximate',200,288,'600 10px '+FONT,'#9FC3D8','center');}
+function sceneHolo(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);var X0=30,W=350,i;function X(k){return X0+(30-k)/30*W;}function Y(v){return 230-(v/10+11)/14*190;}
+ txt(c,'Antarctic temperature, last 30,000 years',200,22,'800 12.5px '+FONT,'#FFFFFF','center');
+ c.fillStyle='rgba(255,122,47,0.15)';c.fillRect(X(11.7),36,X(0)-X(11.7),200);
+ c.strokeStyle='#FFB27E';c.lineWidth=2.5;c.beginPath();for(i=29;i>=0;i--){var x=X(i+0.5),y=Y(IC_T[i]);if(i===29)c.moveTo(x,y);else c.lineTo(x,y);}c.stroke();
+ c.strokeStyle='#BFE6F5';c.lineWidth=1;c.beginPath();c.moveTo(X0,246);c.lineTo(X0+W,246);c.stroke();
+ for(i=30;i>=0;i-=10){txt(c,i===0?'today':fmt(i*1000),X(i),262,'600 10px '+FONT,'#9FC3D8','center');}
+ txt(c,'years ago',X0+W/2,278,'600 10px '+FONT,'#9FC3D8','center');
+ pill(c,'Last ice age',X(20),Y(-95)+26,10.5,'#8FC9E3','center');pill(c,'Holocene: about 11,700 years',X(5.8),56,10.5,'#FFB27E','center');}
+function sceneSpeed(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);txt(c,'How fast does CO\u2082 rise?',200,26,'800 14px '+FONT,'#FFFFFF','center');
+ var g=Math.min(1,(t%8)/2);c.fillStyle='#4FA3E0';rr(c,60,230-20*g,100,20*g+1,4);c.fill();c.fillStyle='#FF5A4A';rr(c,240,230-170*g,100,170*g+1,4);c.fill();
+ c.strokeStyle='#BFE6F5';c.lineWidth=1;c.beginPath();c.moveTo(40,231);c.lineTo(360,231);c.stroke();
+ txt(c,'End of the last ice age',110,250,'800 11px '+FONT,'#8FC9E3','center');txt(c,'about 1 ppm per century',110,266,'600 10.5px '+FONT,'#FFFFFF','center');
+ txt(c,'Today',290,250,'800 11px '+FONT,'#FF8A80','center');txt(c,'over 2 ppm per year',290,266,'600 10.5px '+FONT,'#FFFFFF','center');
+ txt(c,'(bars not to scale)',200,290,'600 9.5px '+FONT,'#9FC3D8','center');pill(c,'about 100 times faster',290,48,12,'#FFD45A','center');}
+function sceneOrbLab(c,t){space(c,400,300,t);ovalOrbit(c,200,110,120,0.4,0.55,t,{sun:14,er:7,labels:true});
+ person(c,90,292,0.66,'#2A9DB5',{glasses:true,clip:true,skin:'#E8B48F',wave:true},t);person(c,210,292,0.6,'#FF7A2F',{goggles:true,skin:'#C68A5E'},t);person(c,330,292,0.6,'#F2C230',{skin:'#F2C9A5'},t);
+ pill(c,'Next: the Orbit Lab',200,200,13,'#FFD45A','center');}
+function drawScene4(c,name,t){
+ if(name==='icecyc')sceneIceCyc(c,t);else if(name==='milank')sceneMilank(c,t);else if(name==='ecc')sceneEcc(c,t);else if(name==='obl')sceneObl(c,t);
+ else if(name==='prec')scenePrec(c,t);else if(name==='n65')sceneN65(c,t);else if(name==='feed4')sceneFeed4(c,t);else if(name==='lgm')sceneLGM(c,t);
+ else if(name==='holo')sceneHolo(c,t);else if(name==='speed')sceneSpeed(c,t);else sceneOrbLab(c,t);}
+
+var CH4_STEPS=[
+ {sc:'icecyc',who:'frost',tx:"Remember the ice cores from Chapter 1? Over 800,000 years they show a repeating pattern: long, cold ice ages and short warm periods called interglacials. The pattern repeats about every 100,000 years."},
+ {sc:'icecyc',who:'sam',tx:"Why would Earth keep switching between ice ages and warm times?"},
+ {sc:'milank',who:'frost',tx:"A Serbian scientist named Milutin Milankovitch worked out a big part of the answer. Earth's orbit and tilt change slowly, in cycles. We call them Milankovitch cycles."},
+ {sc:'ecc',who:'frost',tx:"Cycle one is orbit shape, called eccentricity. Earth's orbit changes from nearly a circle to slightly oval and back. The main cycle takes about 100,000 years, and there is also a longer cycle of about 405,000 years."},
+ {sc:'obl',who:'frost',tx:"Cycle two is tilt, called obliquity. Earth's tilt slowly swings between about 22.1 and 24.5 degrees, about every 41,000 years. Today it is about 23.4 degrees and slowly shrinking. More tilt means stronger seasons."},
+ {sc:'prec',who:'frost',tx:"Cycle three is wobble, called precession. Earth's axis wobbles like a spinning top, about once every 26,000 years. Together with the orbit changes, this shifts when Earth is closest to the Sun, on cycles of about 19,000 to 23,000 years. Right now we are closest in early January, during northern winter, just like you saw in Chapter 2."},
+ {sc:'n65',who:'rosa',tx:"But those changes sound tiny. How can they start an ice age?"},
+ {sc:'n65',who:'frost',tx:"The key is summer sunlight far north, around 65 degrees north. There is lots of land there, in Canada, Europe, and Asia, where ice sheets can grow. If summers there are too cool to melt the winter snow, the snow piles up year after year and becomes an ice sheet."},
+ {sc:'feed4',who:'frost',tx:"Then feedbacks make the change much bigger. More ice reflects more sunlight, like the ice-albedo feedback from Chapter 3. Colder oceans also absorb more CO\u2082 from the air. When the ice melts, both feedbacks work in reverse."},
+ {sc:'lgm',who:'frost',tx:"The last ice age peaked about 20,000 years ago. Ice sheets up to about 3 kilometers thick covered most of Canada and the northern United States. So much water was locked up in ice that sea level was about 120 meters lower, and Florida was much wider than today."},
+ {sc:'holo',who:'frost',tx:"Then the ice melted. Our current warm period, called the Holocene, began about 11,700 years ago. All of human history with farms and cities has happened during it."},
+ {sc:'speed',who:'sam',tx:"So is today's warming just another orbit cycle?"},
+ {sc:'speed',who:'frost',tx:"No! Orbit cycles take tens of thousands of years. Today, CO\u2082 is rising about 100 times faster than it did at the end of the last ice age, and it is already over 420 parts per million. The orbit can't do that. We'll look at the evidence in Chapter 8."},
+ {sc:'orblab',who:'frost',tx:"Now it's your turn. First, build your own ice age in the Orbit Lab. Then explore the real ice core data."}
+];
+
+/* ---- Activity A: Orbit Lab + Ice Age Machine ---- */
+var ORB={e:0.0167,tilt:23.44,pm:0,tab:'shape',ice:0,c:null,ms:null,last:''};
+var OB_GROW=0.3,OB_MELT=0.6;
+function obTab(tb){ORB.tab=tb;var bs=$('obTabs').children;for(var i=0;i<bs.length;i++)bs[i].className='chip'+(bs[i].getAttribute('data-t')===tb?' sel':'');
+ $('obSE').style.display=(tb==='shape'||tb==='machine')?'block':'none';$('obST').style.display=(tb==='tilt'||tb==='machine')?'block':'none';$('obSP').style.display=(tb==='wobble'||tb==='machine')?'block':'none';ORB.last='';}
+function obRead(){ORB.e=parseInt($('obE').value,10)/1000;ORB.tilt=parseInt($('obT').value,10)/10;ORB.pm=parseInt($('obP').value,10);ORB.last='';}
+function obSet(e,tilt,pm){$('obE').value=Math.round(e*1000);$('obT').value=Math.round(tilt*10);$('obP').value=pm;obRead();}
+function drawObShape(c,t){space(c,400,300,t);var ev=Math.min(0.62,ORB.e*10);ovalOrbit(c,200,150,150,ev,0.8,t,{sun:16,er:9,labels:true});
+ txt(c,'Orbit shape',10,20,'800 13px '+FONT,'#FFFFFF');pill(c,'shape exaggerated',390,20,10,'#FFB27E','right');
+ var pct=(Math.pow((1+ORB.e)/(1-ORB.e),2)-1)*100;
+ txt(c,ORB.e<0.0015?'A perfect circle: same sunlight all year':'About '+Math.round(pct)+'% more sunlight at the closest point',200,272,'700 12px '+FONT,'#FFD45A','center');
+ txt(c,'Cycles: about 100,000 and 405,000 years',200,290,'600 10.5px '+FONT,'#BFE6F5','center');}
+function drawObTilt(c,t){space(c,400,180,t);sunGlow(c,-30,90,34);var va=(12+(ORB.tilt-22.1)/2.4*26)*RAD;
+ for(var i=-2;i<=2;i++){arw(c,14,90+i*26,120,90+i*26,'rgba(255,214,90,0.8)',2,7);}
+ var p=tGlobe(c,200,96,62,va,true);pill(c,'65'+DEG+'N',p[0]-6,p[1]-2,10,'#FFD45A','right');
+ txt(c,'Tilt: '+ORB.tilt.toFixed(1)+DEG,292,40,'800 14px '+FONT,'#FFFFFF');txt(c,'Earth in June',292,58,'600 10px '+FONT,'#BFE6F5');
+ var st=ORB.tilt>23.6?['Stronger seasons','#FF9A5C']:(ORB.tilt<23.2?['Weaker seasons','#8FC9E3']:['Medium seasons','#FFFFFF']);txt(c,st[0],292,80,'800 12px '+FONT,st[1]);
+ txt(c,'(angle exaggerated)',292,170,'600 9.5px '+FONT,'#9FC3D8');
+ c.save();c.translate(0,180);drawBeams(c,[25+ORB.tilt,25-ORB.tilt],['65'+DEG+'N in June','65'+DEG+'N in December']);c.restore();}
+function drawObWob(c,t){space(c,400,300,t);var cx=205,cy=150,a=118,ev=0.32,sy=0.72,i;
+ var thp=((ORB.pm*30.44+3)-355)/365.25*2*Math.PI;
+ function rAt(th){return a*(1-ev*ev)/(1+ev*Math.cos(th-thp));}
+ function P(th,extra){var r=rAt(th)+(extra||0);return [cx+r*Math.cos(th),cy-r*Math.sin(th)*sy];}
+ c.strokeStyle='rgba(191,230,245,0.55)';c.lineWidth=1.5;c.setLineDash([5,5]);c.beginPath();for(i=0;i<=72;i++){var q=P(i/72*6.2832);if(i===0)c.moveTo(q[0],q[1]);else c.lineTo(q[0],q[1]);}c.stroke();c.setLineDash([]);
+ for(i=0;i<12;i++){var th=((i*30.44+15)-355)/365.25*2*Math.PI,q2=P(th,20);txt(c,MONTHS[i],q2[0],q2[1]+4,'700 10px '+FONT,i===ORB.pm?'#FFB27E':'#BFE6F5','center');}
+ sunGlow(c,cx,cy,14);var pc=P(thp),pf=P(thp+Math.PI);c.fillStyle='#FF7A2F';circ(c,pc[0],pc[1],4.5);circ(c,pf[0],pf[1],3);
+ var te=t*0.9,qe=P(te);var gg=c.createRadialGradient(qe[0]-3,qe[1]-3,1,qe[0],qe[1],8);gg.addColorStop(0,'#7FC0F0');gg.addColorStop(1,'#1F5FA8');c.fillStyle=gg;circ(c,qe[0],qe[1],7);
+ wobTop(c,40,62,t,0.9);txt(c,'wobble',40,110,'700 9.5px '+FONT,'#BFE6F5','center');
+ txt(c,'Closest to the Sun: '+MON[ORB.pm]+(ORB.pm===0?' (today)':''),200,22,'800 13px '+FONT,'#FFFFFF','center');
+ var nh=(ORB.pm>=5&&ORB.pm<=7)?['Northern summer is near the closest point','#FF9A5C']:((ORB.pm<=1||ORB.pm>=11)?['Northern winter is near the closest point','#8FC9E3']:['Closest point is in spring or fall','#FFFFFF']);
+ txt(c,nh[0],200,272,'700 11.5px '+FONT,nh[1],'center');txt(c,'Full wobble: about 26,000 years (orbit exaggerated)',200,290,'600 10px '+FONT,'#9FC3D8','center');}
+function drawObMachine(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);naMap(c,4,24,326,244,ORB.ice,t);
+ txt(c,'Ice Age Machine',8,17,'800 13px '+FONT,'#FFFFFF');pill(c,'simplified model, approximate map',330,18,9.5,'#9FC3D8','right');
+ var m=sun65(ORB.e,ORB.tilt,ORB.pm),x=350,y=70,h=170;c.fillStyle='#0A1522';c.fillRect(334,24,66,276);
+ txt(c,'65'+DEG+'N',367,40,'800 10px '+FONT,'#FFFFFF','center');txt(c,'summer sun',367,52,'700 8.5px '+FONT,'#BFE6F5','center');txt(c,'HIGH',367,y-5,'800 9px '+FONT,'#FF9A5C','center');
+ c.fillStyle='#22384F';rr(c,x,y,34,h,8);c.fill();var col=m<OB_GROW?'#4FA3E0':(m>OB_MELT?'#FF7A2F':'#FFD45A');c.fillStyle=col;rr(c,x,y+h*(1-m),34,Math.max(2,h*m),8);c.fill();
+ c.strokeStyle='#FFFFFF';c.lineWidth=1.5;c.setLineDash([3,3]);c.beginPath();c.moveTo(x-4,y+h*(1-OB_GROW));c.lineTo(x+38,y+h*(1-OB_GROW));c.moveTo(x-4,y+h*(1-OB_MELT));c.lineTo(x+38,y+h*(1-OB_MELT));c.stroke();c.setLineDash([]);
+ txt(c,'LOW',367,y+h+14,'800 9px '+FONT,'#8FC9E3','center');
+ var s=m<OB_GROW?['Cool summers: snow survives, so the ice sheet GROWS','#8FC9E3']:(m>OB_MELT?['Warm summers: the ice sheet MELTS','#FF9A5C']:['In between: the ice sheet stays about the same','#FFFFFF']);
+ txt(c,s[0],167,288,'800 11px '+FONT,s[1],'center');
+ if(ORB.ice>0.95)pill(c,'Sea level about 120 m lower',167,258,10,'#FFFFFF','center');}
+function obLoop(dt,t){var m=sun65(ORB.e,ORB.tilt,ORB.pm);if(m<OB_GROW)ORB.ice=Math.min(1,ORB.ice+dt*0.16);else if(m>OB_MELT)ORB.ice=Math.max(0,ORB.ice-dt*0.2);
+ var c=ORB.c;if(ORB.tab==='shape')drawObShape(c,t);else if(ORB.tab==='tilt')drawObTilt(c,t);else if(ORB.tab==='wobble')drawObWob(c,t);else drawObMachine(c,t);
+ var key=ORB.e+'|'+ORB.tilt+'|'+ORB.pm;if(key!==ORB.last){ORB.last=key;$('obEv').textContent=ORB.e.toFixed(3)+(Math.abs(ORB.e-0.017)<0.0015?' (about today)':'');$('obTv').textContent=ORB.tilt.toFixed(1)+DEG+(Math.abs(ORB.tilt-23.4)<0.06?' (about today)':'');$('obPv').textContent=MON[ORB.pm]+(ORB.pm===0?' (today)':'');}}
+var OB_MIS=[
+ {tx:'Orbit shape: slide Earth\'s orbit to its MOST oval shape.',hint:'Drag the orbit shape slider all the way to the right.',start:function(){obTab('shape');},ok:function(){return ORB.e>=0.055;},yes:'At its most oval, Earth gets about a quarter more sunlight at its closest point than at its farthest. The orbit shape cycle takes about 100,000 years, with a longer cycle of about 405,000 years.'},
+ {tx:'Tilt: set Earth\'s tilt to its smallest, about 22.1 degrees. Watch what happens to summer sunlight at 65 degrees north.',hint:'Drag the tilt slider all the way to the left.',start:function(){obTab('tilt');},ok:function(){return ORB.tilt<=22.15;},yes:'Less tilt means weaker seasons: cooler summers and milder winters. The tilt swings between about 22.1 and 24.5 degrees about every 41,000 years.'},
+ {tx:'Wobble: change the wobble so Earth is closest to the Sun in July, during northern summer.',hint:'Drag the wobble slider until it says July.',start:function(){obTab('wobble');},ok:function(){return ORB.pm===6;},yes:'Now northern summers get a little extra sunlight. Today it is the opposite: Earth is closest to the Sun in early January, during northern winter, just like in Chapter 2.'},
+ {tx:'Ice Age Machine: use all three sliders to give 65 degrees north the weakest summer sunlight. Grow the ice sheet to full size.',hint:'Weakest summers: the smallest tilt, the most oval orbit, and Earth closest to the Sun in December or January, so it is far from the Sun in June. Then wait for the ice to grow.',start:function(){obTab('machine');ORB.ice=0;},ok:function(){return ORB.ice>=0.98;},yes:'Ice age! Summers at 65 degrees north were too cool to melt the winter snow, so it piled up. About 20,000 years ago, ice up to about 3 kilometers thick covered most of Canada and the northern United States.'},
+ {tx:'Now end the ice age! Give 65 degrees north the strongest summer sunlight and melt the ice sheet.',hint:'Strongest summers: the biggest tilt, the most oval orbit, and Earth closest to the Sun in June or July. Then wait for the ice to melt.',start:function(){obTab('machine');},ok:function(){return ORB.ice<=0.02;},yes:'The ice melts! In the real world, feedbacks helped: less ice meant less sunlight reflected, and warming oceans released CO\u2082. That is how small orbit changes lead to huge climate changes.'}
+];
+function startOrbit(){show('scrOrbit');ORB.ice=0;obSet(0.0167,23.44,0);ORB.c=setupCanvas($('obCv'),400,300,0.4);ORB.ms=misRun('ob',OB_MIS,'Next: Ice Core Graph',startGraph);startLoop(obLoop);}
+
+/* ---- Activity B: real ice core graph ---- */
+var GR={c:null,age:-1,dot:null,n:0,ms:null,won:false,last:''};
+var GL=44,GRR=390,GT0=26,GT1=168,GC0=200,GC1=360;
+function gX(k){return GRR-k/800*(GRR-GL);}
+function gTY(v){return GT1-(v+11)/17*(GT1-GT0);}
+function gCY(p){return GC1-(p-160)/280*(GC1-GC0);}
+function grDraw(c,t){var i;c.fillStyle='#0E1B2C';c.fillRect(0,0,400,400);
+ c.fillStyle='#132539';c.fillRect(GL,GT0,GRR-GL,GT1-GT0);c.fillRect(GL,GC0,GRR-GL,GC1-GC0);
+ txt(c,'Antarctic temperature change ('+DEG+'C)',GL,18,'800 11px '+FONT,'#FFB27E');txt(c,'CO\u2082 (ppm)',GL,GC0-8,'800 11px '+FONT,'#8FD3F0');
+ c.strokeStyle='#27425F';c.lineWidth=1;c.font='600 9.5px '+FONT;
+ var tv=[-10,-5,0,5];for(i=0;i<tv.length;i++){var y=gTY(tv[i]);c.beginPath();c.moveTo(GL,y);c.lineTo(GRR,y);c.stroke();txt(c,(tv[i]>0?'+':'')+tv[i],GL-5,y+3,'600 9.5px '+FONT,'#9FC3D8','right');}
+ var cv=[200,300,400];for(i=0;i<cv.length;i++){var y2=gCY(cv[i]);c.beginPath();c.moveTo(GL,y2);c.lineTo(GRR,y2);c.stroke();txt(c,String(cv[i]),GL-5,y2+3,'600 9.5px '+FONT,'#9FC3D8','right');}
+ c.setLineDash([4,4]);c.strokeStyle='rgba(255,178,126,0.6)';c.beginPath();c.moveTo(GL,gTY(0));c.lineTo(GRR,gTY(0));c.stroke();c.setLineDash([]);
+ c.strokeStyle='#FFB27E';c.lineWidth=1.4;c.beginPath();for(i=799;i>=0;i--){var x=gX(i+0.5),yy=gTY(IC_T[i]/10);if(i===799)c.moveTo(x,yy);else c.lineTo(x,yy);}c.stroke();
+ c.strokeStyle='#8FD3F0';c.lineWidth=1.4;c.beginPath();for(i=799;i>=0;i--){var x3=gX(i+0.5),y3=gCY(IC_C[i]);if(i===799)c.moveTo(x3,y3);else c.lineTo(x3,y3);}c.stroke();
+ for(i=0;i<=800;i+=100){var xt=gX(i);c.strokeStyle='#27425F';c.beginPath();c.moveTo(xt,GC1);c.lineTo(xt,GC1+4);c.stroke();if(i%200===0)txt(c,i===0?'today':i+'k',xt,GC1+16,'600 9.5px '+FONT,'#9FC3D8',i===0?'right':'center');}
+ txt(c,'thousand years ago',(GL+GRR)/2,GC1+32,'600 9.5px '+FONT,'#9FC3D8','center');
+ if(GR.won){c.fillStyle='#FF5A4A';rr(c,GRR-10,gCY(422),10,GC1-gCY(422),3);c.fill();pill(c,'Today: over 420',GRR-14,gCY(422)+4,10,'#FF8A80','right');}
+ if(GR.dot){c.fillStyle='#FF7A2F';circ(c,GR.dot.x,GR.dot.y,6);c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.arc(GR.dot.x,GR.dot.y,6,0,6.2832);c.stroke();}
+ if(GR.age>=0){var k=Math.min(799,Math.floor(GR.age)),xc=gX(GR.age);c.strokeStyle='#FFFFFF';c.lineWidth=1.5;c.beginPath();c.moveTo(xc,GT0);c.lineTo(xc,GC1);c.stroke();
+  c.fillStyle='#FFB27E';circ(c,xc,gTY(IC_T[k]/10),4.5);c.fillStyle='#8FD3F0';circ(c,xc,gCY(IC_C[k]),4.5);}}
+function grLoop(dt,t){grDraw(GR.c,t);var key=GR.age+'|'+(GR.dot?GR.dot.p:'');if(key===GR.last)return;GR.last=key;
+ if(GR.age>=0){var k=Math.min(799,Math.floor(GR.age)),T=IC_T[k]/10;$('grAge').textContent='about '+fmt(Math.max(1,Math.round(GR.age))*1000)+' years ago';$('grT').textContent=(T>0?'+':'')+T.toFixed(1)+DEG+'C compared with the last 1,000 years';$('grC').textContent='about '+IC_C[k]+' ppm';}
+ $('grDot').textContent=GR.dot?('about '+Math.round(GR.dot.p)+' ppm'):'(tap the CO\u2082 panel)';}
+function grTouch(e){e.preventDefault();ac();var p=lpos($('grCv'),e,400);if(p.x<GL-6||p.x>GRR+6)return;var x=Math.max(GL,Math.min(GRR,p.x));GR.age=(GRR-x)/(GRR-GL)*800;
+ if(p.y>=GC0-30&&p.y<=GC1){var y=Math.max(GC0-30,Math.min(GC1,p.y));GR.dot={x:x,y:y,p:160+(GC1-y)/(GC1-GC0)*280,age:GR.age};}}
+var GR_DRAG=false;
+function grCount(){var B=$('grCount');B.innerHTML='';for(var n=6;n<=11;n++){(function(n){var b=el('button','chip'+(GR.n===n?' sel':''),String(n));b.onclick=function(){sfx.click();GR.n=n;grCount();};B.appendChild(b);})(n);}}
+var GR_MIS=[
+ {tx:'Drag along the graph to find the last ice age, about 20,000 years ago. Look for the deep low point near the right side.',hint:'20,000 years ago is very close to the right edge. The "today" label is at 0, so go just a little to the left of it.',start:function(){$('grCount').style.display='none';},ok:function(){return GR.age>=15&&GR.age<=30;},yes:'You found it! About 20,000 years ago, Antarctica was about 9 degrees Celsius colder than the last 1,000 years, and CO\u2082 was only about 190 ppm.'},
+ {tx:'Count the big warm peaks (interglacials) in the temperature graph, including today\'s warm period at the far right. Tap your answer below.',hint:'Count each tall peak that reaches up near the 0 line, from left to right. Do not forget today\'s peak at the far right.',start:function(){GR.n=0;grCount();$('grCount').style.display='flex';},
+  ok:function(){var n=GR.n;GR_MIS[1].hint=n===0?'Tap a number below first.':(n>9?'Close! Some warm periods have two bumps close together, like the one around 240,000 to 210,000 years ago. Scientists count those as one warm period.':'Look again. Some older peaks are smaller, but they still count. Do not forget today\'s peak at the far right.');return n===8||n===9;},
+  yes:'Yes! Scientists count about 8 or 9 warm periods in the last 800,000 years, roughly one every 100,000 years. The older ones were weaker, so people count them a little differently.'},
+ {tx:'Today\'s CO\u2082 is over 420 ppm. Tap the CO\u2082 panel at the far right (today) at the height where 420 ppm would be.',hint:'Find 400 on the CO\u2082 scale on the left. Tap a little above that line, right next to the "today" edge.',start:function(){$('grCount').style.display='none';GR.dot=null;},ok:function(){var d=GR.dot;if(d&&d.age<=60&&d.p>=405&&d.p<=445){GR.won=true;return true;}return false;},yes:'Way above anything in the ice cores! For 800,000 years, CO\u2082 stayed below about 300 ppm. Today it is over 420, and it rose about 100 times faster than at the end of the last ice age.'}
+];
+function startGraph(){show('scrGraph');GR.age=-1;GR.dot=null;GR.n=0;GR.won=false;GR.last='';$('grAge').textContent='-';$('grT').textContent='-';$('grC').textContent='-';
+ GR.c=setupCanvas($('grCv'),400,400,0.48);GR.ms=misRun('gr',GR_MIS,'Take the quiz',function(){startQuiz('ch4',CH4_QUIZ);});startLoop(grLoop);}
+
+/* ---- quiz backgrounds ---- */
+function bgCycles(c){space(c,600,620,1);var i;for(i=1;i<3;i++){c.fillStyle='#27425F';c.fillRect(20,i*206,560,2);}
+ ovalOrbit(c,300,104,190,0.5,0.6,5,{sun:16,er:10});
+ tGlobe(c,300,310,70,30*RAD,false);
+ wobTop(c,300,516,0.8,2.3);c.fillStyle='rgba(255,214,90,0.9)';}
+function bgIceAxis(c){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,600);var L=70,R=570,T=70,B=520,i;
+ txt(c,'Temperature over the last 800,000 years',300,38,'800 22px '+FONT,'#0E1B2C','center');
+ c.strokeStyle='#DDE6EE';c.lineWidth=1;for(i=0;i<=8;i++){var x=L+i/8*(R-L);c.beginPath();c.moveTo(x,T);c.lineTo(x,B);c.stroke();}
+ c.strokeStyle='#0E1B2C';c.lineWidth=2.5;c.beginPath();c.moveTo(L,T);c.lineTo(L,B);c.lineTo(R,B);c.stroke();
+ for(i=0;i<=8;i++){var x2=L+i/8*(R-L);txt(c,i===8?'today':(800-i*100)+'k',x2,B+26,'700 16px '+FONT,'#2C4A63','center');}
+ txt(c,'thousand years ago',(L+R)/2,B+56,'600 16px '+FONT,'#4A6B85','center');
+ txt(c,'Warmer',L-8,T+14,'800 16px '+FONT,'#B3261E','right');txt(c,'Colder',L-8,B-6,'800 16px '+FONT,'#1F5FD1','right');}
+
+var CH4_QUIZ=[
+ {t:'mc',q:'Which Milankovitch cycle is the slow change in the SHAPE of Earth\'s orbit?',o:['Eccentricity','Obliquity','Precession','Rotation'],a:0,why:'Eccentricity is the orbit\'s shape, from nearly circular to slightly oval. Its main cycle is about 100,000 years, with a longer cycle of about 405,000 years.'},
+ {t:'mc',q:'Earth\'s tilt swings between about 22.1 and 24.5 degrees. About how long does one full cycle take?',o:['About 1 year','About 410 years','About 41,000 years','About 4 million years'],a:2,why:'Obliquity (tilt) changes over about 41,000 years. Today the tilt is about 23.4 degrees and slowly getting smaller.'},
+ {t:'mc',q:'What is precession?',o:['A slow wobble of Earth\'s axis, like a spinning top','The change in the shape of Earth\'s orbit','Earth spinning once each day','The Moon pulling on the oceans'],a:0,why:'Precession is the axis wobble, about once every 26,000 years. It shifts which time of year Earth is closest to the Sun. Today that is early January.'},
+ {t:'mc',q:'Why do summers at about 65 degrees north matter so much for ice ages?',o:['If summers there are too cool to melt the winter snow, ice sheets grow','The Sun is closest to Earth at 65 degrees north','Winters there are always warm','There is no land at 65 degrees north'],a:0,why:'There is lots of land near 65 degrees north. If summer is too cool to melt the winter snow, snow piles up year after year and becomes an ice sheet.'},
+ {t:'mc',q:'Orbit changes only change sunlight a little. What turns that small change into a huge ice age?',o:['Feedbacks: more ice reflects more sunlight, and colder oceans absorb more CO\u2082','Volcanoes erupting every 100,000 years','The Sun turning off for part of each year','Earth moving to orbit a different star'],a:0,why:'Feedbacks amplify the small orbit change. Growing ice reflects more sunlight (ice-albedo feedback), and colder oceans take CO\u2082 out of the air.'},
+ {t:'mc',q:'Why can\'t Milankovitch cycles explain today\'s warming?',o:['They change over tens of thousands of years, but today\'s CO\u2082 is rising about 100 times faster','They stopped working 1,000 years ago','They only affect the Southern Hemisphere','They make Earth warm by exactly 1 degree every year'],a:0,why:'Orbit cycles are very slow. Today\'s CO\u2082 rise is about 100 times faster than at the end of the last ice age, so the orbit cannot be the cause.'},
+ {t:'label',q:'Label the three Milankovitch cycles. Tap a label, then tap the dashed circle where it belongs.',bg:'cycles',guide:true,labels:[{s:'Orbit shape',x:300,y:104,r:100},{s:'Tilt',x:300,y:310,r:100},{s:'Wobble',x:300,y:516,r:100}]},
+ {t:'draw',q:'Sketch the ice-age pattern over the last 800,000 years. Show the long cold ice ages and the short warm peaks, ending with today\'s warm period.',bg:'iceaxis',cols:[['Blue','#1F5FD1'],['Red','#E0312A'],['Black','#111418']]},
+ {t:'text',q:'Explain how a small change in Earth\'s orbit can lead to a huge ice age.'}
+];
+
 /* ---------- menu ---------- */
 function openMenu(){show('scrMenu');$('hello').textContent='Hi, '+S.name+' (Period '+S.period+'). Pick a chapter.';var L=$('chList');L.innerHTML='';
  for(var i=0;i<CH.length;i++){(function(i){var ch=CH[i];var r=S.res[ch.id];var bt=el('button','ch'+(ch.ready?'':' off'));bt.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,ch.title));tx.appendChild(el('small',null,ch.desc));bt.appendChild(tx);
   bt.appendChild(el('span','pill'+(r?' done':''),r?('Score '+r.score+'/'+r.total):(ch.ready?'Start':'Soon')));
-  bt.onclick=function(){sfx.click();ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=ch.title;return;}if(ch.id==='ch1')startStory(CH1_STEPS,startDrillGame,'Start drilling');else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');};L.appendChild(bt);})(i);}}
+  bt.onclick=function(){sfx.click();ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=ch.title;return;}if(ch.id==='ch1')startStory(CH1_STEPS,startDrillGame,'Start drilling');else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');};L.appendChild(bt);})(i);}}
 
 /* ---------- report + PDF ---------- */
 var pdfBlob=null,pdfName='';
@@ -1227,6 +1526,11 @@ $('abHeat').onclick=abHeat;
 $('abFill').onclick=function(){sfx.click();if(AB.fb&&AB.fb.on)return;for(var i=0;i<AB.g.length;i++)AB.g[i]=AB.sel;};
 var abc=$('abCv');abc.addEventListener('touchstart',abStart,false);abc.addEventListener('touchmove',abMove,false);abc.addEventListener('touchend',abEnd,false);abc.addEventListener('mousedown',abStart,false);abc.addEventListener('mousemove',abMove,false);window.addEventListener('mouseup',abEnd,false);
 $('btnShareImg').onclick=shareImg;
+$('obCheck').onclick=function(){misCheck(ORB.ms);};$('obHint').onclick=function(){misHint(ORB.ms);};
+(function(){var bs=$('obTabs').children;for(var i=0;i<bs.length;i++){bs[i].onclick=function(){sfx.click();obTab(this.getAttribute('data-t'));};}
+ var ids=['obE','obT','obP'];for(var j=0;j<ids.length;j++){$(ids[j]).addEventListener('input',obRead,false);$(ids[j]).addEventListener('change',obRead,false);}})();
+$('grCheck').onclick=function(){misCheck(GR.ms);};$('grHint').onclick=function(){misHint(GR.ms);};
+var grc=$('grCv');grc.addEventListener('touchstart',grTouch,false);grc.addEventListener('touchmove',grTouch,false);grc.addEventListener('mousedown',function(e){GR_DRAG=true;grTouch(e);},false);grc.addEventListener('mousemove',function(e){if(GR_DRAG)grTouch(e);},false);window.addEventListener('mouseup',function(){GR_DRAG=false;},false);
 $('btnShare').onclick=sharePdf;
 
 load();loadSet();
