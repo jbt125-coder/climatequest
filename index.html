@@ -178,7 +178,6 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     <button id="btnReport" class="big alt">My results (PDF)</button>
     <button id="btnCamp" class="big alt">Check on the camp (mini game)</button>
     <p id="campNote" class="msg"></p>
-    <button id="btnSwitch" class="link">Need to change your name?</button>
   </div>
 
   <div id="scrSoon" class="scr">
@@ -467,6 +466,10 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     <p class="vnote">Story voices. Pick Daniel, Samantha, or Karen for each character, then tap Test.</p>
     <div id="voiceRows"></div>
     <button id="btnVoiceReset" class="link">Reset voices (Daniel, Samantha, Karen)</button>
+    <p class="vnote">Code (for the teacher)</p>
+    <input id="inCode" type="password" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="Enter code">
+    <button id="btnCode" class="big alt">Enter code</button>
+    <p id="codeMsg" class="vnote"></p>
     <button id="btnSetDone" class="big">Done</button>
   </div>
 </div>
@@ -479,16 +482,6 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     <div class="warn">This is the name your teacher will see. Check the spelling of your first and last name. After you tap Yes, your name is locked.</div>
     <button id="nmYes" class="big">Yes, that's me</button>
     <button id="nmNo" class="big alt">Go back and fix it</button>
-  </div>
-</div>
-
-<div id="chgCard" class="overlay">
-  <div class="card">
-    <h2>Your name is locked</h2>
-    <p>Your name is <b id="chgName"></b>.</p>
-    <div class="warn"><b>Changing your name will not fix your old PDFs.</b> Chapters you already finished keep the old name. New PDFs are only made when you complete a chapter and its quiz again, so you would have to redo those chapters to get PDFs with your new name.</div>
-    <button id="chgKeep" class="big">Keep my name</button>
-    <button id="chgGo" class="big alt">Change my name anyway</button>
   </div>
 </div>
 
@@ -583,7 +576,7 @@ var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','sc
 var raf=null,loopFn=null;
 function stopLoops(){loopFn=null;if(raf){cancelAnimationFrame(raf);}raf=null;stopDrillSnd();}
 function startLoop(fn){stopLoops();loopFn=fn;var last=0;function f(ts){if(loopFn!==fn)return;var dt=last?Math.min(0.05,(ts-last)/1000):0.016;last=ts;fn(dt,ts/1000);raf=requestAnimationFrame(f);}raf=requestAnimationFrame(f);}
-function show(id){stopLoops();hush();stClear();for(var i=0;i<screens.length;i++){$(screens[i]).style.display=(screens[i]===id)?'block':'none';}cur=id;$('btnHome').style.visibility=(id==='scrSign'||id==='scrMenu')?'hidden':'visible';$('coreCard').style.display='none';$('nameCard').style.display='none';$('chgCard').style.display='none';$('hpCard').style.display='none';$(id).scrollTop=0;}
+function show(id){stopLoops();hush();stClear();for(var i=0;i<screens.length;i++){$(screens[i]).style.display=(screens[i]===id)?'block':'none';}cur=id;$('btnHome').style.visibility=(id==='scrSign'||id==='scrMenu')?'hidden':'visible';$('coreCard').style.display='none';$('nameCard').style.display='none';$('hpCard').style.display='none';$(id).scrollTop=0;}
 function setupCanvas(cv,lw,lh,maxHFrac){var w=cv.parentNode.clientWidth||360;var maxH=window.innerHeight*(maxHFrac||0.5);if(w*lh/lw>maxH){w=maxH*lw/lh;}var h=w*lh/lw;cv.style.width=Math.round(w)+'px';cv.style.height=Math.round(h)+'px';cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);var c=cv.getContext('2d');var k=cv.width/lw;c.setTransform(k,0,0,k,0,0);return c;}
 
 /* ---------- drawing helpers ---------- */
@@ -2720,14 +2713,15 @@ function buildVoiceRows(){var box=$('voiceRows'),vs=enVoices(),k,i,j;box.innerHT
   sel.onchange=function(){VSET[who]=sel.value;saveSet();say(VSAMPLE[who],WHO[who].pitch,who);};
   var tb=el('button','sbtn','Test');tb.onclick=function(){ac();if(!V.on){$('btnSound').textContent='Sound: Off (turn on to test)';return;}say(VSAMPLE[who],WHO[who].pitch,who);};
   line.appendChild(sel);line.appendChild(tb);row.appendChild(line);box.appendChild(row);})(keys[k]);}}
-function openSettings(){sfx.click();$('btnSound').textContent='Sound: '+(V.on?'On':'Off');buildVoiceRows();$('setCard').style.display='block';}
+function openSettings(){sfx.click();$('btnSound').textContent='Sound: '+(V.on?'On':'Off');buildVoiceRows();$('codeMsg').textContent='';$('inCode').value='';$('setCard').style.display='block';}
 $('btnGear').onclick=openSettings;
+/* teacher code: reopens the camp mini game right away (clears the 10-minute cooldown) */
+$('btnCode').onclick=function(){var v=String($('inCode').value||'').replace(/\s+/g,'').toLowerCase();$('inCode').value='';
+ if(v==='yourdadacademy'){S.campNext=0;save();campBtn();$('campNote').textContent='';sfx.good();$('codeMsg').textContent='Code accepted. The camp mini game is open.';}
+ else{sfx.bad();$('codeMsg').textContent='That code did not work.';}};
 $('btnSetDone').onclick=function(){sfx.click();hush();$('setCard').style.display='none';};
 $('btnVoiceReset').onclick=function(){VSET.frost=VDEF.frost;VSET.sam=VDEF.sam;VSET.rosa=VDEF.rosa;saveSet();buildVoiceRows();sfx.click();};
 if(window.speechSynthesis&&'onvoiceschanged' in speechSynthesis){speechSynthesis.onvoiceschanged=function(){if($('setCard').style.display==='block')buildVoiceRows();};}
-$('btnSwitch').onclick=function(){sfx.click();$('chgName').textContent=S.name+' (Period '+S.period+')';$('chgCard').style.display='block';};
-$('chgKeep').onclick=function(){sfx.click();$('chgCard').style.display='none';};
-$('chgGo').onclick=function(){sfx.click();openSign();};
 $('btnSignCancel').onclick=function(){sfx.click();if(S.name&&S.period)openMenu();};
 $('nmYes').onclick=nameYes;
 $('nmNo').onclick=function(){sfx.click();nmPend=null;$('nameCard').style.display='none';$('inFirst').focus();};
