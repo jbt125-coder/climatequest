@@ -363,6 +363,21 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     <p class="note">Climographs: red line = average temperature, shaded band = average low to average high, blue bars = precipitation. Climate groups use the textbook Koppen rules applied to each city's data.</p>
   </div>
 
+  <div id="scrSpiral" class="scr">
+    <div class="mis">
+      <b id="spHead"></b>
+      <p id="spText"></p>
+      <div class="row"><button id="spHint" class="sbtn">Hint</button><button id="spCheck" class="big">Check</button></div>
+      <p id="spMsg" class="msg"></p>
+    </div>
+    <div class="cvwrap"><canvas id="spCv"></canvas></div>
+    <div class="row2"><button id="spPlay" class="sbtn">Play</button><button id="spRot" class="sbtn">Rotate to 3D</button></div>
+    <div class="row2"><span id="spRangeL">Scrub through time</span></div>
+    <input id="spRange" type="range" min="0" max="100" step="1" value="0">
+    <div class="stats"><b id="spRead"></b></div>
+    <p class="note">Data: NASA GISTEMP v4 global land and ocean temperatures, every month since 1880. NASA compares with 1951-1980; here every value is shifted to compare with the 1880-1900 average (approximately pre-industrial).</p>
+  </div>
+
   <div id="scrQuiz" class="scr"><div id="quizBody"></div></div>
 
   <div id="scrReport" class="scr">
@@ -425,7 +440,7 @@ var CH=[
  {id:'ch5',title:'Moving Air',desc:'Convection, the Coriolis effect, and air masses.',ready:true},
  {id:'ch6',title:'Mountains and Rain Shadows',desc:'Push a cloud over a mountain.',ready:true},
  {id:'ch7',title:'City Planner',desc:'Match each city to the right climate.',ready:true},
- {id:'ch8',title:'Climate Spiral',desc:'1880 to today in one minute.'}
+ {id:'ch8',title:'Climate Spiral',desc:'1880 to today in one minute.',ready:true}
 ];
 
 /* ---------- audio ---------- */
@@ -461,7 +476,7 @@ function say(t,pitch,who){if(!window.speechSynthesis)return;speechSynthesis.canc
 function hush(){if(window.speechSynthesis){speechSynthesis.cancel();}}
 
 /* ---------- screens + loop ---------- */
-var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','scrLab','scrAlbedo','scrOrbit','scrGraph','scrConv','scrCor','scrAm','scrFc','scrDc','scrPlan','scrQuiz','scrReport'];
+var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','scrLab','scrAlbedo','scrOrbit','scrGraph','scrConv','scrCor','scrAm','scrFc','scrDc','scrPlan','scrSpiral','scrQuiz','scrReport'];
 var raf=null,loopFn=null;
 function stopLoops(){loopFn=null;if(raf){cancelAnimationFrame(raf);}raf=null;stopDrillSnd();}
 function startLoop(fn){stopLoops();loopFn=fn;var last=0;function f(ts){if(loopFn!==fn)return;var dt=last?Math.min(0.05,(ts-last)/1000):0.016;last=ts;fn(dt,ts/1000);raf=requestAnimationFrame(f);}raf=requestAnimationFrame(f);}
@@ -748,7 +763,7 @@ function renderMC(b,q){var btns=[];for(var i=0;i<q.o.length;i++){(function(i){va
  Q.items.push({t:'mc',q:q.q,ans:q.o[i],ok:ok,right:q.o[q.a]});b.appendChild(el('div','why',(ok?'Correct! ':'Not quite. ')+q.why));nextBtn(b);};btns.push(o);b.appendChild(o);})(i);}}
 function renderText(b,q){var ta=el('textarea');ta.placeholder='Type your answer here. Use complete sentences.';b.appendChild(ta);var m=el('p','msg','');var s=el('button','big','Save my answer');s.onclick=function(){var v=clean(ta.value).replace(/^\s+|\s+$/g,'');if(v.split(/\s+/).length<8){m.textContent='Write at least one full sentence (8 or more words).';sfx.bad();return;}ta.disabled=true;s.style.display='none';m.textContent='';sfx.good();Q.items.push({t:'text',q:q.q,ans:v,ok:null});b.appendChild(el('div','why','Saved. Your teacher will read this answer in your PDF.'));nextBtn(b);};b.appendChild(s);b.appendChild(m);}
 function cpos(cv,e){var r=cv.getBoundingClientRect();var p=(e.touches&&e.touches.length)?e.touches[0]:((e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e);return {x:(p.clientX-r.left)*cv.width/r.width,y:(p.clientY-r.top)*cv.height/r.height};}
-function drawBg(c,name){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);if(name==='sheet')bgSheet(c);else if(name==='draw')bgDraw(c);else if(name==='sideJune')bgSideJune(c);else if(name==='sideDec')bgSideDec(c);else if(name==='energy')bgEnergy(c);else if(name==='gh')bgGH(c);else if(name==='cycles')bgCycles(c);else if(name==='iceaxis')bgIceAxis(c);else if(name==='cells')bgCells(c);else if(name==='breeze')bgBreeze(c);else if(name==='mtn')bgMtn(c);else if(name==='mtndraw')bgMtnDraw(c);else if(name==='climolbl')bgClimoLbl(c);else if(name==='climodraw')bgClimoDraw(c);}
+function drawBg(c,name){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);if(name==='sheet')bgSheet(c);else if(name==='draw')bgDraw(c);else if(name==='sideJune')bgSideJune(c);else if(name==='sideDec')bgSideDec(c);else if(name==='energy')bgEnergy(c);else if(name==='gh')bgGH(c);else if(name==='cycles')bgCycles(c);else if(name==='iceaxis')bgIceAxis(c);else if(name==='cells')bgCells(c);else if(name==='breeze')bgBreeze(c);else if(name==='mtn')bgMtn(c);else if(name==='mtndraw')bgMtnDraw(c);else if(name==='climolbl')bgClimoLbl(c);else if(name==='climodraw')bgClimoDraw(c);else if(name==='spiral')bgSpiral(c);else if(name==='trend')bgTrend(c);}
 function lblOk(lb,p){if(lb.seg){var x1=lb.seg[0],y1=lb.seg[1],x2=lb.seg[2],y2=lb.seg[3],dx=x2-x1,dy=y2-y1,u=((p.x-x1)*dx+(p.y-y1)*dy)/(dx*dx+dy*dy);u=Math.max(0,Math.min(1,u));var ex=x1+u*dx-p.x,ey=y1+u*dy-p.y;return Math.sqrt(ex*ex+ey*ey)<(lb.tol||35);}var ddx=p.x-lb.x,ddy=p.y-lb.y;return Math.sqrt(ddx*ddx+ddy*ddy)<(lb.r||50);}
 function renderLabel(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=620;b.appendChild(cv);var c=cv.getContext('2d');var place=[],sel=-1,checked=false,chips=[];var i;for(i=0;i<q.labels.length;i++)place.push(null);
  function tag(s,x,y,col){c.font='700 20px '+FONT;var w=mtext(c,s)+20;var tx=Math.max(4,Math.min(596-w,x-w/2)),ty=y-44,above=true;if(ty<4){ty=y+14;above=false;}c.strokeStyle=col;c.lineWidth=2;c.beginPath();c.moveTo(x,y);c.lineTo(tx+w/2,above?ty+30:ty);c.stroke();c.fillStyle='rgba(14,27,44,0.9)';rr(c,tx,ty,w,30,9);c.fill();c.strokeStyle=col;c.lineWidth=2.5;rr(c,tx,ty,w,30,9);c.stroke();c.font='700 20px '+FONT;c.fillStyle='#FFFFFF';ftext(c,s,tx+10,ty+21);c.fillStyle=col;circ(c,x,y,7);c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.arc(x,y,7,0,6.2832);c.stroke();}
@@ -1747,9 +1762,9 @@ function rainCloud(c,x,y,s,dark,rain,t){var col=mix('#FFFFFF','#7A8794',dark);c.
  if(rain>0){c.strokeStyle='rgba(60,120,210,'+(0.4+0.5*rain).toFixed(2)+')';c.lineWidth=1.6;for(var k=0;k<7;k++){var rx=x-20*s+k*6.5*s,ph=((t||0)*120+k*17)%(30*s);c.beginPath();c.moveTo(rx,y+16*s+ph);c.lineTo(rx-3*s,y+24*s+ph);c.stroke();}}}
 /* Slide frame for the Chapter 6 presentation */
 var SL_ORDER=['sl_intro','sl_oro','sl_cool','sl_dew','sl_lee','sl_shadow','sl_sierra','sl_casc','sl_hawaii','sl_himal','sl_andes','sl_end'];
-function slideFrame(c,t,name,title){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);c.fillStyle='#F4FAFD';rr(c,6,6,388,272,10);c.fill();
+function slideFrame(c,t,name,title,ord){ord=ord||SL_ORDER;c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);c.fillStyle='#F4FAFD';rr(c,6,6,388,272,10);c.fill();
  c.fillStyle='#16283E';rr(c,6,6,388,30,10);c.fill();c.fillRect(6,26,388,10);txt(c,title,16,27,'800 14px '+FONT,'#FFFFFF');
- var n=SL_ORDER.indexOf(name)+1;txt(c,'Slide '+n+' of '+SL_ORDER.length,388,27,'700 10px '+FONT,'#BFE6F5','right');
+ var n=ord.indexOf(name)+1;txt(c,'Slide '+n+' of '+ord.length,388,27,'700 10px '+FONT,'#BFE6F5','right');
  person(c,368,298,0.42,'#2A9DB5',{glasses:true,clip:true,skin:'#E8B48F',wave:true},t);}
 function slideLabel(c,s,x,y,col,al){c.font='800 11px '+FONT;var w=mtext(c,s)+10,x0=al==='left'?x-5:(al==='right'?x-w+5:x-w/2);c.fillStyle='rgba(244,250,253,0.88)';rr(c,x0,y-12,w,16,5);c.fill();txt(c,s,x,y,'800 11px '+FONT,col||'#0E1B2C',al||'center');}
 function sceneSlide(c,name,t){var r,i;
@@ -1989,7 +2004,7 @@ function sceneTeam7(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);worldMap(
  c.fillStyle='#FFD45A';star5(c,120+Math.sin(t*2)*6,90,10);pill(c,'Next: City Planner',200,140,13,'#FFD45A','center');}
 function drawScene7(c,name,t){
  if(name==='latmap')sceneLatMap(c,t);else if(name==='elev')sceneElev(c,t);else if(name==='coast')sceneCoast(c,t);else if(name==='current')sceneCurrent(c,t);
- else if(name==='climo')sceneClimo(c,t);else if(name==='kop')sceneKop(c,t);else if(name==='uhi')sceneUHI(c,t);else sceneTeam7(c,t);}
+ else if(name==='climo')sceneClimo(c,t);else if(name==='kop')sceneKop(c,t);else if(name==='uhi')sceneUHI(c,t);else if(name==='team7')sceneTeam7(c,t);else drawScene8(c,name,t);}
 
 var CH7_STEPS=[
  {sc:'latmap',who:'frost',tx:"Welcome, city planners! Remember Chapter 2? Sunlight is most direct near the equator. So, in general, the farther a place is from the equator, the colder its average temperature."},
@@ -2083,11 +2098,179 @@ var CH7_QUIZ=[
  {t:'text',q:'Two cities are at the same latitude but one is much colder. Give two reasons why.'}
 ];
 
+/* ================= CHAPTER 8: CLIMATE SPIRAL ================= */
+/* NASA GISTEMP v4 global land-ocean monthly temperature anomalies (GLB.Ts+dSST.csv, data.giss.nasa.gov/gistemp).
+   GT_RAW: every month from Jan of GT_Y0, in hundredths of a degree C relative to NASA's 1951-1980 base; empty = not yet available.
+   GT_BASE: the 1880-1900 average on NASA's scale. Display values = raw/100 - GT_BASE (relative to 1880-1900, approximately pre-industrial). */
+var GT_Y0=1880,GT_BASE=-0.2179;
+var GT_RAW='-19,-25,-9,-16,-10,-21,-19,-10,-15,-23,-22,-18,-20,-14,3,5,6,-19,0,-3,-15,-22,-19,-7,16,13,4,-16,-14,-22,-16,-8,-15,-23,-17,-36,-29,-37,-12,-18,-18,-7,-8,-14,-22,-11,-24,-11,-13,-8,-36,-40,-33,-35,-30,-28,-27,-25,-33,-31,-58,-34,-27,-42,-45,-44,-34,-31,-28,-23,-24,-10,-44,-51,-43,-28,-24,-35,-18,-30,-23,-27,-28,-25,-72,-57,-35,-35,-30,-25,-26,-35,-25,-35,-26,-33,-34,-36,-42,-21,-22,-17,-11,-16,-12,1,2,-4,-9,16,6,9,-1,-10,-8,-20,-24,-25,-34,-29,-42,-45,-40,-30,-39,-25,-28,-39,-37,-25,-44,-32,-34,-46,-18,-27,-16,-21,-18,-17,-15,-22,-31,-4,-29,-12,-40,-33,-23,-22,-31,-27,-16,-13,-42,-39,-81,-56,-22,-27,-34,-25,-14,-25,-22,-18,-18,-32,-52,-29,-23,-45,-31,-40,-24,-24,-27,-22,-26,-21,-41,-42,-32,-22,-27,-21,-17,-17,-12,-10,-17,-14,-22,-12,-26,-30,-16,-11,-2,-5,-7,6,-4,-5,-15,-17,-13,-2,-2,-12,-3,-9,-8,-13,-18,-21,-3,-30,-51,-30,-30,-19,-22,-27,-21,-35,-38,-24,-17,-38,-37,-20,-23,-32,-16,-8,-4,-4,12,-26,-36,-6,0,-9,-9,-10,-13,-9,-5,10,-7,-7,-23,-10,6,-3,-15,-12,-14,-20,-22,-29,-17,-27,-17,-8,-27,-27,-32,-32,-28,-30,-29,-30,-37,-42,-24,-6,-23,-41,-40,-43,-35,-45,-49,-46,-42,-51,-63,-58,-50,-51,-52,-48,-51,-49,-55,-39,-18,-33,-34,-59,-21,-33,-29,-28,-26,-20,-18,-23,-6,-13,-27,-29,-18,-4,-25,-19,-23,-19,-27,-19,-37,-14,-42,-50,-27,-36,-45,-41,-34,-34,-33,-22,-46,-47,-44,-32,-55,-44,-37,-37,-35,-45,-35,-43,-51,-49,-73,-45,-54,-58,-54,-52,-45,-33,-38,-39,-32,-56,-43,-42,-50,-42,-34,-38,-34,-36,-38,-40,-57,-67,-62,-58,-60,-54,-52,-51,-42,-43,-40,-26,-21,-22,-27,-16,-39,-18,-21,-24,-42,-54,-57,-58,-40,-43,-40,-45,-42,-39,-44,-45,-36,-33,-34,-31,-20,-2,4,-10,-24,-30,-21,-25,-23,-16,-16,-3,-16,-5,-21,-4,-10,6,-5,-22,-12,-21,-19,-24,-13,-21,-13,-15,-28,-31,-35,-49,-37,-28,-36,-33,-46,-81,-56,-62,-64,-55,-55,-43,-25,-22,-22,-44,-34,-67,-47,-35,-26,-44,-43,-36,-31,-31,-17,-5,-11,-30,-20,-23,-21,-13,-28,-36,-29,-33,-24,-19,-41,-42,-24,-27,-11,-24,-26,-35,-30,-26,-21,-26,-26,-46,-4,-17,-22,-29,-29,-27,-14,-26,-18,-3,-14,-17,-34,-45,-15,-23,-33,-30,-27,-33,-35,-31,-14,-19,-27,-39,-33,-41,-33,-29,-31,-33,-31,-13,-2,-3,-22,-23,-8,-30,-18,-26,-29,-36,-32,-35,-20,-43,-37,-39,-27,-26,-29,-33,-27,-20,-19,-17,5,7,21,3,12,-13,-23,-26,-27,-13,-14,-11,-6,-29,-27,-17,-38,-30,-25,-27,-19,-24,-12,0,-5,-33,-2,-9,-25,-28,-29,-39,-19,-22,-21,-19,-9,-16,-45,-58,-33,-41,-38,-43,-37,-32,-25,-14,-12,-54,-30,-26,-10,-24,-24,-21,-21,-15,-15,-11,18,-5,-10,-20,-10,-23,-19,-8,-3,-3,-6,6,-6,-5,15,-17,-18,-6,-17,-29,-24,-21,-10,-9,-27,-26,-23,-29,-29,-25,-29,-34,-21,-23,-29,-25,-30,-44,-21,-3,-29,-31,-10,-15,-11,-12,-15,-7,3,-3,-34,14,-14,-37,-29,-27,-21,-22,-21,-6,-26,-17,-28,-38,-21,-20,-16,-22,-10,-13,-9,-3,1,-1,-7,3,-20,-16,-6,-5,-4,1,9,8,8,-8,8,4,10,6,-10,-17,-9,-6,1,15,7,-12,-5,-6,-18,-10,-5,-7,-6,-6,-7,-4,7,42,-1,8,9,17,10,11,12,7,15,11,16,31,17,30,10,16,16,12,22,14,2,35,22,21,29,2,5,9,11,5,0,-4,-3,1,9,12,-1,17,-4,11,6,-5,8,1,5,23,20,23,36,24,26,19,18,15,17,18,28,26,12,4,10,1,6,19,6,1,4,26,21,19,7,-7,15,3,1,6,-7,-21,-12,-20,-7,-7,-5,-31,-6,-8,7,6,-2,-2,-5,-7,-12,7,2,-13,6,-15,-24,-12,-1,-5,-11,-11,-14,-5,-13,-24,6,-14,-2,-11,-10,-27,-13,-13,-14,-7,-10,-18,-26,-27,-8,-21,-11,-5,-9,-16,-11,-20,-34,-22,-34,-42,-20,-14,0,-7,-1,6,5,8,-1,15,11,11,-8,3,-3,-3,4,5,7,0,-13,-2,7,15,11,20,12,12,1,5,5,8,-3,5,-24,-10,-15,-14,-20,-19,-19,-17,-10,-2,8,-18,13,-16,-32,-22,-20,-13,-11,2,-11,-5,-25,-28,-13,-24,-21,-28,-29,-15,-9,-25,-19,-23,-15,-6,-9,-3,-5,0,9,15,2,15,9,1,8,15,39,22,9,2,6,-9,5,-5,-3,4,2,1,8,7,18,16,4,3,3,-1,-6,-7,-8,0,0,13,-35,-15,-8,-4,-4,2,7,6,-11,19,7,19,9,13,12,11,1,1,8,0,3,-16,5,15,10,5,-6,3,2,-1,0,1,6,-3,-3,18,-14,-7,-6,5,6,22,17,14,15,-3,-9,-10,-21,-32,-25,-4,-4,-22,-30,-32,-21,-30,-8,-17,-13,-19,-12,-9,-14,-4,-15,-5,-6,-8,-19,-4,3,-13,-12,1,8,-9,-3,-17,-1,-2,-7,-21,5,-5,12,-8,2,1,-6,9,-5,-5,-26,-14,20,-6,-14,-9,-13,-9,-19,9,-5,-14,-11,-18,1,17,18,3,-4,4,8,9,12,24,8,22,6,5,-3,-2,2,-10,12,3,2,-12,-2,-15,-18,-7,-5,-16,-8,-1,-5,-4,-7,-8,-22,-18,3,0,-3,4,1,16,2,8,2,18,29,32,29,27,23,19,13,5,9,10,4,-7,-10,-27,-5,-12,-4,-5,-3,10,-8,-6,-8,-8,10,8,13,4,16,-1,-1,-17,-2,-11,-17,-17,-3,-6,-21,-7,-20,-12,-10,-12,-6,-24,-6,11,18,23,24,26,33,27,20,18,2,3,16,3,6,10,19,17,9,-1,4,-14,6,3,13,8,8,-10,19,15,4,14,4,17,25,26,28,47,30,39,29,30,35,20,22,18,20,13,30,22,53,42,48,32,24,29,33,35,15,12,23,41,5,15,3,15,18,6,14,3,14,13,18,43,53,43,42,28,34,23,18,36,37,17,30,17,31,14,26,6,33,2,19,19,21,13,6,-4,22,-4,17,12,15,15,4,17,13,12,5,14,26,37,30,22,21,12,11,16,3,15,10,13,32,43,18,24,26,35,40,25,35,33,29,46,57,44,51,42,44,40,33,39,37,38,12,29,12,30,36,29,17,15,35,33,34,29,20,37,41,44,80,56,46,37,46,34,23,45,46,40,42,50,35,51,34,53,48,39,44,29,30,32,47,40,48,27,31,26,9,8,-1,7,3,22,34,37,36,28,28,23,25,11,11,23,3,18,26,2,29,41,28,43,30,21,31,42,44,39,52,79,46,47,27,43,45,45,33,46,45,26,24,46,33,33,27,26,36,49,25,22,42,37,32,41,52,33,34,55,34,41,52,61,64,59,58,88,63,63,68,77,66,65,42,42,43,55,48,64,33,32,26,36,38,31,39,34,37,41,25,56,55,56,35,40,39,42,39,27,30,28,45,44,56,50,57,52,59,47,52,50,72,56,77,79,88,58,64,53,61,53,64,54,59,44,75,58,60,55,60,48,58,63,62,72,53,75,58,73,63,61,37,44,26,44,50,61,73,51,75,60,74,67,63,65,61,59,72,76,74,68,56,74,63,47,48,67,54,72,66,71,74,79,101,70,72,77,69,61,60,60,60,59,59,50,30,38,75,54,50,50,60,44,60,67,69,54,65,53,54,61,65,64,74,68,72,65,80,67,75,84,92,85,75,67,63,66,63,71,81,45,52,48,66,64,53,62,70,74,56,65,59,60,47,49,57,73,78,65,59,65,72,80,78,52,70,61,67,53,60,70,60,70,76,69,83,70,76,55,78,81,86,67,58,83,87,80,67,78,86,91,95,75,80,81,73,80,83,107,106,117,117,136,135,109,96,80,84,101,90,87,91,86,102,112,115,93,91,71,82,87,74,88,87,93,82,84,88,88,81,77,83,78,80,102,83,92,93,95,117,100,86,90,94,95,93,100,99,111,118,123,118,111,99,91,89,86,96,87,108,80,81,64,89,76,79,85,92,81,92,98,92,88,91,89,104,83,84,92,94,94,88,97,73,79,87,96,123,98,94,108,119,119,148,134,140,135,125,143,139,132,116,123,120,130,121,134,129,126,137,125,136,124,107,106,102,117,124,118,121,105,108,123,130,116,113,117,124,142,138,,,';
+var GT=[],GT_ANN=[],GT_N=0,GT_YN=0,GT_LAST=0;
+(function(){var a=GT_RAW.split(','),i;for(i=0;i<a.length;i++){if(a[i]==='')break;GT.push({y:GT_Y0+Math.floor(i/12),m:i%12,a:parseInt(a[i],10)/100-GT_BASE});}
+ GT_N=GT.length;GT_LAST=GT[GT_N-1].y;GT_YN=GT_LAST-GT_Y0+1;for(i=0;i<GT_YN;i++)GT_ANN.push({s:0,n:0});for(i=0;i<GT_N;i++){GT_ANN[GT[i].y-GT_Y0].s+=GT[i].a;GT_ANN[GT[i].y-GT_Y0].n++;}
+ for(i=0;i<GT_YN;i++)GT_ANN[i]=GT_ANN[i].s/GT_ANN[i].n;})();
+function gtFull(y){var n=0;for(var i=0;i<GT_N;i++)if(GT[i].y===y)n++;return n===12;}
+var GT_WARM=GT_Y0,GT_FIRST1=0,GT_10=0;(function(){var y,s=0,n=0;for(y=GT_Y0;y<=GT_LAST;y++){if(!gtFull(y))continue;if(GT_ANN[y-GT_Y0]>GT_ANN[GT_WARM-GT_Y0])GT_WARM=y;if(!GT_FIRST1&&GT_ANN[y-GT_Y0]>1)GT_FIRST1=y;}
+ var fl=gtFull(GT_LAST)?GT_LAST:GT_LAST-1;for(y=fl-9;y<=fl;y++){s+=GT_ANN[y-GT_Y0];n++;}GT_10=s/n;GT_10Y=[fl-9,fl];})();
+var GT_10Y;
+function gtA(y){return GT_ANN[y-GT_Y0];}
+function sgn(a){return (a>=0?'+':'-')+Math.abs(a).toFixed(2)+DEG+'C';}
+function gtCol(a){var S=[[-0.5,'#1F5FD1'],[0,'#8FD3F0'],[0.5,'#FFFFFF'],[1,'#FF5A4A'],[1.5,'#B3001B']];if(a<=S[0][0])return S[0][1];for(var i=1;i<S.length;i++){if(a<=S[i][0])return mix(S[i-1][1],S[i][1],(a-S[i-1][0])/(S[i][0]-S[i-1][0]));}return S[S.length-1][1];}
+/* Flat spiral: angle = month (January at top, clockwise), radius grows with temperature */
+function spR(a,k,r0){return r0+(a+0.6)*k;}
+function spPt(i,cx,cy,k,r0){var g=GT[i],th=-Math.PI/2+g.m*Math.PI/6,r=spR(g.a,k,r0);return [cx+r*Math.cos(th),cy+r*Math.sin(th)];}
+function spRings(c,cx,cy,k,r0,lbl,fs){var R=[[0,'0'+DEG+'C (1880-1900)','#FFFFFF'],[1,'+1.0'+DEG+'C','#FFB27E'],[1.5,'+1.5'+DEG+'C','#FF5A4A']];
+ for(var i=0;i<3;i++){var r=spR(R[i][0],k,r0);c.strokeStyle=R[i][2];c.globalAlpha=0.75;c.lineWidth=1.4;c.setLineDash([5,4]);c.beginPath();c.arc(cx,cy,r,0,6.2832);c.stroke();c.setLineDash([]);c.globalAlpha=1;
+  if(lbl)pill(c,R[i][1],cx+r*0.71+2,cy-r*0.71,fs||9,R[i][2],'left');}}
+function spMonths(c,cx,cy,r,fs){for(var m=0;m<12;m++){var th=-Math.PI/2+m*Math.PI/6;txt(c,MONTHS[m],cx+r*Math.cos(th),cy+r*Math.sin(th)+fs*0.35,'700 '+fs+'px '+FONT,'#9FC3D8','center');}}
+function spFlat(c,cx,cy,k,r0,pEnd,lw){var i,p0=spPt(0,cx,cy,k,r0);c.lineWidth=lw||1.6;c.lineCap='round';for(i=1;i<=pEnd&&i<GT_N;i++){var p1=spPt(i,cx,cy,k,r0);c.strokeStyle=gtCol(GT[i].a);c.globalAlpha=0.35+0.65*Math.min(1,(i+400-pEnd)/400);c.beginPath();c.moveTo(p0[0],p0[1]);c.lineTo(p1[0],p1[1]);c.stroke();p0=p1;}c.globalAlpha=1;}
+
+/* ---- story scenes ---- */
+function sceneSpIntro(c,t){c.fillStyle='#0B1424';c.fillRect(0,0,400,300);var p=Math.floor(Math.min(1,(t%14)/10)*(GT_N-1));spRings(c,200,152,40,14,false);spFlat(c,200,152,40,14,p,1.3);
+ txt(c,String(GT[p].y),200,158,'800 22px '+FONT,'#FFFFFF','center');txt(c,'Real NASA temperatures, 1880 to today',200,290,'700 11px '+FONT,'#BFE6F5','center');}
+function sceneSpBase(c,t){c.fillStyle='#0B1424';c.fillRect(0,0,400,300);spRings(c,200,150,52,14,true,10);spMonths(c,200,150,128,9);
+ txt(c,'Rings show warming above 1880-1900',200,290,'700 11px '+FONT,'#BFE6F5','center');}
+function sceneSpBars(c,t){c.fillStyle='#0B1424';c.fillRect(0,0,400,300);var L=30,R=390,B=230,k=110,i,w=(R-L)/GT_YN;
+ c.strokeStyle='#27425F';c.lineWidth=1;for(var v=0;v<=1.5;v+=0.5){var y=B-v*k;c.beginPath();c.moveTo(L,y);c.lineTo(R,y);c.stroke();txt(c,(v>0?'+':'')+v.toFixed(1),L-4,y+3,'600 9px '+FONT,'#9FC3D8','right');}
+ for(i=0;i<GT_YN;i++){var a=GT_ANN[i];c.fillStyle=gtCol(a);var y0=B-Math.max(0,a)*k,h=Math.abs(a)*k;c.fillRect(L+i*w,a>=0?y0:B,Math.max(1,w-0.4),Math.max(1,h));}
+ txt(c,'Yearly global temperature (NASA)',200,22,'800 13px '+FONT,'#FFFFFF','center');txt(c,DEG+'C above 1880-1900',L,40,'600 9.5px '+FONT,'#9FC3D8');
+ txt(c,'1880',L,248,'600 9.5px '+FONT,'#9FC3D8');txt(c,String(GT_LAST),R,248,'600 9.5px '+FONT,'#9FC3D8','right');
+ var wx=L+(GT_WARM-GT_Y0+0.5)*w;pill(c,GT_WARM+': about +'+gtA(GT_WARM).toFixed(1)+DEG+'C',wx-6,B-gtA(GT_WARM)*k-8,10,'#FF8A80','right');
+ txt(c,'Recent 10-year average: about +'+GT_10.toFixed(1)+DEG+'C',200,276,'800 11.5px '+FONT,'#FFD45A','center');}
+function sceneSpTeam(c,t){c.fillStyle='#0B1424';c.fillRect(0,0,400,300);spRings(c,200,110,26,8,false);spFlat(c,200,110,26,8,GT_N-1,1);
+ person(c,90,292,0.6,'#2A9DB5',{glasses:true,clip:true,skin:'#E8B48F',wave:true},t);person(c,210,292,0.55,'#FF7A2F',{goggles:true,skin:'#C68A5E'},t);person(c,330,292,0.55,'#F2C230',{skin:'#F2C9A5'},t);
+ pill(c,'Next: the Climate Spiral',200,214,13,'#FFD45A','center');}
+/* Evidence slides */
+var EV_ORDER=['ev1','ev2','ev3','ev4','ev5','ev6','ev7','ev8','ev9','ev10','ev11','ev12'];
+function evLine(c,x0,y0,w,h,y1){var i,k=h/1.7,yA=Math.max(GT_Y0,y1);c.strokeStyle='#E0312A';c.lineWidth=2.4;c.beginPath();for(var y=yA;y<=GT_LAST;y++){if(!gtFull(y))continue;var x=x0+(y-yA)/(GT_LAST-yA)*w,v=y0+h-(gtA(y)+0.2)*k;if(y===yA)c.moveTo(x,v);else c.lineTo(x,v);}c.stroke();
+ txt(c,String(yA),x0,y0+h+12,'600 9px '+FONT,'#4A6B85');txt(c,String(GT_LAST),x0+w,y0+h+12,'600 9px '+FONT,'#4A6B85','right');}
+function tick(c,x,y,ok){c.strokeStyle=ok?'#2E9E5B':'#E0312A';c.lineWidth=4;c.lineCap='round';c.beginPath();if(ok){c.moveTo(x-8,y);c.lineTo(x-2,y+7);c.lineTo(x+10,y-8);}else{c.moveTo(x-8,y-8);c.lineTo(x+8,y+8);c.moveTo(x+8,y-8);c.lineTo(x-8,y+8);}c.stroke();}
+function sceneEv(c,name,t){var i,T={ev1:'1. Carbon dioxide is way up',ev2:'2. The carbon-13 fingerprint',ev3:'3. The carbon-14 fingerprint',ev4:'4. Oxygen is slowly dropping',ev5:'5. Upper air cooling, lower air warming',ev6:'6. It is not the Sun',ev7:'7. Nights and winters',ev8:'8. Satellites see trapped heat',ev9:'9. The ocean holds the heat',ev10:'10. The ocean is turning acidic',ev11:'11. Not volcanoes, not orbits',ev12:'12. Models need human emissions'};
+ slideFrame(c,t,name,T[name],EV_ORDER);
+ if(name==='ev1'){var mn=999,mx=0;for(i=0;i<800;i++){mn=Math.min(mn,IC_C[i]);mx=Math.max(mx,IC_C[i]);}function Y(p){return 250-p/450*190;}
+  c.fillStyle='rgba(31,95,209,0.25)';c.fillRect(50,Y(mx),150,Y(mn)-Y(mx));c.strokeStyle='#1F5FD1';c.lineWidth=2;c.strokeRect(50,Y(mx),150,Y(mn)-Y(mx));
+  slideLabel(c,'Ice cores: 800,000 years',125,Y(mx)-22,'#1F5FA8');slideLabel(c,'about '+mn+' to '+mx+' ppm',125,Y(mx)-6,'#1F5FA8');slideLabel(c,'(1,000-year averages)',125,Y(mn)+16,'#4A6B85');
+  c.fillStyle='#E0312A';rr(c,260,Y(420),70,250-Y(420),5);c.fill();slideLabel(c,'Today: over 420 ppm',295,Y(420)-8,'#B3261E');
+  c.strokeStyle='#4A6B85';c.lineWidth=1.5;c.beginPath();c.moveTo(40,250);c.lineTo(360,250);c.stroke();slideLabel(c,'Before industry: about 280 ppm',200,268,'#0E1B2C');}
+ else if(name==='ev2'||name==='ev3'||name==='ev4'){var lbl={ev2:['Fossil fuels come from ancient plants','plants are low in carbon-13','share of carbon-13 in the air'],ev3:['Fossil carbon is millions of years old','it has no carbon-14 left','carbon-14 share in the air, before 1950s bombs'],ev4:['Burning fossil fuels uses up oxygen','oxygen in the air','in step with fossil fuel burning']}[name];
+  c.fillStyle='#5A3B22';rr(c,40,150,60,80,8);c.fill();c.fillStyle='#2B2F38';rr(c,46,160,48,62,6);c.fill();c.fillStyle='#4F8A3C';circ(c,70,128,18);c.fillStyle='#2A6B38';circ(c,60,138,12);
+  slideLabel(c,lbl[0],210,66,'#0E1B2C');slideLabel(c,lbl[1],210,86,'#4A6B85');
+  c.strokeStyle='#9FB8CC';c.lineWidth=1.5;c.beginPath();c.moveTo(130,120);c.lineTo(130,236);c.lineTo(370,236);c.stroke();
+  c.strokeStyle='#1F5FD1';c.lineWidth=3;c.beginPath();c.moveTo(134,130);c.bezierCurveTo(240,132,300,150,366,210);c.stroke();arw(c,350,194,366,212,'#1F5FD1',3,10);
+  slideLabel(c,lbl[2],250,256,'#1F5FA8');slideLabel(c,'(sketch of the trend: going down)',250,272-2,'#4A6B85');}
+ else if(name==='ev5'){c.fillStyle='#BFE6F5';c.fillRect(30,48,340,90);c.fillStyle='#FFD2B8';c.fillRect(30,140,340,96);c.fillStyle='#5E9E5A';c.fillRect(30,236,340,10);
+  slideLabel(c,'Stratosphere (upper air): COOLING',200,96,'#1F5FA8');slideLabel(c,'Lower atmosphere: WARMING',200,190,'#B3261E');
+  arw(c,330,80,330,120,'#1F5FD1',4,12);arw(c,330,220,330,170,'#E0312A',4,12);slideLabel(c,'A brighter Sun would warm both layers',200,262,'#0E1B2C');}
+ else if(name==='ev6'){evLine(c,40,56,320,150,1980);slideLabel(c,'Global temperature (NASA)',150,74,'#B3261E');
+  c.strokeStyle='#E6A100';c.lineWidth=3;c.setLineDash([7,5]);c.beginPath();c.moveTo(40,200);c.lineTo(360,204);c.stroke();c.setLineDash([]);slideLabel(c,"Sun's energy: flat or slightly lower",220,190,'#8A5A00');
+  slideLabel(c,'(Sun line is a sketch)',200,262,'#4A6B85');sunGlow(c,370,60,12);}
+ else if(name==='ev7'){c.fillStyle='#16283E';rr(c,30,56,160,180,12);c.fill();c.fillStyle='#F4FAFD';circ(c,110,110,24);c.fillStyle='#16283E';circ(c,120,104,22);slideLabel(c,'Nights',110,170,'#0E1B2C');slideLabel(c,'warming faster',110,190,'#B3261E');
+  c.fillStyle='#FFE9B0';rr(c,210,56,160,180,12);c.fill();sunGlow(c,290,110,18);slideLabel(c,'Days',290,170,'#0E1B2C');slideLabel(c,'warming more slowly',290,190,'#8A5A00');
+  slideLabel(c,'In many places, winters are warming faster than summers too',200,262,'#0E1B2C');}
+ else if(name==='ev8'){c.save();c.beginPath();c.rect(14,40,372,222);c.clip();c.fillStyle='#0B1424';c.fillRect(14,40,372,222);var g=c.createRadialGradient(80,230,10,80,240,90);g.addColorStop(0,'#5FA8E8');g.addColorStop(1,'#1F5FA8');c.fillStyle=g;circ(c,80,250,80);
+  c.fillStyle='#BFC9D6';c.fillRect(296,70,22,14);c.fillStyle='#4F8AD9';c.fillRect(270,73,22,8);c.fillRect(322,73,22,8);
+  c.strokeStyle='#FFD45A';c.lineWidth=2;c.beginPath();for(var x=150;x<=370;x+=2){var u=(x-150)/220,y=230-120*Math.sin(Math.PI*u);if(u>0.45&&u<0.6)y+=60*Math.sin(Math.PI*(u-0.45)/0.15);if(x===150)c.moveTo(x,y);else c.lineTo(x,y);}c.stroke();
+  pill(c,'less heat escaping at CO\u2082 wavelengths',266,190,9.5,'#FF8A80','center');pill(c,'heat leaving Earth (sketch)',266,100,9.5,'#FFD45A','center');c.restore();}
+ else if(name==='ev9'){c.fillStyle='#1F5FA8';c.beginPath();c.moveTo(130,155);c.arc(130,155,80,-Math.PI/2,-Math.PI/2+0.9*6.2832);c.closePath();c.fill();c.fillStyle='#E6C88A';c.beginPath();c.moveTo(130,155);c.arc(130,155,80,-Math.PI/2+0.9*6.2832,-Math.PI/2+6.2832);c.closePath();c.fill();
+  slideLabel(c,'About 90%',290,120,'#1F5FA8');slideLabel(c,'goes into the ocean',290,138,'#1F5FA8');slideLabel(c,'The rest: land, ice, and air',290,172,'#8A5A00');slideLabel(c,'Ocean heat content keeps rising',200,262,'#0E1B2C');}
+ else if(name==='ev10'){var x0=50,w=300;for(i=0;i<50;i++){c.fillStyle=mix('#E0312A','#1F5FD1',i/49);c.fillRect(x0+i*w/50,150,w/50+1,30);}
+  slideLabel(c,'more acidic',x0+30,200,'#B3261E');slideLabel(c,'more basic',x0+w-30,200,'#1F5FA8');
+  var p1=x0+w*0.62,p2=x0+w*0.56;arw(c,p1,130,p2+4,130,'#0E1B2C',3,10);slideLabel(c,'surface pH: about 0.1 lower',200,110,'#0E1B2C');slideLabel(c,'= about 30% more acidic',200,226,'#B3261E');
+  slideLabel(c,'The ocean absorbs about a quarter of the CO\u2082 we emit',200,262,'#1F5FA8');}
+ else if(name==='ev11'){c.fillStyle='#E0312A';rr(c,70,70,80,170,6);c.fill();c.fillStyle='#8A5A1E';rr(c,210,238,80,2,1);c.fill();
+  slideLabel(c,'Humans',110,254,'#B3261E');slideLabel(c,'Volcanoes:',250,210,'#8A5A1E');slideLabel(c,'about 1% or less',250,228,'#8A5A1E');
+  slideLabel(c,'Orbit cycles: far too slow (Chapter 4)',200,272-4,'#4A6B85');slideLabel(c,'CO\u2082 each year',200,58,'#0E1B2C');}
+ else{evLine(c,40,60,320,130,1880);slideLabel(c,'Observed (NASA)',110,74,'#B3261E');
+  tick(c,60,220,false);slideLabel(c,'Natural causes only: cannot match',190,224,'#B3261E');tick(c,60,250,true);slideLabel(c,'Natural + human causes: matches',190,254,'#1F7A45');}}
+function drawScene8(c,name,t){if(name.indexOf('ev')===0)sceneEv(c,name,t);else if(name==='sp_intro')sceneSpIntro(c,t);else if(name==='sp_base')sceneSpBase(c,t);else if(name==='sp_bars')sceneSpBars(c,t);else sceneSpTeam(c,t);}
+
+var CH8_STEPS=[
+ {sc:'sp_intro',who:'frost',tx:"Welcome to the finale! Today we will watch Earth's temperature change from 1880 to today, using real measurements from NASA."},
+ {sc:'sp_base',who:'frost',tx:"We compare each month with the average from 1880 to 1900, before most fossil fuel burning, so it is approximately pre-industrial. The rings at plus 1 and plus 1.5 degrees Celsius show how far Earth has warmed."},
+ {sc:'sp_bars',who:'sam',tx:"So how much has Earth warmed?"},
+ {sc:'sp_bars',who:'frost',tx:"In NASA's data, the last ten full years averaged about "+GT_10.toFixed(1)+" degrees Celsius warmer than 1880 to 1900. The warmest year on record is "+GT_WARM+", at about "+gtA(GT_WARM).toFixed(1)+" degrees. The World Meteorological Organization also reported "+GT_WARM+" at about 1.5 degrees above pre-industrial."},
+ {sc:'sp_team',who:'frost',tx:"Now it is your turn. Play the climate spiral, then rotate it into 3D. After that, I will show you the evidence that humans are causing this warming."}
+];
+var CH8_EVID=[
+ {sc:'ev1',who:'frost',tx:"How do scientists know humans are the cause? Twelve clues. Clue one: CO\u2082 rose from about 280 parts per million before industry to over 420 today. That is the highest in at least 800,000 years, as you saw in the Chapter 1 ice cores."},
+ {sc:'ev2',who:'frost',tx:"Clue two, the carbon-13 fingerprint. Fossil fuels come from ancient plants, and plants are low in carbon-13. As we burn fossil fuels, the share of carbon-13 in the air keeps falling."},
+ {sc:'ev3',who:'frost',tx:"Clue three, carbon-14. Fossil carbon is millions of years old, so it has no carbon-14 left. Burning it diluted the carbon-14 in the air. Scientists measured this before the 1950s bomb tests added more."},
+ {sc:'ev4',who:'frost',tx:"Clue four: oxygen in the air is slowly decreasing, in step with fossil fuel burning. Burning uses up oxygen."},
+ {sc:'ev5',who:'frost',tx:"Clue five: the upper atmosphere, the stratosphere, is cooling while the lower atmosphere warms. A brighter Sun would warm both. Greenhouse gases trap heat lower down."},
+ {sc:'ev6',who:'rosa',tx:"But what if the Sun is just getting stronger?"},
+ {sc:'ev6',who:'frost',tx:"Clue six: the Sun's energy output has been flat or slightly lower since the 1980s, while temperatures kept rising."},
+ {sc:'ev7',who:'frost',tx:"Clue seven: in many places, nights are warming faster than days, and winters faster than summers. That is the pattern expected when greenhouse gases trap heat."},
+ {sc:'ev8',who:'frost',tx:"Clue eight: satellites measure less heat escaping to space at the exact wavelengths that CO\u2082 and methane absorb."},
+ {sc:'ev9',who:'frost',tx:"Clue nine: about 90 percent of the extra heat is going into the ocean, and ocean heat content keeps rising."},
+ {sc:'ev10',who:'frost',tx:"Clue ten: the ocean absorbs about a quarter of the CO\u2082 we emit, and it is becoming more acidic. Surface pH has dropped about 0.1, which means about 30 percent more acidic."},
+ {sc:'ev11',who:'sam',tx:"What about volcanoes?"},
+ {sc:'ev11',who:'frost',tx:"Clue eleven: volcanoes emit about 1 percent or less as much CO\u2082 as humans each year. And orbit cycles, from Chapter 4, are far too slow."},
+ {sc:'ev12',who:'frost',tx:"Clue twelve: climate models match the warming we have measured only when human emissions are included. With natural causes alone, they cannot. Every clue points the same way. Now, let's see what you learned!"}
+];
+
+/* ---- Activity: Climate Spiral (flat, then 3D hoops) ---- */
+var SP={c:null,p:0,play:false,tilt:0,tgt:0,rot:0,rotMoved:0,sel:GT_LAST,drag:false,lx:0,ms:null,last:''};
+var SP_CX=200,SP_CY=200,SP_K=53,SP_R0=24;
+function spDraw(t){var c=SP.c,i,k;c.fillStyle='#0B1424';c.fillRect(0,0,400,400);
+ if(SP.tilt<0.02){spRings(c,SP_CX,SP_CY,SP_K,SP_R0,true,9);spMonths(c,SP_CX,SP_CY,SP_R0+(2.1+0.6)*SP_K+14,9);spFlat(c,SP_CX,SP_CY,SP_K,SP_R0,Math.floor(SP.p),1.6);
+  var g=GT[Math.floor(SP.p)];txt(c,String(g.y),SP_CX,SP_CY+10,'800 30px '+FONT,'#FFFFFF','center');txt(c,MON[g.m],SP_CX,SP_CY+28,'700 11px '+FONT,'#BFE6F5','center');return;}
+ var e=(90-SP.tilt*72)*RAD,sE=Math.sin(e),S=1-0.3*SP.tilt,zH=250*SP.tilt,yb=SP_CY+110*SP.tilt;
+ function P(r,m,kk){var th=-Math.PI/2+m*Math.PI/6+SP.rot,px=r*Math.cos(th)*S,py=r*Math.sin(th)*S;return [SP_CX+px,yb-zH*kk/(GT_YN-1)+py*sE];}
+ for(var rg=0;rg<3;rg++){var rv=[0,1,1.5][rg],rr2=spR(rv,SP_K,SP_R0);c.strokeStyle=['#FFFFFF','#FFB27E','#FF5A4A'][rg];c.globalAlpha=0.5;c.setLineDash([5,4]);c.lineWidth=1.2;c.beginPath();for(var m2=0;m2<=12;m2++){var q=P(rr2,m2,0);if(m2===0)c.moveTo(q[0],q[1]);else c.lineTo(q[0],q[1]);}c.stroke();c.setLineDash([]);c.globalAlpha=1;}
+ var idx=0;for(k=0;k<GT_YN;k++){var y=GT_Y0+k,pts=[];while(idx<GT_N&&GT[idx].y===y){pts.push(P(spR(GT[idx].a,SP_K,SP_R0),GT[idx].m,k));idx++;}
+  var hi=y===SP.sel;c.strokeStyle=hi?'#FFD45A':gtCol(gtA(y));c.lineWidth=hi?3.2:1.1;c.beginPath();for(i=0;i<pts.length;i++){if(i===0)c.moveTo(pts[i][0],pts[i][1]);else c.lineTo(pts[i][0],pts[i][1]);}if(pts.length===12)c.closePath();c.stroke();}
+ var sk=SP.sel-GT_Y0,sp=P(spR(Math.max(1.6,gtA(SP.sel)),SP_K,SP_R0),3,sk);pill(c,SP.sel+': '+sgn(gtA(SP.sel)),Math.min(392,sp[0]+8),sp[1],11,'#FFD45A','right');
+ txt(c,'1880',SP_CX,yb+42,'700 10px '+FONT,'#9FC3D8','center');txt(c,String(GT_LAST),SP_CX,yb-zH-28,'700 10px '+FONT,'#9FC3D8','center');txt(c,'drag sideways to spin',8,394,'600 9.5px '+FONT,'#9FC3D8');}
+function spLoop(dt,t){if(SP.play&&SP.tilt<0.02){SP.p=Math.min(GT_N-1,SP.p+dt*GT_N/60);if(SP.p>=GT_N-1){SP.play=false;$('spPlay').textContent='Play';}$('spRange').value=Math.floor(SP.p);}
+ SP.tilt+=(SP.tgt-SP.tilt)*Math.min(1,dt*2.2);if(Math.abs(SP.tgt-SP.tilt)<0.003)SP.tilt=SP.tgt;spDraw(t);spRead();}
+function spRead(){var key=SP.tgt+'|'+Math.floor(SP.p)+'|'+SP.sel;if(key===SP.last)return;SP.last=key;
+ if(SP.tgt===0){var g=GT[Math.floor(SP.p)];$('spRead').textContent=MON[g.m]+' '+g.y+': '+sgn(g.a)+' compared with 1880-1900';}
+ else{$('spRead').textContent=SP.sel+(gtFull(SP.sel)?'':' (not finished yet)')+' average: '+sgn(gtA(SP.sel))+' compared with 1880-1900';}}
+function spMode(td){SP.tgt=td?1:0;SP.play=false;$('spPlay').textContent='Play';$('spRot').textContent=td?'Back to flat':'Rotate to 3D';$('spPlay').style.display=td?'none':'inline-block';
+ var r=$('spRange');if(td){r.min=GT_Y0;r.max=GT_LAST;r.value=SP.sel;$('spRangeL').textContent='Pick a year (hoop)';}else{r.min=0;r.max=GT_N-1;r.value=Math.floor(SP.p);$('spRangeL').textContent='Scrub through time';}SP.last='';}
+function spRange(){var v=parseInt($('spRange').value,10);if(SP.tgt===1)SP.sel=v;else{SP.p=v;SP.play=false;$('spPlay').textContent='Play';}}
+function spTouch(e){if(SP.tgt!==1)return;e.preventDefault();var p=lpos($('spCv'),e,400);SP.drag=true;SP.lx=p.x;}
+function spMove(e){if(!SP.drag)return;e.preventDefault();var p=lpos($('spCv'),e,400);SP.rot+=(p.x-SP.lx)*0.012;SP.rotMoved+=Math.abs(p.x-SP.lx)*0.012;SP.lx=p.x;}
+function spEnd(){SP.drag=false;}
+var SP_MIS=[
+ {tx:'Press Play and watch Earth\'s temperature from 1880 to today. Wait until the spiral reaches the latest month.',hint:'Tap Play. It takes about a minute. You can also drag the slider all the way to the right.',start:function(){spMode(false);},ok:function(){return SP.p>=GT_N-1;},yes:'Those are real NASA measurements. The spiral stays near the 0 ring for decades, then spreads outward fast after about 1980.'},
+ {tx:'Drag the slider back to the 1880s. Where is the spiral compared with the 0 ring?',hint:'Slide all the way to the left, to before 1890.',ok:function(){return GT[Math.floor(SP.p)].y<1890;},yes:'Right near the 0 ring. That is our approximately pre-industrial starting point.'},
+ {tx:'Tap "Rotate to 3D". Then drag sideways on the picture to spin the stack of yearly hoops.',hint:'Tap "Rotate to 3D", wait for it to tilt, then drag left or right on the picture.',ok:function(){return SP.tgt===1&&SP.tilt>0.95&&SP.rotMoved>0.5;},yes:'Each hoop is one year, with 1880 at the bottom and the latest year on top. Blue and white hoops are cooler; red hoops are warmer.'},
+ {tx:'Use the slider to find the FIRST year whose average was more than 1.0'+DEG+'C above 1880-1900.',hint:'Watch the yellow label as you move the slider. Look in the 2010s.',start:function(){if(SP.tgt!==1)spMode(true);},ok:function(){var me=this;if(SP.sel===GT_FIRST1)return true;me.hint=gtA(SP.sel)>1?'That year was above 1.0, but there is an earlier one. Move the slider back a little.':'That year was not above 1.0 yet. Move the slider later.';return false;},yes:GT_FIRST1+' was the first year above +1.0'+DEG+'C, at about '+sgn(gtA(GT_FIRST1))+'.'},
+ {tx:'Now find the warmest full year in the record.',hint:'Check the last few years. Only count years with all 12 months.',ok:function(){var me=this;if(SP.sel===GT_WARM)return true;me.hint=gtFull(SP.sel)?SP.sel+' was '+sgn(gtA(SP.sel))+'. Keep looking near the top of the stack.':SP.sel+' is not finished yet, so it does not count. Try the full years just before it.';return false;},yes:GT_WARM+' is the warmest full year so far, at about '+sgn(gtA(GT_WARM))+', roughly 1.5'+DEG+'C above pre-industrial.'},
+ {tx:'Last one: use the slider to find the year you were born, then tap Check.',hint:'Move the slider to your birth year.',ok:function(){var me=this;if(SP.sel>=1990&&SP.sel<=GT_LAST){me.yes='In '+SP.sel+', Earth averaged about '+sgn(gtA(SP.sel))+'. In '+GT_WARM+', it was about '+sgn(gtA(GT_WARM))+'. Earth has warmed even in your lifetime.';return true;}me.hint='Pick a year from 1990 to '+GT_LAST+'.';return false;},yes:''}
+];
+function startSpiral(){show('scrSpiral');SP.p=0;SP.play=false;SP.tilt=0;SP.tgt=0;SP.rot=0;SP.rotMoved=0;SP.sel=GT_LAST;SP.last='';SP.c=setupCanvas($('spCv'),400,400,0.5);
+ SP.ms=misRun('sp',SP_MIS,'See the evidence',function(){startStory(CH8_EVID,function(){startQuiz('ch8',CH8_QUIZ);},'Take the quiz');});startLoop(spLoop);}
+
+/* ---- quiz backgrounds ---- */
+var SPQ={cx:300,cy:320,k:95,r0:40};
+function spqPt(a,m){var th=-Math.PI/2+m*Math.PI/6,r=spR(a,SPQ.k,SPQ.r0);return [Math.round(SPQ.cx+r*Math.cos(th)),Math.round(SPQ.cy+r*Math.sin(th))];}
+function bgSpiral(c){c.fillStyle='#0B1424';c.fillRect(0,0,600,620);spRings(c,SPQ.cx,SPQ.cy,SPQ.k,SPQ.r0,false);spMonths(c,SPQ.cx,SPQ.cy,spR(1.75,SPQ.k,SPQ.r0)+16,14);spFlat(c,SPQ.cx,SPQ.cy,SPQ.k,SPQ.r0,GT_N-1,2.2);
+ txt(c,'Global temperature spiral, 1880 to '+GT_LAST+' (NASA)',300,30,'800 20px '+FONT,'#FFFFFF','center');}
+function bgTrend(c){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,600);var L=80,R=570,T=70,B=500,y0=(T+B)/2+60;
+ txt(c,'Global temperature, 1880 to today',300,36,'800 22px '+FONT,'#0E1B2C','center');c.strokeStyle='#2C4A63';c.lineWidth=2.5;c.beginPath();c.moveTo(L,T);c.lineTo(L,B);c.lineTo(R,B);c.stroke();
+ c.strokeStyle='#9FB8CC';c.setLineDash([8,6]);c.lineWidth=2;c.beginPath();c.moveTo(L,y0);c.lineTo(R,y0);c.stroke();c.setLineDash([]);txt(c,'1880-1900 average',R,y0-8,'700 15px '+FONT,'#4A6B85','right');
+ for(var y=1880;y<=2020;y+=20){var x=L+(y-1880)/(GT_LAST-1880)*(R-L);txt(c,String(y),x,B+24,'700 15px '+FONT,'#2C4A63','center');}
+ txt(c,'Warmer',L-8,T+12,'800 16px '+FONT,'#B3261E','right');txt(c,'Cooler',L-8,B-6,'800 16px '+FONT,'#1F5FD1','right');}
+var SPQ_L=[{s:'1880s',x:SPQ.cx,y:SPQ.cy,r:70},{s:'Most recent years',x:0,y:0,r:24},{s:'+1.0'+DEG+'C ring',x:0,y:0,r:26},{s:'+1.5'+DEG+'C ring',x:0,y:0,r:26}];
+(function(){var p=spqPt(gtA(GT_LAST)>1.6?1.35:gtA(GT_LAST),5);var iL=GT_N-1;for(var i=GT_N-1;i>GT_N-24;i--){if(GT[i].m===5){iL=i;break;}}p=spqPt(GT[iL].a,5);SPQ_L[1].x=p[0];SPQ_L[1].y=p[1];var a=spqPt(1,9);SPQ_L[2].x=a[0];SPQ_L[2].y=a[1];var b=spqPt(1.5,8);b=[Math.round(SPQ.cx+spR(1.5,SPQ.k,SPQ.r0)*Math.cos(-Math.PI/2+7.5*Math.PI/6)),Math.round(SPQ.cy+spR(1.5,SPQ.k,SPQ.r0)*Math.sin(-Math.PI/2+7.5*Math.PI/6))];SPQ_L[3].x=b[0];SPQ_L[3].y=b[1];})();
+var CH8_QUIZ=[
+ {t:'mc',q:'In the climate spiral, what does it mean when the line moves farther from the center?',o:['That month was warmer compared with 1880-1900','That month had more rain','The Earth moved farther from the Sun','The data is missing'],a:0,why:'The distance from the center shows the temperature compared with 1880-1900. Farther out means warmer.'},
+ {t:'mc',q:'In NASA\'s data, about how much warmer were the last ten full years than 1880-1900?',o:['About 0.1'+DEG+'C','About '+GT_10.toFixed(1)+DEG+'C','About 5'+DEG+'C','About 10'+DEG+'C'],a:1,why:'The last ten full years ('+GT_10Y[0]+' to '+GT_10Y[1]+') averaged about '+GT_10.toFixed(1)+DEG+'C above 1880-1900, and '+GT_WARM+' reached about '+gtA(GT_WARM).toFixed(1)+DEG+'C.'},
+ {t:'mc',q:'Why does the falling share of carbon-13 in the air point to fossil fuels?',o:['Fossil fuels come from ancient plants, which are low in carbon-13','Volcanoes are made of carbon-13','The ocean makes carbon-13','Carbon-13 comes from the Sun'],a:0,why:'Plants take in less carbon-13. Fossil fuels formed from ancient plants, so burning them adds carbon that is low in carbon-13.'},
+ {t:'mc',q:'If a brighter Sun were causing the warming, what would we expect to see?',o:['The whole atmosphere warming, including the stratosphere','Only the stratosphere cooling','Only the ocean cooling','No change in temperature'],a:0,why:'A brighter Sun would warm both the lower atmosphere and the stratosphere. Instead, the stratosphere is cooling, which matches greenhouse gases trapping heat lower down.'},
+ {t:'mc',q:'What has the Sun\'s energy output done since the 1980s?',o:['Stayed flat or dropped slightly','Doubled','Risen faster than Earth\'s temperature','Stopped completely'],a:0,why:'The Sun\'s output has been flat or slightly lower since the 1980s while global temperature kept rising, so the Sun cannot explain the warming.'},
+ {t:'mc',q:'Each year, how does the CO\u2082 from volcanoes compare with the CO\u2082 from humans?',o:['Volcanoes emit about 1 percent or less as much as humans','Volcanoes emit about 100 times more than humans','They are exactly equal','Volcanoes emit no CO\u2082 at all'],a:0,why:'Volcanoes emit about 1 percent or less as much CO\u2082 as human activities each year.'},
+ {t:'label',q:'Label the climate spiral. Tap a label, then tap the dashed circle where it belongs.',bg:'spiral',guide:true,labels:SPQ_L},
+ {t:'draw',q:'Sketch the shape of global temperature from 1880 to today. Compare it with the 1880-1900 average line.',bg:'trend',cols:[['Red','#E0312A'],['Blue','#1F5FD1'],['Black','#111418']]},
+ {t:'text',q:'Give three pieces of evidence that humans are causing today\'s warming and explain one in detail.'}
+];
+
 /* ---------- menu ---------- */
 function openMenu(){show('scrMenu');$('hello').textContent='Hi, '+S.name+' (Period '+S.period+'). Pick a chapter.';var L=$('chList');L.innerHTML='';
  for(var i=0;i<CH.length;i++){(function(i){var ch=CH[i];var r=S.res[ch.id];var bt=el('button','ch'+(ch.ready?'':' off'));bt.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,ch.title));tx.appendChild(el('small',null,ch.desc));bt.appendChild(tx);
   bt.appendChild(el('span','pill'+(r?' done':''),r?('Score '+r.score+'/'+r.total):(ch.ready?'Start':'Soon')));
-  bt.onclick=function(){sfx.click();ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=ch.title;return;}if(ch.id==='ch1')startStory(CH1_STEPS,startDrillGame,'Start drilling');else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');};L.appendChild(bt);})(i);}}
+  bt.onclick=function(){sfx.click();ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=ch.title;return;}if(ch.id==='ch1')startStory(CH1_STEPS,startDrillGame,'Start drilling');else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');};L.appendChild(bt);})(i);}}
 
 /* ---------- report + PDF ---------- */
 var pdfBlob=null,pdfName='';
@@ -2229,6 +2412,11 @@ $('plCheck').onclick=function(){misCheck(PL.ms);};$('plHint').onclick=function()
 var plm=$('plMap');plm.addEventListener('touchstart',plTouch,false);plm.addEventListener('touchmove',plMove,false);plm.addEventListener('touchend',plEnd,false);plm.addEventListener('mousedown',plTouch,false);plm.addEventListener('mousemove',plMove,false);window.addEventListener('mouseup',plEnd,false);
 var plcl=$('plClim');plcl.addEventListener('touchstart',plClimoTap,false);plcl.addEventListener('mousedown',plClimoTap,false);
 var plb=$('plBlk');plb.addEventListener('touchstart',plBlkTap,false);plb.addEventListener('mousedown',plBlkTap,false);
+$('spCheck').onclick=function(){misCheck(SP.ms);};$('spHint').onclick=function(){misHint(SP.ms);};
+$('spPlay').onclick=function(){sfx.click();ac();if(SP.p>=GT_N-1)SP.p=0;SP.play=!SP.play;this.textContent=SP.play?'Pause':'Play';};
+$('spRot').onclick=function(){sfx.click();spMode(SP.tgt!==1);};
+$('spRange').addEventListener('input',spRange,false);$('spRange').addEventListener('change',spRange,false);
+var spc=$('spCv');spc.addEventListener('touchstart',spTouch,false);spc.addEventListener('touchmove',spMove,false);spc.addEventListener('touchend',spEnd,false);spc.addEventListener('mousedown',spTouch,false);spc.addEventListener('mousemove',spMove,false);window.addEventListener('mouseup',spEnd,false);
 $('grCheck').onclick=function(){misCheck(GR.ms);};$('grHint').onclick=function(){misHint(GR.ms);};
 var grc=$('grCv');grc.addEventListener('touchstart',grTouch,false);grc.addEventListener('touchmove',grTouch,false);grc.addEventListener('mousedown',function(e){GR_DRAG=true;grTouch(e);},false);grc.addEventListener('mousemove',function(e){if(GR_DRAG)grTouch(e);},false);window.addEventListener('mouseup',function(){GR_DRAG=false;},false);
 $('btnShare').onclick=sharePdf;

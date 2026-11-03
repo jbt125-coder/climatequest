@@ -1,7 +1,7 @@
 # Climate Quest - project rules
 
 ## What it is
-A single-file, iPhone-optimized HTML game for high school Earth Space Science in Florida. It has 8 chapters reached from an open menu. Chapters 1 to 7 are done: Ice Core Drill, Sunlight and Seasons, Earth's Energy Balance, Orbit Cycles and Ice Ages, Moving Air, Mountains and Rain Shadows, and City Planner. Every chapter follows the same flow: narrated story, then interactive activity, then quiz. Quiz results go into a PDF the student shares to Canvas.
+A single-file, iPhone-optimized HTML game for high school Earth Space Science in Florida. It has 8 chapters reached from an open menu. All 8 chapters are done: Ice Core Drill, Sunlight and Seasons, Earth's Energy Balance, Orbit Cycles and Ice Ages, Moving Air, Mountains and Rain Shadows, City Planner, and Climate Spiral. Every chapter follows the same flow: narrated story, then interactive activity, then quiz. Quiz results go into a PDF the student shares to Canvas.
 
 The whole game lives in `index.html` at the repo root.
 
@@ -20,7 +20,7 @@ The whole game lives in `index.html` at the repo root.
 ## Architecture (reuse what exists; don't duplicate)
 - Screens: div.scr elements listed in the `screens` array. Switch with show(id), which stops loops and speech.
 - Animation: startLoop(function(dt,t){...}). setupCanvas(cv, logicalW, logicalH, maxHeightFraction) returns a context scaled to logical coordinates.
-- Story: startStory(STEPS, onDone, 'Last button label'). Each step is {sc:'sceneName', who:'frost'|'sam'|'rosa', tx:"..."}. Story canvas is 400x300 logical. Scenes chain drawScene -> drawScene2 -> drawScene3 -> drawScene4 -> drawScene5 -> drawScene6 -> drawScene7 (drawScene6 sends names starting with sl_ to the slides); add drawScene8 from drawScene7's final else., each called from the previous one's final else.
+- Story: startStory(STEPS, onDone, 'Last button label'). Each step is {sc:'sceneName', who:'frost'|'sam'|'rosa', tx:"..."}. Story canvas is 400x300 logical. Scenes chain drawScene -> drawScene2 -> drawScene3 -> drawScene4 -> drawScene5 -> drawScene6 -> drawScene7 -> drawScene8 (drawScene6 sends names starting with sl_ to the Chapter 6 slides; drawScene8 sends ev1 to ev12 to the Chapter 8 evidence slides). slideFrame(c,t,name,title,order) numbers slides from the order list you pass., each called from the previous one's final else.
 - Characters: Dr. Frost is the scientist and narrator. Sam and Rosa are new workers who ask the questions students would ask. Narration uses say(text, WHO[who].pitch, who) so each character speaks in the voice chosen in Settings (the cog, top right). Voices are limited to Daniel, Samantha, and Karen (VSUG); defaults are Dr. Frost = Daniel, Sam = Samantha, Rosa = Karen (VDEF), and any character can be switched to any of the three. Mission and activity lines use say(text, 1.05), which defaults to Dr. Frost's voice.
 - Quiz: startQuiz('chN', LIST). Question types:
   - {t:'mc', q, o:[4 options], a, why}
@@ -36,6 +36,7 @@ The whole game lives in `index.html` at the repo root.
 - Never pass mix() output into mix() again: mix() only reads #rrggbb hex colors.
 - Real data already embedded: IC_T (Dome C Antarctic temperature change x10, Jouzel et al. 2007) and IC_C (CO2 ppm, Bereiter et al. 2015), both 800 values of 1,000-year averages from NOAA NCEI, index 0 = most recent, CO2 ending about 1850. Reuse them instead of re-embedding.
 - CITY: 10 cities of monthly normals (hi, lo, av in C; pr in mm). 8 are NOAA NCEI 1991-2020 (Miami, Phoenix, Orlando, San Francisco, Chicago, Fairbanks, Utqiagvik), Singapore is NEA 1991-2020, London is Met Office Kew Gardens 1991-2020, and Quito is older WMO averages (period not stated). Los Angeles was dropped because its 1991-2020 data classifies as B, not Mediterranean C.
+- GT_RAW / GT: NASA GISTEMP v4 monthly global anomalies from Jan 1880 (uploaded file, through Sep 2026), shown relative to 1880-1900 (GT_BASE). GT_ANN = yearly averages; GT_WARM, GT_FIRST1, GT_10 are computed from the data. To update, replace GT_RAW from a newer GLB.Ts+dSST.csv; all story and quiz numbers recompute.
 - Data downloads: this environment blocks www.ncei.noaa.gov and data.giss.nasa.gov. If a chapter needs data, ask the user to upload the file in chat.
 
 ## Style and content
