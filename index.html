@@ -21,6 +21,8 @@ input,select,textarea{width:100%;font-family:inherit;font-size:17px;padding:12px
 textarea{min-height:130px;resize:vertical;}
 .big{display:block;width:100%;background:#FF7A2F;color:#1A0F08;border:0;border-radius:14px;padding:15px;font-family:inherit;font-size:18px;font-weight:800;margin-top:12px;}
 .big.alt{background:#BFE6F5;color:#0E1B2C;}
+.big:disabled,.big.wait{background:#33475E;color:#8FA6BA;}
+#nextNote{font-size:13px;color:#4A6B85;font-weight:700;text-align:center;margin:8px 0 0 0;min-height:16px;}
 .link{display:block;margin:16px auto 0 auto;background:none;border:0;color:#8FC9E3;font-family:inherit;font-size:15px;text-decoration:underline;}
 .msg{color:#FFD2B8;font-weight:700;min-height:20px;margin:8px 0 0 0;font-size:15px;line-height:1.4;}
 .cvwrap{width:100%;display:flex;justify-content:center;}
@@ -174,7 +176,7 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
         <button id="btnReplay" class="sbtn">Replay</button>
         <button id="btnNext" class="big">Next</button>
       </div>
-      <button id="btnSkip" class="link">Skip to the activity</button>
+      <p id="nextNote"></p>
     </div>
   </div>
 
@@ -524,7 +526,8 @@ function loadSet(){try{var r=localStorage.getItem(SKEY);if(r){var o=JSON.parse(r
 function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify({voice:VSET,sound:V.on}));}catch(e){}}
 function enVoices(){if(!window.speechSynthesis)return [];var vs=speechSynthesis.getVoices()||[],out=[];for(var i=0;i<vs.length;i++){if(String(vs[i].lang).toLowerCase().indexOf('en')===0)out.push(vs[i]);}return out;}
 function voiceFor(who){var n=VSET[who||'frost'],vs=enVoices(),i;if(n){for(i=0;i<vs.length;i++){if(vs[i].name===n)return vs[i];}for(i=0;i<vs.length;i++){if(vs[i].name.indexOf(n)===0)return vs[i];}}return pickVoice();}
-function say(t,pitch,who){if(!window.speechSynthesis)return;speechSynthesis.cancel();if(!V.on)return;var u=new SpeechSynthesisUtterance(subDig(t));u.rate=0.97;u.pitch=pitch||1;u.lang='en-US';var v=voiceFor(who);if(v){try{u.voice=v;u.lang=v.lang;}catch(e){u.lang='en-US';}}speechSynthesis.speak(u);}
+/* say() returns true when it starts speaking; cb (optional) runs when that line ends or fails. */
+function say(t,pitch,who,cb){if(!window.speechSynthesis)return false;speechSynthesis.cancel();if(!V.on)return false;var u=new SpeechSynthesisUtterance(subDig(t));u.rate=0.97;u.pitch=pitch||1;u.lang='en-US';var v=voiceFor(who);if(v){try{u.voice=v;u.lang=v.lang;}catch(e){u.lang='en-US';}}if(cb){u.onend=cb;u.onerror=cb;}speechSynthesis.speak(u);return true;}
 function hush(){if(window.speechSynthesis){speechSynthesis.cancel();}}
 
 /* ---------- screens + loop ---------- */
@@ -532,7 +535,7 @@ var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','sc
 var raf=null,loopFn=null;
 function stopLoops(){loopFn=null;if(raf){cancelAnimationFrame(raf);}raf=null;stopDrillSnd();}
 function startLoop(fn){stopLoops();loopFn=fn;var last=0;function f(ts){if(loopFn!==fn)return;var dt=last?Math.min(0.05,(ts-last)/1000):0.016;last=ts;fn(dt,ts/1000);raf=requestAnimationFrame(f);}raf=requestAnimationFrame(f);}
-function show(id){stopLoops();hush();for(var i=0;i<screens.length;i++){$(screens[i]).style.display=(screens[i]===id)?'block':'none';}cur=id;$('btnHome').style.visibility=(id==='scrSign'||id==='scrMenu')?'hidden':'visible';$('coreCard').style.display='none';$('nameCard').style.display='none';$('chgCard').style.display='none';$('hpCard').style.display='none';$(id).scrollTop=0;}
+function show(id){stopLoops();hush();stClear();for(var i=0;i<screens.length;i++){$(screens[i]).style.display=(screens[i]===id)?'block':'none';}cur=id;$('btnHome').style.visibility=(id==='scrSign'||id==='scrMenu')?'hidden':'visible';$('coreCard').style.display='none';$('nameCard').style.display='none';$('chgCard').style.display='none';$('hpCard').style.display='none';$(id).scrollTop=0;}
 function setupCanvas(cv,lw,lh,maxHFrac){var w=cv.parentNode.clientWidth||360;var maxH=window.innerHeight*(maxHFrac||0.5);if(w*lh/lw>maxH){w=maxH*lw/lh;}var h=w*lh/lw;cv.style.width=Math.round(w)+'px';cv.style.height=Math.round(h)+'px';cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);var c=cv.getContext('2d');var k=cv.width/lw;c.setTransform(k,0,0,k,0,0);return c;}
 
 /* ---------- drawing helpers ---------- */
@@ -702,8 +705,23 @@ function drawScene(c,name,t){if(name==='camp')sceneCamp(c,t);else if(name==='sno
 /* ---------- story engine ---------- */
 var WHO={frost:{n:'Dr. Frost',col:'#1F7E94',pitch:1.05},sam:{n:'Sam (new worker)',col:'#D9601C',pitch:0.8},rosa:{n:'Rosa (new worker)',col:'#A37F00',pitch:1.3}};
 var story=null,sIdx=0;
-function startStory(steps,onDone,last){story={steps:steps,done:onDone,last:last};sIdx=0;show('scrStory');var c=setupCanvas($('storyCv'),400,300,0.42);startLoop(function(dt,t){drawScene(c,story.steps[sIdx].sc,t);});renderStep();}
-function renderStep(){var st=story.steps[sIdx],w=WHO[st.who];$('spName').textContent=w.n;$('spName').style.color=w.col;$('spText').textContent=st.tx;$('stepCount').textContent=(sIdx+1)+' / '+story.steps.length;$('btnPrev').style.visibility=sIdx>0?'visible':'hidden';$('btnNext').textContent=(sIdx===story.steps.length-1)?(story.last||'Start'):'Next';say(st.tx,w.pitch,st.who);}
+/* No skipping: Next stays dim until the line has been spoken (or, with sound off, until there has
+   been time to read it). Lines already heard unlock right away when a student goes Back. A backup timer
+   makes sure Next always unlocks even if the device never reports that speech ended. */
+var stTimers=[];
+function stClear(){for(var i=0;i<stTimers.length;i++)clearTimeout(stTimers[i]);stTimers=[];}
+function stLock(on){var b=$('btnNext');b.disabled=on;b.className=on?'big wait':'big';$('nextNote').textContent=on?(V.on?'Listen to the whole line to unlock Next.':'Read the whole line to unlock Next.'):'';}
+function stUnlock(tok){if(!story||tok!==story.tok)return;if(sIdx>story.max)story.max=sIdx;stLock(false);}
+function startStory(steps,onDone,last){stClear();story={steps:steps,done:onDone,last:last,max:-1,tok:0};sIdx=0;show('scrStory');var c=setupCanvas($('storyCv'),400,300,0.42);startLoop(function(dt,t){drawScene(c,story.steps[sIdx].sc,t);});renderStep();}
+function renderStep(){var st=story.steps[sIdx],w=WHO[st.who];$('spName').textContent=w.n;$('spName').style.color=w.col;$('spText').textContent=st.tx;$('stepCount').textContent=(sIdx+1)+' / '+story.steps.length;$('btnPrev').style.visibility=sIdx>0?'visible':'hidden';$('btnNext').textContent=(sIdx===story.steps.length-1)?(story.last||'Start'):'Next';
+ stClear();story.tok++;var tok=story.tok,words=st.tx.split(/\s+/).length,heard=sIdx<=story.max;stLock(!heard);
+ if(heard){say(st.tx,w.pitch,st.who);return;}
+ var minMs=Math.max(1500,words*230),gate={spoke:false,min:false};
+ function tryOpen(){if(gate.spoke&&gate.min)stUnlock(tok);}
+ stTimers.push(setTimeout(function(){gate.min=true;tryOpen();},minMs));
+ var talking=say(st.tx,w.pitch,st.who,function(){if(tok!==story.tok)return;gate.spoke=true;tryOpen();});
+ if(!talking){gate.spoke=true;stTimers.push(setTimeout(function(){stUnlock(tok);},Math.max(2500,words*300)));}
+ else{stTimers.push(setTimeout(function(){stUnlock(tok);},words*700+5000));}}
 
 var CH1_STEPS=[
  {sc:'camp',who:'frost',tx:"Welcome to Antarctica, team! I'm Dr. Frost. Right now we are standing on an ice sheet more than 3 kilometers thick."},
@@ -2458,10 +2476,9 @@ $('hpBack').onclick=function(){sfx.click();hush();hpNext=null;$('hpCard').style.
 $('hpSound').onclick=function(){V.on=true;saveSet();ac();sfx.click();hpSoundBtn();say('Sound is on. Put on your headphones and turn up the volume.',1.05);};
 $('btnSoonBack').onclick=function(){sfx.click();openMenu();};
 $('btnReport').onclick=function(){sfx.click();openReport(-1);};
-$('btnNext').onclick=function(){sfx.click();if(sIdx>=story.steps.length-1){story.done();}else{sIdx++;renderStep();}};
+$('btnNext').onclick=function(){if(this.disabled)return;sfx.click();if(sIdx>=story.steps.length-1){story.done();}else{sIdx++;renderStep();}};
 $('btnPrev').onclick=function(){sfx.click();if(sIdx>0){sIdx--;renderStep();}};
-$('btnReplay').onclick=function(){var st=story.steps[sIdx];say(st.tx,WHO[st.who].pitch,st.who);};
-$('btnSkip').onclick=function(){sfx.click();story.done();};
+$('btnReplay').onclick=function(){var st=story.steps[sIdx];if(sIdx<=story.max){say(st.tx,WHO[st.who].pitch,st.who);}else{renderStep();}};
 var hb=$('btnHold');hb.addEventListener('touchstart',holdOn,false);hb.addEventListener('touchend',holdOff,false);hb.addEventListener('touchcancel',holdOff,false);hb.addEventListener('mousedown',holdOn,false);hb.addEventListener('mouseup',holdOff,false);hb.addEventListener('mouseleave',function(){if(D.hold)holdOff();},false);
 hb.addEventListener('contextmenu',function(e){e.preventDefault();},false);
 $('btnPull').onclick=function(){if(D.phase!=='reached')return;D.phase='pull';D.pull=0;sfx.winch();$('btnPull').style.display='none';$('dMsg').textContent='Pulling up the core...';};
