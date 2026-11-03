@@ -29,7 +29,7 @@ The whole game lives in `index.html` at the repo root.
   - {t:'text', q}
 - Register quiz backgrounds in drawBg(c,name). Every chapter quiz has 6 multiple choice, 1 label, 1 draw, and 1 typed answer.
 - Menu: set ready:true on the chapter's CH entry and add a branch in openMenu's onclick to start it.
-- The report and PDF already include any chapter saved in S.res. Don't change them.
+- The report and PDF already include any chapter saved in S.res. Don't change them. buildPages() lays the report out in two columns and shrinks text and pictures (down to a 70% floor) so all chapters fit on 2 pages; below that floor it adds pages instead.
 - Missions: misRun(prefix, LIST, 'Last button label', onDone) runs the Check / Next mission flow (added in Chapter 3). It expects elements prefix+Head, Text, Check, Msg and a Hint button wired to misHint. Each mission is {tx, hint, ok:function(){}, yes, start:function(){} (optional)}.
 - Helpers to reuse: circ, rr, txt, pill, star5, mix, sky, space, sunGlow, drawSide, drawOrbit, miniEarth, person, rig, rnd, fmt, lpos, cpos, el, angDiff, norm, mol (co2, ch4, h2o, n2, o2), molS (scaled mol), arw (arrow), wavyArw (infrared arrow), cloud, thermo, ebg (space/air/ground backdrop).
 

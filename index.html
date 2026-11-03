@@ -1102,20 +1102,39 @@ var pdfBlob=null,pdfName='';
 function openReport(){show('scrReport');var n=0;for(var i=0;i<CH.length;i++){if(S.res[CH[i].id])n++;}$('repInfo').textContent=n?('Chapters finished: '+n+'. Your PDF will include every finished chapter.'):'Finish at least one chapter quiz first.';$('btnMakePdf').style.display=n?'block':'none';$('btnShare').style.display='none';$('repStatus').textContent='';$('repPreview').innerHTML='';pdfBlob=null;}
 function wrapLines(c,t,maxW){var out=[],ps=String(t).split('\n');for(var p=0;p<ps.length;p++){var ws=ps[p].split(' '),line='';for(var i=0;i<ws.length;i++){var test=line?line+' '+ws[i]:ws[i];if(mtext(c,test)>maxW&&line){out.push(line);line=ws[i];}else{line=test;}}out.push(line);}return out;}
 function loadImgs(cb){var list=[],i,j;for(i=0;i<CH.length;i++){var r=S.res[CH[i].id];if(!r)continue;for(j=0;j<r.items.length;j++){if(r.items[j].img)list.push(r.items[j]);}}var left=list.length;if(!left){cb();return;}for(i=0;i<list.length;i++){(function(it){var im=new Image();im.onload=im.onerror=function(){it._im=im;left--;if(left===0)cb();};im.src=it.img;})(list[i]);}}
-function buildPages(){var W=1224,H=1584,M=90,pages=[],cv,c,y;
- function newPage(){cv=document.createElement('canvas');cv.width=W;cv.height=H;c=cv.getContext('2d');c.fillStyle='#FFFFFF';c.fillRect(0,0,W,H);c.fillStyle='#0E1B2C';c.fillRect(0,0,W,140);
-  txt(c,'Climate Quest: Student Report',M,66,'800 44px '+FONT,'#BFE6F5');txt(c,clean(S.name)+'   |   Period '+S.period+'   |   Page '+(pages.length+1),M,112,'600 24px '+FONT,'#FFFFFF');pages.push(cv);y=210;}
- function need(h){if(y+h>H-M)newPage();}
- function para(t,font,col,lh,ind){c.font=font;var ls=wrapLines(c,clean(t),W-2*M-(ind||0));for(var i=0;i<ls.length;i++){need(lh);c.font=font;c.fillStyle=col;ftext(c,ls[i],M+(ind||0),y);y+=lh;}}
- newPage();
- para('Name: '+S.name,'800 34px '+FONT,'#0E1B2C',46);para('Period: '+S.period+'      Date: '+new Date().toLocaleDateString(),'600 28px '+FONT,'#2C4A63',44);y+=14;
- for(var i=0;i<CH.length;i++){var r=S.res[CH[i].id];if(!r)continue;need(140);y+=20;c.fillStyle='#BFE6F5';c.fillRect(M,y-40,W-2*M,58);txt(c,'Chapter '+(i+1)+': '+r.title,M+18,y,'800 32px '+FONT,'#0E1B2C');txt(c,'Score: '+r.score+' / '+r.total,W-M-18,y,'800 28px '+FONT,'#0E1B2C','right');y+=60;
-  for(var j=0;j<r.items.length;j++){var it=r.items[j];para((j+1)+'. '+it.q,'700 26px '+FONT,'#0E1B2C',36);
-   if(it.t==='mc'){para('Answer: '+it.ans+(it.ok?'   (correct)':'   (incorrect - correct answer: '+it.right+')'),'600 24px '+FONT,it.ok?'#1F7A45':'#B3261E',34,30);}
-   else if(it.t==='text'){para(it.ans,'500 24px '+FONT,'#1C2B3A',34,30);}
-   else if(it.t==='label'){para(it.ans,'600 24px '+FONT,'#1C2B3A',34,30);}
-   if(it._im&&it._im.width){var iw=520,ih=iw*it._im.height/it._im.width;need(ih+20);c.drawImage(it._im,M+30,y,iw,ih);c.strokeStyle='#9FB8CC';c.lineWidth=2;c.strokeRect(M+30,y,iw,ih);y+=ih+14;}
-   y+=16;}}
+/* Report layout: two columns per page. Tries full size first, then shrinks text and pictures
+   step by step until everything fits on 2 pages. Below the smallest readable size it adds pages instead. */
+function buildPages(){var W=1224,H=1584,K=2,M=46,G=34,HEAD=100,TOP=HEAD+22,CW=(W-2*M-G)/2,colH=H-M-TOP,mc=document.createElement('canvas').getContext('2d'),s,i,j,best=null;
+ function F(sz,wt){return wt+' '+sz.toFixed(1)+'px '+FONT;}
+ function blocks(s){var B=[],gap=Math.round(9*s),pend=[];
+  function textB(t,font,col,lh,ind,keep,after){mc.font=font;var ls=wrapLines(mc,clean(t),CW-ind);for(var k=0;k<ls.length;k++){B.push({k:'line',t:ls[k],font:font,col:col,ind:ind,h:lh+(k===ls.length-1?(after||0):0),keep:keep||k<ls.length-1});}}
+  function flush(){if(!pend.length)return;var iw=Math.min((CW-14)/2,262*s),ih=0,k;for(k=0;k<pend.length;k++){ih=Math.max(ih,iw*pend[k].im.height/pend[k].im.width);}B.push({k:'imgs',list:pend,iw:iw,ih:ih,cap:Math.round(13*s),h:ih+Math.round(20*s)+gap});pend=[];}
+  for(var a=0;a<CH.length;a++){var r=S.res[CH[a].id];if(!r)continue;
+   B.push({k:'head',t:'Chapter '+(a+1)+': '+r.title,sc:'Score: '+r.score+' / '+r.total,fs:19*s,h:Math.round(34*s)+gap,keep:true});
+   for(var b=0;b<r.items.length;b++){var it=r.items[b],qf=F(15.5*s,700),af=F(14*s,600),lq=Math.round(20*s),la=Math.round(18.5*s),ind=Math.round(16*s);
+    if(!(it._im&&it._im.width))flush();
+    textB((b+1)+'. '+it.q,qf,'#0E1B2C',lq,0,true);
+    if(it.t==='mc')textB('Answer: '+it.ans+(it.ok?'  (correct)':'  (incorrect; correct answer: '+it.right+')'),af,it.ok?'#1F7A45':'#B3261E',la,ind,false,gap);
+    else if(it.t==='text')textB(it.ans,F(14*s,500),'#1C2B3A',la,ind,false,gap);
+    else if(it.t==='label')textB(it.ans+' (picture below)',af,'#1C2B3A',la,ind,true,gap);
+    else textB('(drawing below)',af,'#1C2B3A',la,ind,true,gap);
+    if(it._im&&it._im.width){pend.push({im:it._im,cap:it.t==='label'?'Label task':'Drawing'});if(pend.length===2)flush();}}
+   flush();B[B.length-1].h+=Math.round(8*s);}
+  return B;}
+ function pack(B){var P=[],col=0,y=0,k;
+  for(k=0;k<B.length;k++){var need=B[k].h,q=k;while(B[q].keep&&q+1<B.length&&need<colH*0.5){q++;need+=B[q].h;}
+   if(y>0&&y+Math.min(need,colH)>colH){col++;y=0;}P.push({b:B[k],col:col,y:y});y+=B[k].h;}
+  return {P:P,pages:Math.floor(col/2)+1};}
+ for(s=1;s>=0.699;s-=0.05){best=pack(blocks(s));best.s=s;if(best.pages<=2)break;}
+ var n=best.pages,pages=[],cvs=[];
+ for(i=0;i<n;i++){var cv=document.createElement('canvas');cv.width=W*K;cv.height=H*K;var c=cv.getContext('2d');c.setTransform(K,0,0,K,0,0);c.fillStyle='#FFFFFF';c.fillRect(0,0,W,H);
+  c.fillStyle='#0E1B2C';c.fillRect(0,0,W,HEAD);txt(c,'Climate Quest: Student Report',M,44,'800 30px '+FONT,'#BFE6F5');
+  txt(c,'Name: '+clean(S.name)+'    |    Period '+S.period+'    |    '+new Date().toLocaleDateString(),M,80,'600 19px '+FONT,'#FFFFFF');txt(c,'Page '+(i+1)+' of '+n,W-M,80,'600 19px '+FONT,'#BFE6F5','right');
+  c.fillStyle='#D5E3EC';c.fillRect(M+CW+G/2-1,TOP,2,colH);pages.push(cv);cvs.push(c);}
+ for(i=0;i<best.P.length;i++){var p=best.P[i],b=p.b,cx=cvs[Math.floor(p.col/2)],x=M+(p.col%2)*(CW+G),y=TOP+p.y;
+  if(b.k==='head'){var hh=b.h-Math.round(9*best.s);cx.fillStyle='#BFE6F5';rr(cx,x,y,CW,hh,6);cx.fill();txt(cx,b.t,x+10,y+hh*0.68,F(b.fs,800),'#0E1B2C');txt(cx,b.sc,x+CW-10,y+hh*0.68,F(b.fs*0.9,800),'#0E1B2C','right');}
+  else if(b.k==='line'){txt(cx,b.t,x+b.ind,y+b.h*0.0+Math.round(15*best.s),b.font,b.col);}
+  else{for(j=0;j<b.list.length;j++){var im=b.list[j].im,ix=x+j*(b.iw+14),ih=b.iw*im.height/im.width;cx.drawImage(im,ix,y,b.iw,ih);cx.strokeStyle='#9FB8CC';cx.lineWidth=1.5;cx.strokeRect(ix,y,b.iw,ih);txt(cx,b.list[j].cap,ix+b.iw/2,y+b.ih+b.cap+3,F(b.cap,700),'#4A6B85','center');}}}
  return pages;}
 function buildPDF(jpgs){var n=jpgs.length,out='%PDF-1.4\n%'+String.fromCharCode(226,227,207,211)+'\n',off=[],kids=[],k;
  function add(num,body){off[num]=out.length;out+=num+' 0 obj\n'+body+'\nendobj\n';}
