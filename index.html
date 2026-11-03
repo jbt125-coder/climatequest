@@ -191,14 +191,14 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
       <p id="lbMsg" class="msg"></p>
     </div>
     <div class="cvwrap"><canvas id="labCv"></canvas></div>
-    <div class="row2"><span>CO2 level: <b id="lbCO2">280 ppm</b></span></div>
+    <div class="row2"><span>CO<sub>2</sub> level: <b id="lbCO2">280 ppm</b></span></div>
     <input id="lbRange" type="range" min="280" max="800" step="1" value="280">
     <div class="ticks"><span class="l" style="left:0%">280<br>1700s</span><span style="left:26.9%">420<br>today</span><span class="r" style="left:100%">800<br>future</span></div>
     <div class="stats">
       <div>Infrared escaped to space: <b id="lbEsc">0</b></div>
       <div>Infrared sent back down: <b id="lbDown">0</b> <span id="lbPct"></span></div>
     </div>
-    <p class="note">Molecules: CO2 (black and red), water vapor H2O (red and white), N2 (blue pairs) and O2 (pink pairs). Infrared passes right through N2 and O2. The thermometer is a simplified model, not a real forecast.</p>
+    <p class="note">Molecules: CO<sub>2</sub> (black and red), water vapor H<sub>2</sub>O (red and white), N<sub>2</sub> (blue pairs) and O<sub>2</sub> (pink pairs). Infrared passes right through N<sub>2</sub> and O<sub>2</sub>. The thermometer is a simplified model, not a real forecast.</p>
   </div>
 
   <div id="scrAlbedo" class="scr">
@@ -308,7 +308,7 @@ function loadSet(){try{var r=localStorage.getItem(SKEY);if(r){var o=JSON.parse(r
 function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify({voice:VSET,sound:V.on}));}catch(e){}}
 function enVoices(){if(!window.speechSynthesis)return [];var vs=speechSynthesis.getVoices()||[],out=[];for(var i=0;i<vs.length;i++){if(String(vs[i].lang).toLowerCase().indexOf('en')===0)out.push(vs[i]);}return out;}
 function voiceFor(who){var id=VSET[who||'frost'];if(id){var vs=enVoices();for(var i=0;i<vs.length;i++){if(vs[i].voiceURI===id||vs[i].name===id)return vs[i];}}return pickVoice();}
-function say(t,pitch,who){if(!window.speechSynthesis)return;speechSynthesis.cancel();if(!V.on)return;var u=new SpeechSynthesisUtterance(t);u.rate=0.97;u.pitch=pitch||1;u.lang='en-US';var v=voiceFor(who);if(v){try{u.voice=v;u.lang=v.lang;}catch(e){u.lang='en-US';}}speechSynthesis.speak(u);}
+function say(t,pitch,who){if(!window.speechSynthesis)return;speechSynthesis.cancel();if(!V.on)return;var u=new SpeechSynthesisUtterance(subDig(t));u.rate=0.97;u.pitch=pitch||1;u.lang='en-US';var v=voiceFor(who);if(v){try{u.voice=v;u.lang=v.lang;}catch(e){u.lang='en-US';}}speechSynthesis.speak(u);}
 function hush(){if(window.speechSynthesis){speechSynthesis.cancel();}}
 
 /* ---------- screens + loop ---------- */
@@ -323,7 +323,15 @@ function setupCanvas(cv,lw,lh,maxHFrac){var w=cv.parentNode.clientWidth||360;var
 function CE(c,x,y,rx,ry){c.save();c.translate(x,y);c.scale(rx,ry);c.beginPath();c.arc(0,0,1,0,6.2832);c.restore();}
 function circ(c,x,y,r){c.beginPath();c.arc(x,y,r,0,6.2832);c.fill();}
 function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
-function txt(c,s,x,y,font,col,align){c.font=font;c.fillStyle=col;c.textAlign=align||'left';c.fillText(s,x,y);c.textAlign='left';}
+/* Chemical subscripts: strings hold U+2080..U+2089. Canvas draws them as small lowered digits (no font dependency). */
+var SUBRE=/[\u2080-\u2089]/;
+function subDig(t){return String(t).replace(/[\u2080-\u2089]/g,function(ch){return String.fromCharCode(ch.charCodeAt(0)-0x2080+48);});}
+function subFont(f){return f.replace(/(\d+(\.\d+)?)px/,function(m,n){return (parseFloat(n)*0.68).toFixed(1)+'px';});}
+function mtext(c,s){s=String(s);if(!SUBRE.test(s))return c.measureText(s).width;var f=c.font,w=0,ps=s.split(/([\u2080-\u2089]+)/);for(var i=0;i<ps.length;i++){if(!ps[i])continue;if(SUBRE.test(ps[i])){c.font=subFont(f);w+=c.measureText(subDig(ps[i])).width;c.font=f;}else{w+=c.measureText(ps[i]).width;}}return w;}
+function ftext(c,s,x,y){s=String(s);if(!SUBRE.test(s)){c.fillText(s,x,y);return;}var al=c.textAlign,w=mtext(c,s),f=c.font,m=/(\d+(\.\d+)?)px/.exec(f),z=m?parseFloat(m[1]):12,ps=s.split(/([\u2080-\u2089]+)/);
+ if(al==='center')x-=w/2;else if(al==='right'||al==='end')x-=w;c.textAlign='left';
+ for(var i=0;i<ps.length;i++){if(!ps[i])continue;if(SUBRE.test(ps[i])){c.font=subFont(f);var d=subDig(ps[i]);c.fillText(d,x,y+z*0.22);x+=c.measureText(d).width;c.font=f;}else{c.fillText(ps[i],x,y);x+=c.measureText(ps[i]).width;}}c.textAlign=al;}
+function txt(c,s,x,y,font,col,align){c.font=font;c.fillStyle=col;c.textAlign=align||'left';ftext(c,s,x,y);c.textAlign='left';}
 function h2r(h){return [parseInt(h.substr(1,2),16),parseInt(h.substr(3,2),16),parseInt(h.substr(5,2),16)];}
 function mix(a,b,f){var A=h2r(a),B=h2r(b);return 'rgb('+Math.round(A[0]+(B[0]-A[0])*f)+','+Math.round(A[1]+(B[1]-A[1])*f)+','+Math.round(A[2]+(B[2]-A[2])*f)+')';}
 function sky(c,w,h,top,bot){var g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,top);g.addColorStop(1,bot);c.fillStyle=g;c.fillRect(0,0,w,h);}
@@ -439,10 +447,10 @@ function sceneBubbles(c,t){
  c.strokeStyle='#2C4A63';c.lineWidth=6;c.beginPath();c.arc(200,136,108,0,6.2832);c.stroke();
  txt(c,'Ancient air trapped in a bubble',200,264,'800 13px '+FONT,'#123A55','center');
  c.fillStyle='#2B2B2B';circ(c,40,284,4);c.fillStyle='#E0523A';circ(c,32,284,3.5);circ(c,48,284,3.5);
- txt(c,'CO2 carbon dioxide',58,288,'600 10.5px '+FONT,'#123A55');
+ txt(c,'CO\u2082 carbon dioxide',58,288,'600 10.5px '+FONT,'#123A55');
  c.fillStyle='#FFFFFF';circ(c,181,279,2.4);circ(c,191,279,2.4);circ(c,181,289,2.4);circ(c,191,289,2.4);c.fillStyle='#2B2B2B';circ(c,186,284,4);
- txt(c,'CH4 methane',198,288,'600 10.5px '+FONT,'#123A55');
- c.fillStyle='#4F7FD9';circ(c,286,284,3.5);circ(c,293,284,3.5);txt(c,'N2, O2 air',301,288,'600 10.5px '+FONT,'#123A55');
+ txt(c,'CH\u2084 methane',198,288,'600 10.5px '+FONT,'#123A55');
+ c.fillStyle='#4F7FD9';circ(c,286,284,3.5);circ(c,293,284,3.5);txt(c,'N\u2082, O\u2082 air',301,288,'600 10.5px '+FONT,'#123A55');
 }
 function sceneLayers(c,t){
  sky(c,400,300,'#9ACDEB','#DDF0FA');
@@ -570,7 +578,7 @@ var CH1_QUIZ=[
  {t:'mc',q:'Where is the OLDEST ice in an ice sheet?',o:['At the top','In the middle','At the bottom','All the ice is the same age'],a:2,why:'New snow piles on top of old snow, so the deepest ice is the oldest and the top is the newest.'},
  {t:'mc',q:'About how far back does the Dome C ice core record go?',o:['8,000 years','80,000 years','800,000 years','8 million years'],a:2,why:'The Dome C core in Antarctica, about 3.2 km long, holds about 800,000 years of climate history.'},
  {t:'mc',q:'What turns snow into solid ice in an ice sheet?',o:['The Sun melts it every day','The weight of new snow squeezes it','Seawater freezes into it','Wind blows it into blocks'],a:1,why:'The weight of the snow above packs the old snow into firn, and then into solid ice.'},
- {t:'mc',q:'Compared to the 800,000-year ice core record, how much CO2 is in the air today?',o:['Lower than ever','About average','Higher than at any time in the record','Exactly the same'],a:2,why:'In the ice core record, CO2 stayed between about 180 and 300 ppm. Today it is over 420 ppm.'},
+ {t:'mc',q:'Compared to the 800,000-year ice core record, how much CO\u2082 is in the air today?',o:['Lower than ever','About average','Higher than at any time in the record','Exactly the same'],a:2,why:'In the ice core record, CO\u2082 stayed between about 180 and 300 ppm. Today it is over 420 ppm.'},
  {t:'mc',q:'Which clue in the ice tells scientists how warm or cold it was?',o:['The color of the drill','Isotopes of hydrogen and oxygen in the ice','How loud the drill is','The size of the ice core'],a:1,why:'Special forms of hydrogen and oxygen atoms, called isotopes, change with temperature, so they work like an ancient thermometer.'},
  {t:'label',q:'Label the ice sheet. Tap a label, then tap where it belongs on the picture.',bg:'sheet',labels:[{s:'Snow',x:300,y:75},{s:'Newest ice',x:300,y:145},{s:'Oldest ice',x:300,y:525},{s:'Air bubble',x:470,y:330}]},
  {t:'draw',q:'Draw the drill going down into the ice. Then circle where you would find the OLDEST air bubbles.',bg:'draw'},
@@ -594,7 +602,7 @@ function cpos(cv,e){var r=cv.getBoundingClientRect();var p=(e.touches&&e.touches
 function drawBg(c,name){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);if(name==='sheet')bgSheet(c);else if(name==='draw')bgDraw(c);else if(name==='sideJune')bgSideJune(c);else if(name==='sideDec')bgSideDec(c);else if(name==='energy')bgEnergy(c);else if(name==='gh')bgGH(c);}
 function lblOk(lb,p){if(lb.seg){var x1=lb.seg[0],y1=lb.seg[1],x2=lb.seg[2],y2=lb.seg[3],dx=x2-x1,dy=y2-y1,u=((p.x-x1)*dx+(p.y-y1)*dy)/(dx*dx+dy*dy);u=Math.max(0,Math.min(1,u));var ex=x1+u*dx-p.x,ey=y1+u*dy-p.y;return Math.sqrt(ex*ex+ey*ey)<(lb.tol||35);}var ddx=p.x-lb.x,ddy=p.y-lb.y;return Math.sqrt(ddx*ddx+ddy*ddy)<(lb.r||50);}
 function renderLabel(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=620;b.appendChild(cv);var c=cv.getContext('2d');var place=[],sel=-1,checked=false,chips=[];var i;for(i=0;i<q.labels.length;i++)place.push(null);
- function tag(s,x,y,col){c.font='700 20px '+FONT;var w=c.measureText(s).width+20;var tx=Math.max(4,Math.min(596-w,x-w/2)),ty=y-44,above=true;if(ty<4){ty=y+14;above=false;}c.strokeStyle=col;c.lineWidth=2;c.beginPath();c.moveTo(x,y);c.lineTo(tx+w/2,above?ty+30:ty);c.stroke();c.fillStyle='rgba(14,27,44,0.9)';rr(c,tx,ty,w,30,9);c.fill();c.strokeStyle=col;c.lineWidth=2.5;rr(c,tx,ty,w,30,9);c.stroke();c.font='700 20px '+FONT;c.fillStyle='#FFFFFF';c.fillText(s,tx+10,ty+21);c.fillStyle=col;circ(c,x,y,7);c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.arc(x,y,7,0,6.2832);c.stroke();}
+ function tag(s,x,y,col){c.font='700 20px '+FONT;var w=mtext(c,s)+20;var tx=Math.max(4,Math.min(596-w,x-w/2)),ty=y-44,above=true;if(ty<4){ty=y+14;above=false;}c.strokeStyle=col;c.lineWidth=2;c.beginPath();c.moveTo(x,y);c.lineTo(tx+w/2,above?ty+30:ty);c.stroke();c.fillStyle='rgba(14,27,44,0.9)';rr(c,tx,ty,w,30,9);c.fill();c.strokeStyle=col;c.lineWidth=2.5;rr(c,tx,ty,w,30,9);c.stroke();c.font='700 20px '+FONT;c.fillStyle='#FFFFFF';ftext(c,s,tx+10,ty+21);c.fillStyle=col;circ(c,x,y,7);c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.arc(x,y,7,0,6.2832);c.stroke();}
  function redraw(res){drawBg(c,q.bg);var k;for(k=0;k<place.length;k++){if(place[k]){var col='#FF7A2F';if(res)col=res[k]?'#2E9E5B':'#E0312A';tag(q.labels[k].s,place[k].x,place[k].y,col);}}
   if(res){for(k=0;k<place.length;k++){if(!res[k]){var lb=q.labels[k];if(lb.seg){c.setLineDash([8,6]);c.strokeStyle='#FF5A4A';c.lineWidth=4;c.beginPath();c.moveTo(lb.seg[0],lb.seg[1]);c.lineTo(lb.seg[2],lb.seg[3]);c.stroke();}c.setLineDash([5,4]);c.strokeStyle='#E0312A';c.lineWidth=3;c.beginPath();c.arc(q.labels[k].x,q.labels[k].y,22,0,6.2832);c.stroke();c.setLineDash([]);txt(c,q.labels[k].s+' goes here',q.labels[k].x,q.labels[k].y+40,'700 16px '+FONT,'#E0312A','center');}}}}
  redraw(null);
@@ -643,7 +651,7 @@ function latStr(v){if(Math.abs(v)<0.3)return '0'+DEG+' (the equator)';var s=Math
 function space(c,w,h,t){c.fillStyle='#0B1424';c.fillRect(0,0,w,h);for(var i=0;i<60;i++){var a=0.35+0.45*Math.abs(Math.sin(t*0.8+i));c.fillStyle='rgba(255,255,255,'+a.toFixed(2)+')';circ(c,rnd(i+300)*w,rnd(i+600)*h,0.6+rnd(i+900)*0.9);}}
 function sunGlow(c,x,y,r){var g=c.createRadialGradient(x,y,r*0.2,x,y,r*2.2);g.addColorStop(0,'rgba(255,214,90,0.9)');g.addColorStop(0.45,'rgba(255,170,40,0.25)');g.addColorStop(1,'rgba(255,170,40,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,r*2.2,0,6.2832);c.fill();var g2=c.createRadialGradient(x-r*0.3,y-r*0.3,r*0.1,x,y,r);g2.addColorStop(0,'#FFF6C8');g2.addColorStop(1,'#FFB21E');c.fillStyle=g2;circ(c,x,y,r);}
 function star5(c,x,y,r){c.beginPath();for(var i=0;i<10;i++){var a=-Math.PI/2+i*Math.PI/5,rr2=(i%2===0)?r:r*0.45;if(i===0)c.moveTo(x+Math.cos(a)*rr2,y+Math.sin(a)*rr2);else c.lineTo(x+Math.cos(a)*rr2,y+Math.sin(a)*rr2);}c.closePath();c.fill();}
-function pill(c,s,x,y,fs,col,align){c.font='700 '+fs+'px '+FONT;var w=c.measureText(s).width+12,h=fs+8,x0=x;if(align==='right')x0=x-w;else if(align==='center')x0=x-w/2;c.fillStyle='rgba(10,21,34,0.85)';rr(c,x0,y-h+4,w,h,6);c.fill();c.fillStyle=col||'#FFFFFF';c.fillText(s,x0+6,y);}
+function pill(c,s,x,y,fs,col,align){c.font='700 '+fs+'px '+FONT;var w=mtext(c,s)+12,h=fs+8,x0=x;if(align==='right')x0=x-w;else if(align==='center')x0=x-w/2;c.fillStyle='rgba(10,21,34,0.85)';rr(c,x0,y-h+4,w,h,6);c.fill();c.fillStyle=col||'#FFFFFF';ftext(c,s,x0+6,y);}
 
 function miniEarth(c,x,y,r,sx,sy){
  c.save();c.beginPath();c.arc(x,y,r,0,6.2832);c.clip();
@@ -864,7 +872,7 @@ function sceneGases(c,t){ebg(c,t,false);sunGlow(c,30,22,16);var i;
   if(ph>1.3){var d=(ph-1.3)*45,an=[-2.4,-0.4,1.2,2.2];for(i=0;i<4;i++){var ex=cx+Math.cos(an[i])*(14+d),ey=cy+Math.sin(an[i])*(14+d);wavyArw(c,cx+Math.cos(an[i])*14,cy+Math.sin(an[i])*14,ex,ey,'#FF5A4A',2.2,t*6,3);}}}
  molS(c,'co2',cx,cy,0,1.5);
  txt(c,'Absorbs infrared, then re-emits it in all directions',200,286,'800 11.5px '+FONT,'#FFFFFF','center');
- pill(c,'Greenhouse gases: CO2, H2O, CH4, N2O',62,20,10,'#FF9A5C','left');pill(c,'N2 and O2: not greenhouse gases',62,38,10,'#8FC9E3','left');}
+ pill(c,'Greenhouse gases: CO\u2082, H\u2082O, CH\u2084, N\u2082O',62,20,10,'#FF9A5C','left');pill(c,'N\u2082 and O\u2082: not greenhouse gases',62,38,10,'#8FC9E3','left');}
 function sceneNoGH(c,t){space(c,400,300,t);txt(c,'Earth\'s average surface temperature',200,26,'800 14px '+FONT,'#FFFFFF','center');
  var x=105,y=140,R=62;c.save();c.beginPath();c.arc(x,y,R,0,6.2832);c.clip();c.fillStyle='#CFE8F5';c.fillRect(x-R,y-R,2*R,2*R);c.fillStyle='#F7FBFF';CE(c,x-15,y-10,40,30);c.fill();CE(c,x+25,y+28,30,22);c.fill();c.restore();
  x=295;c.save();c.beginPath();c.arc(x,y,R,0,6.2832);c.clip();c.fillStyle='#2F7FD1';c.fillRect(x-R,y-R,2*R,2*R);c.fillStyle='#46A35A';CE(c,x-18,y-8,24,18);c.fill();CE(c,x+22,y+20,18,24);c.fill();c.fillStyle='#F7FBFF';c.fillRect(x-R,y-R,2*R,12);c.fillRect(x-R,y+R-10,2*R,10);c.restore();
@@ -924,7 +932,7 @@ var CH3_STEPS=[
  {sc:'gases',who:'rosa',tx:"So greenhouse gases bounce the heat back down, like a mirror?"},
  {sc:'gases',who:'frost',tx:"Not quite! A mirror reflects. A greenhouse gas molecule absorbs the infrared, then re-emits it in a random direction: up, sideways, or down. Some of it heads back toward the surface. Nitrogen and oxygen make up about 99 percent of the air, and they are not greenhouse gases."},
  {sc:'noGH',who:'frost',tx:"This natural greenhouse effect is a good thing. Without it, Earth's average temperature would be about minus 18 degrees Celsius, or 0 degrees Fahrenheit. With it, the average is about 15 degrees Celsius, or 59 degrees Fahrenheit."},
- {sc:'co2',who:'frost',tx:"But adding more greenhouse gas traps more infrared, and that causes warming. Remember the ice cores? For 800,000 years, CO2 stayed between about 180 and 300 parts per million. Today it is over 420."},
+ {sc:'co2',who:'frost',tx:"But adding more greenhouse gas traps more infrared, and that causes warming. Remember the ice cores? For 800,000 years, CO\u2082 stayed between about 180 and 300 parts per million. Today it is over 420."},
  {sc:'shirts',who:'frost',tx:"Now, albedo. Albedo is the fraction of sunlight a surface reflects, from 0 to 1. Picture a white T-shirt and a black T-shirt on a sunny day. The white shirt reflects most of the light. The black shirt absorbs it and gets hot."},
  {sc:'albedo',who:'frost',tx:"Fresh snow reflects about 80 to 90 percent of sunlight. Sea ice reflects about 50 to 70 percent. Open ocean reflects only about 6 percent, so it absorbs almost all of it."},
  {sc:'feedback',who:'rosa',tx:"Wait. If sea ice melts, the dark ocean underneath soaks up more sunlight. Then it gets even warmer?"},
@@ -988,9 +996,9 @@ function drawLab(c,t){var i,p,m;space(c,400,340,t);
  c.fillStyle='#0A1522';c.fillRect(LB_W,0,400-LB_W,340);c.fillStyle='#27425F';c.fillRect(LB_W,0,1,340);
  txt(c,'Temp',376,22,'800 10px '+FONT,'#FFFFFF','center');thermo(c,376,52,190,LAB.temp,true);}
 var LAB_MIS=[
- {tx:'Yellow dots are sunlight. Red wavy lines are infrared from the warm ground. Keep CO2 at 280 ppm, the level before factories, and wait until 10 infrared photons are sent back down.',hint:'Watch a red photon hit a molecule. The molecule absorbs it, glows, then sends it off in a random direction. Some go down. Just wait and watch the counter.',ok:function(){return LAB.C<=290&&LAB.down>=10;},yes:'Even before factories, greenhouse gases sent some heat back down. That natural greenhouse effect keeps Earth at about 15 degrees Celsius instead of about minus 18.'},
- {tx:'Slide CO2 up to today\'s level, about 420 ppm. Watch the number of molecules and the thermometer.',hint:'Drag the slider to the middle mark labeled 420.',ok:function(){return Math.abs(LAB.C-420)<=10;},yes:'More CO2 molecules means more infrared gets absorbed and sent back down, so the thermometer climbs.'},
- {tx:'Slide CO2 to 800 ppm, a possible future level. Wait until 30 infrared photons have escaped or been sent back down. Compare the percent sent back down with before.',hint:'Drag the slider all the way to the right, then wait for the two counters to add up to 30.',ok:function(){return LAB.C>=790&&LAB.esc+LAB.down>=30;},yes:'At 800 ppm, a bigger share of the infrared is sent back down before it can escape. More heat stays near the surface, so the planet warms.'}
+ {tx:'Yellow dots are sunlight. Red wavy lines are infrared from the warm ground. Keep CO\u2082 at 280 ppm, the level before factories, and wait until 10 infrared photons are sent back down.',hint:'Watch a red photon hit a molecule. The molecule absorbs it, glows, then sends it off in a random direction. Some go down. Just wait and watch the counter.',ok:function(){return LAB.C<=290&&LAB.down>=10;},yes:'Even before factories, greenhouse gases sent some heat back down. That natural greenhouse effect keeps Earth at about 15 degrees Celsius instead of about minus 18.'},
+ {tx:'Slide CO\u2082 up to today\'s level, about 420 ppm. Watch the number of molecules and the thermometer.',hint:'Drag the slider to the middle mark labeled 420.',ok:function(){return Math.abs(LAB.C-420)<=10;},yes:'More CO\u2082 molecules means more infrared gets absorbed and sent back down, so the thermometer climbs.'},
+ {tx:'Slide CO\u2082 to 800 ppm, a possible future level. Wait until 30 infrared photons have escaped or been sent back down. Compare the percent sent back down with before.',hint:'Drag the slider all the way to the right, then wait for the two counters to add up to 30.',ok:function(){return LAB.C>=790&&LAB.esc+LAB.down>=30;},yes:'At 800 ppm, a bigger share of the infrared is sent back down before it can escape. More heat stays near the surface, so the planet warms.'}
 ];
 function startLab(){show('scrLab');LAB.ph=[];LAB.q=[];LAB.mols=[];LAB.sp=0;LAB.temp=0.25;LAB.shown='';LAB.C=-1;$('lbRange').value=280;setCO2(280);
  LAB.c=setupCanvas($('labCv'),400,340,0.42);LAB.ms=misRun('lb',LAB_MIS,'Next: Albedo Painter',startAlbedo);startLoop(labLoop);}
@@ -1092,13 +1100,13 @@ function openMenu(){show('scrMenu');$('hello').textContent='Hi, '+S.name+' (Peri
 /* ---------- report + PDF ---------- */
 var pdfBlob=null,pdfName='';
 function openReport(){show('scrReport');var n=0;for(var i=0;i<CH.length;i++){if(S.res[CH[i].id])n++;}$('repInfo').textContent=n?('Chapters finished: '+n+'. Your PDF will include every finished chapter.'):'Finish at least one chapter quiz first.';$('btnMakePdf').style.display=n?'block':'none';$('btnShare').style.display='none';$('repStatus').textContent='';$('repPreview').innerHTML='';pdfBlob=null;}
-function wrapLines(c,t,maxW){var out=[],ps=String(t).split('\n');for(var p=0;p<ps.length;p++){var ws=ps[p].split(' '),line='';for(var i=0;i<ws.length;i++){var test=line?line+' '+ws[i]:ws[i];if(c.measureText(test).width>maxW&&line){out.push(line);line=ws[i];}else{line=test;}}out.push(line);}return out;}
+function wrapLines(c,t,maxW){var out=[],ps=String(t).split('\n');for(var p=0;p<ps.length;p++){var ws=ps[p].split(' '),line='';for(var i=0;i<ws.length;i++){var test=line?line+' '+ws[i]:ws[i];if(mtext(c,test)>maxW&&line){out.push(line);line=ws[i];}else{line=test;}}out.push(line);}return out;}
 function loadImgs(cb){var list=[],i,j;for(i=0;i<CH.length;i++){var r=S.res[CH[i].id];if(!r)continue;for(j=0;j<r.items.length;j++){if(r.items[j].img)list.push(r.items[j]);}}var left=list.length;if(!left){cb();return;}for(i=0;i<list.length;i++){(function(it){var im=new Image();im.onload=im.onerror=function(){it._im=im;left--;if(left===0)cb();};im.src=it.img;})(list[i]);}}
 function buildPages(){var W=1224,H=1584,M=90,pages=[],cv,c,y;
  function newPage(){cv=document.createElement('canvas');cv.width=W;cv.height=H;c=cv.getContext('2d');c.fillStyle='#FFFFFF';c.fillRect(0,0,W,H);c.fillStyle='#0E1B2C';c.fillRect(0,0,W,140);
   txt(c,'Climate Quest: Student Report',M,66,'800 44px '+FONT,'#BFE6F5');txt(c,clean(S.name)+'   |   Period '+S.period+'   |   Page '+(pages.length+1),M,112,'600 24px '+FONT,'#FFFFFF');pages.push(cv);y=210;}
  function need(h){if(y+h>H-M)newPage();}
- function para(t,font,col,lh,ind){c.font=font;var ls=wrapLines(c,clean(t),W-2*M-(ind||0));for(var i=0;i<ls.length;i++){need(lh);c.font=font;c.fillStyle=col;c.fillText(ls[i],M+(ind||0),y);y+=lh;}}
+ function para(t,font,col,lh,ind){c.font=font;var ls=wrapLines(c,clean(t),W-2*M-(ind||0));for(var i=0;i<ls.length;i++){need(lh);c.font=font;c.fillStyle=col;ftext(c,ls[i],M+(ind||0),y);y+=lh;}}
  newPage();
  para('Name: '+S.name,'800 34px '+FONT,'#0E1B2C',46);para('Period: '+S.period+'      Date: '+new Date().toLocaleDateString(),'600 28px '+FONT,'#2C4A63',44);y+=14;
  for(var i=0;i<CH.length;i++){var r=S.res[CH[i].id];if(!r)continue;need(140);y+=20;c.fillStyle='#BFE6F5';c.fillRect(M,y-40,W-2*M,58);txt(c,'Chapter '+(i+1)+': '+r.title,M+18,y,'800 32px '+FONT,'#0E1B2C');txt(c,'Score: '+r.score+' / '+r.total,W-M-18,y,'800 28px '+FONT,'#0E1B2C','right');y+=60;

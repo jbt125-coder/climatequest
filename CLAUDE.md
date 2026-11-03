@@ -9,6 +9,7 @@ The whole game lives in `index.html` at the repo root.
 - One self-contained HTML file. No libraries, CDNs, web fonts, image files, or network calls at runtime. Embed all data in the file.
 - ES5 only: var and function. No arrow functions, template literals, let/const, classes, default parameters, for...of, spread, or destructuring.
 - The whole file is ASCII only. Use '\u00B0' in JS and &deg; in HTML. No smart quotes, en dashes, or em dashes.
+- Chemical formulas always use correct subscripts (CO2 is written with a subscript 2, also H2O, CH4, N2O, N2, O2). In HTML use <sub>2</sub>. In JS strings use the escapes '\u2080' to '\u2089' (for example 'CO\u2082'). txt(), pill(), quiz label tags, and the PDF draw these as small lowered digits through ftext()/mtext(), so draw canvas text through txt()/pill()/ftext(), not raw fillText. say() turns them back into plain digits for speech. Student-typed text is left as typed.
 - No CSS custom properties (var(--x)). Use literal hex colors.
 - Never call ctx.ellipse(). Use the CE(c,x,y,rx,ry) helper.
 - No emoji in canvas fillText. Pass any user text drawn on canvas through clean().
