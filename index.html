@@ -54,6 +54,14 @@ textarea{min-height:130px;resize:vertical;}
 #heatFill{height:100%;width:0%;background:#6FE3A4;}
 .hold{display:block;width:132px;height:132px;border-radius:66px;margin:12px auto 0 auto;background:#FF7A2F;border:6px solid #FFD2B8;color:#1A0F08;font-family:inherit;font-weight:800;font-size:18px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 .hold.on{background:#FFA36B;}
+.gear{padding:6px 9px;line-height:0;}
+#setCard{z-index:30;}
+.vrow{margin:12px 0 0 0;}
+.vrow label{color:#0E1B2C;margin:0 0 4px 0;}
+.vrow .row select{flex:1 1 auto;width:auto;min-width:0;font-size:15px;padding:10px;}
+.vrow .row .sbtn{margin:0 0 0 8px;background:#DDEFF8;color:#0E1B2C;border-color:#B5D3E5;}
+.vnote{font-size:14px;color:#4A6B85;line-height:1.4;margin:14px 0 0 0;}
+#setCard .link{color:#2A6F96;}
 .overlay{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(5,12,20,0.82);padding:20px 14px;overflow-y:auto;z-index:20;display:none;}
 .card{background:#F4FAFD;color:#0E1B2C;border-radius:18px;padding:16px;max-width:560px;margin:30px auto;}
 .card h2{color:#0E1B2C;}
@@ -95,7 +103,7 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
   <div id="bar">
     <button id="btnHome" class="sbtn">Chapters</button>
     <span id="barTitle">Climate Quest</span>
-    <button id="btnSound" class="sbtn">Sound: On</button>
+    <button id="btnGear" class="sbtn gear" aria-label="Settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DDEFF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
   </div>
 
   <div id="scrSign" class="scr">
@@ -225,6 +233,17 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
   </div>
 </div>
 
+<div id="setCard" class="overlay">
+  <div class="card">
+    <h2>Settings</h2>
+    <button id="btnSound" class="big alt">Sound: On</button>
+    <p class="vnote">Story voices. The list comes from this device, so it can be different on each iPhone. Pick a voice, then tap Test.</p>
+    <div id="voiceRows"></div>
+    <button id="btnVoiceReset" class="link">Reset all voices to Automatic</button>
+    <button id="btnSetDone" class="big">Done</button>
+  </div>
+</div>
+
 <div id="coreCard" class="overlay">
   <div class="card">
     <h2 id="ccTitle"></h2>
@@ -281,7 +300,15 @@ function stopDrillSnd(){if(!drillNodes)return;try{drillNodes.src.stop();drillNod
 
 /* ---------- speech ---------- */
 function pickVoice(){if(!window.speechSynthesis)return null;var vs=speechSynthesis.getVoices();if(!vs||!vs.length)return null;var pref=['Samantha','Ava','Allison','Susan','Karen','Moira'];for(var p=0;p<pref.length;p++){for(var i=0;i<vs.length;i++){if(vs[i].name.indexOf(pref[p])===0&&vs[i].lang.indexOf('en')===0)return vs[i];}}for(var j=0;j<vs.length;j++){if(vs[j].lang==='en-US')return vs[j];}return null;}
-function say(t,pitch){if(!window.speechSynthesis)return;speechSynthesis.cancel();if(!V.on)return;var u=new SpeechSynthesisUtterance(t);u.rate=0.97;u.pitch=pitch||1;u.lang='en-US';var v=pickVoice();if(v){u.voice=v;}speechSynthesis.speak(u);}
+/* Voice settings: one chosen device voice per story character ('' = Automatic) */
+var SKEY='climateQuest_settings';
+var VSET={frost:'',sam:'',rosa:''};
+var VSUG=[['Samantha','US English, woman'],['Alex','US English, man'],['Aaron','US English, man'],['Nicky','US English, woman'],['Fred','US English, robot-style man'],['Daniel','British, man'],['Arthur','British, man'],['Martha','British, woman'],['Karen','Australian, woman'],['Gordon','Australian, man'],['Moira','Irish, woman'],['Fiona','Scottish, woman'],['Tessa','South African, woman'],['Rishi','Indian English, man']];
+function loadSet(){try{var r=localStorage.getItem(SKEY);if(r){var o=JSON.parse(r);if(o&&o.voice){for(var k in VSET){if(typeof o.voice[k]==='string')VSET[k]=o.voice[k];}}if(o&&o.sound===false)V.on=false;}}catch(e){}}
+function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify({voice:VSET,sound:V.on}));}catch(e){}}
+function enVoices(){if(!window.speechSynthesis)return [];var vs=speechSynthesis.getVoices()||[],out=[];for(var i=0;i<vs.length;i++){if(String(vs[i].lang).toLowerCase().indexOf('en')===0)out.push(vs[i]);}return out;}
+function voiceFor(who){var id=VSET[who||'frost'];if(id){var vs=enVoices();for(var i=0;i<vs.length;i++){if(vs[i].voiceURI===id||vs[i].name===id)return vs[i];}}return pickVoice();}
+function say(t,pitch,who){if(!window.speechSynthesis)return;speechSynthesis.cancel();if(!V.on)return;var u=new SpeechSynthesisUtterance(t);u.rate=0.97;u.pitch=pitch||1;u.lang='en-US';var v=voiceFor(who);if(v){try{u.voice=v;u.lang=v.lang;}catch(e){u.lang='en-US';}}speechSynthesis.speak(u);}
 function hush(){if(window.speechSynthesis){speechSynthesis.cancel();}}
 
 /* ---------- screens + loop ---------- */
@@ -452,7 +479,7 @@ function drawScene(c,name,t){if(name==='camp')sceneCamp(c,t);else if(name==='sno
 var WHO={frost:{n:'Dr. Frost',col:'#1F7E94',pitch:1.05},sam:{n:'Sam (new worker)',col:'#D9601C',pitch:0.8},rosa:{n:'Rosa (new worker)',col:'#A37F00',pitch:1.3}};
 var story=null,sIdx=0;
 function startStory(steps,onDone,last){story={steps:steps,done:onDone,last:last};sIdx=0;show('scrStory');var c=setupCanvas($('storyCv'),400,300,0.42);startLoop(function(dt,t){drawScene(c,story.steps[sIdx].sc,t);});renderStep();}
-function renderStep(){var st=story.steps[sIdx],w=WHO[st.who];$('spName').textContent=w.n;$('spName').style.color=w.col;$('spText').textContent=st.tx;$('stepCount').textContent=(sIdx+1)+' / '+story.steps.length;$('btnPrev').style.visibility=sIdx>0?'visible':'hidden';$('btnNext').textContent=(sIdx===story.steps.length-1)?(story.last||'Start'):'Next';say(st.tx,w.pitch);}
+function renderStep(){var st=story.steps[sIdx],w=WHO[st.who];$('spName').textContent=w.n;$('spName').style.color=w.col;$('spText').textContent=st.tx;$('stepCount').textContent=(sIdx+1)+' / '+story.steps.length;$('btnPrev').style.visibility=sIdx>0?'visible':'hidden';$('btnNext').textContent=(sIdx===story.steps.length-1)?(story.last||'Start'):'Next';say(st.tx,w.pitch,st.who);}
 
 var CH1_STEPS=[
  {sc:'camp',who:'frost',tx:"Welcome to Antarctica, team! I'm Dr. Frost. Right now we are standing on an ice sheet more than 3 kilometers thick."},
@@ -1111,13 +1138,33 @@ function startApp(){ac();var n=clean($('inName').value).replace(/^\s+|\s+$/g,'')
 /* ---------- wire up ---------- */
 $('btnStart').onclick=startApp;
 $('btnHome').onclick=function(){sfx.click();openMenu();};
-$('btnSound').onclick=function(){V.on=!V.on;this.textContent='Sound: '+(V.on?'On':'Off');if(!V.on){hush();stopDrillSnd();}else{ac();sfx.click();}};
+$('btnSound').onclick=function(){V.on=!V.on;this.textContent='Sound: '+(V.on?'On':'Off');saveSet();if(!V.on){hush();stopDrillSnd();}else{ac();sfx.click();}};
+var VSAMPLE={frost:"Hi team, I'm Dr. Frost. Let's find out how Earth's climate works.",sam:"Hi, I'm Sam. I have a lot of questions!",rosa:"Hi, I'm Rosa. This is going to be fun."};
+function buildVoiceRows(){var box=$('voiceRows'),vs=enVoices(),k,i,j;box.innerHTML='';
+ var keys=['frost','sam','rosa'];
+ for(k=0;k<keys.length;k++){(function(who){var row=el('div','vrow');row.appendChild(el('label',null,WHO[who].n.replace(' (new worker)','')+' voice'));
+  var line=el('div','row');var sel=el('select');sel.appendChild(el('option',null,'Automatic'));sel.options[0].value='';
+  var used={},g1=el('optgroup'),g2=el('optgroup');g1.label='Suggested voices';g2.label='Other English voices on this device';
+  for(i=0;i<VSUG.length;i++){var found=null;for(j=0;j<vs.length;j++){if(vs[j].name.indexOf(VSUG[i][0])===0&&!used[vs[j].voiceURI]){found=vs[j];break;}}
+   var o=el('option',null,VSUG[i][0]+' - '+VSUG[i][1]+(found?'':' (not on this device)'));if(found){o.value=found.voiceURI;used[found.voiceURI]=1;}else{o.value='x'+i;o.disabled=true;}g1.appendChild(o);}
+  for(j=0;j<vs.length;j++){if(used[vs[j].voiceURI])continue;var o2=el('option',null,clean(vs[j].name)+' ('+vs[j].lang+')');o2.value=vs[j].voiceURI;g2.appendChild(o2);}
+  sel.appendChild(g1);if(g2.children.length)sel.appendChild(g2);
+  sel.value=VSET[who];if(sel.value!==VSET[who])sel.value='';
+  sel.onchange=function(){VSET[who]=sel.value;saveSet();say(VSAMPLE[who],WHO[who].pitch,who);};
+  var tb=el('button','sbtn','Test');tb.onclick=function(){ac();if(!V.on){$('btnSound').textContent='Sound: Off (turn on to test)';return;}say(VSAMPLE[who],WHO[who].pitch,who);};
+  line.appendChild(sel);line.appendChild(tb);row.appendChild(line);box.appendChild(row);})(keys[k]);}
+ if(!vs.length)box.appendChild(el('p','vnote','No voices are loaded yet. Close and open Settings again in a moment.'));}
+function openSettings(){sfx.click();$('btnSound').textContent='Sound: '+(V.on?'On':'Off');buildVoiceRows();$('setCard').style.display='block';}
+$('btnGear').onclick=openSettings;
+$('btnSetDone').onclick=function(){sfx.click();hush();$('setCard').style.display='none';};
+$('btnVoiceReset').onclick=function(){VSET.frost='';VSET.sam='';VSET.rosa='';saveSet();buildVoiceRows();sfx.click();};
+if(window.speechSynthesis&&'onvoiceschanged' in speechSynthesis){speechSynthesis.onvoiceschanged=function(){if($('setCard').style.display==='block')buildVoiceRows();};}
 $('btnSwitch').onclick=function(){sfx.click();openSign();};
 $('btnSoonBack').onclick=function(){sfx.click();openMenu();};
 $('btnReport').onclick=function(){sfx.click();openReport();};
 $('btnNext').onclick=function(){sfx.click();if(sIdx>=story.steps.length-1){story.done();}else{sIdx++;renderStep();}};
 $('btnPrev').onclick=function(){sfx.click();if(sIdx>0){sIdx--;renderStep();}};
-$('btnReplay').onclick=function(){var st=story.steps[sIdx];say(st.tx,WHO[st.who].pitch);};
+$('btnReplay').onclick=function(){var st=story.steps[sIdx];say(st.tx,WHO[st.who].pitch,st.who);};
 $('btnSkip').onclick=function(){sfx.click();story.done();};
 var hb=$('btnHold');hb.addEventListener('touchstart',holdOn,false);hb.addEventListener('touchend',holdOff,false);hb.addEventListener('touchcancel',holdOff,false);hb.addEventListener('mousedown',holdOn,false);hb.addEventListener('mouseup',holdOff,false);hb.addEventListener('mouseleave',function(){if(D.hold)holdOff();},false);
 hb.addEventListener('contextmenu',function(e){e.preventDefault();},false);
@@ -1138,7 +1185,7 @@ var abc=$('abCv');abc.addEventListener('touchstart',abStart,false);abc.addEventL
 $('btnMakePdf').onclick=makePdf;
 $('btnShare').onclick=sharePdf;
 
-load();
+load();loadSet();
 if(S.name&&S.period){openMenu();}else{openSign();}
 })();
 </script>
