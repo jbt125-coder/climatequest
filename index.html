@@ -427,7 +427,8 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     </div>
     <div id="campIntro" class="campPanel">
       <h2>Camp break!</h2>
-      <p>Help Dr. Frost around camp. Penguins slide in and Weddell seals pop up through breathing holes in the ice. Toss a fish into a hungry animal's mouth to earn a heart.</p>
+      <p>Help Dr. Frost around camp. Penguins slide in and Weddell seals pop up through breathing holes in the ice. Toss a fish to a hungry animal to earn a heart. Fish bounce and slide on the ice, so a fish that slides right up to an animal counts too. Don't let one slide into an empty breathing hole!</p>
+      <p>Penguins on top of the glacier cliff are worth 2 hearts. The cliff is too high to climb, so jump and toss in the air for a jump shot.</p>
       <button id="campGo" class="big">Start (1 minute)</button>
       <p><b>Controls:</b> the arrow pad runs left and right. A (or up) jumps; press it again in the air to double jump. Hold B to fill the power meter, then let go to toss. Green is a short, soft toss and red is a long, hard one. The fish flies the way Dr. Frost is facing.</p>
       <p>Watch out for south polar skuas! Their poop costs a heart. If your fish hits a skua, it gets mad and swoops at you. Jump on a skua to bop it for a heart. A fish that bounces off a skua and still gets eaten is worth 2 hearts.</p>
@@ -2389,8 +2390,11 @@ var CH8_QUIZ=[
 /* ================= CAMP BREAK MINI GAME (menu, after sign-in) =================
    Side view of the drill camp. Dr. Frost runs and jumps with the same feel as Basketball Builder,
    and the fish fly like its basketballs: hold B to fill the power meter, let go to toss in an arc.
-   Penguins slide in and Weddell seals pop up through breathing holes. A fish that reaches a waiting
-   animal's mouth feeds it: +1 heart (+2 if it bounced off a skua first). Skuas poop on you (-1 heart);
+   Fish bounce and slide on the ice like the basketballs bounce and roll. Penguins slide in and Weddell
+   seals pop up through breathing holes. A fish that reaches a waiting animal (in the air or sliding along
+   the ice) feeds it: +1 heart, +1 more if it bounced off a skua first. A fish that slides into an empty
+   breathing hole is lost. On the right is a glacier cliff with an overhang: Dr. Frost can't climb it,
+   so penguins on top need a jump shot, and they are worth +2. Skuas poop on you (-1 heart);
    hit one with a fish and it swoops at you (-1 heart if it catches you); jump on one to bop it (+1 heart).
    Hearts never go below 0. 1 minute; after a round the camp is closed for 10 minutes.
    Controls (same as Basketball Builder): d-pad left/right to run, up or A to jump (again in the air
@@ -2398,7 +2402,10 @@ var CH8_QUIZ=[
 var CK={l:0,r:0,u:0,d:0,a:0,b:0},G=null,campCtx=null;
 var CAMP_COOL=600000,CAMP_LEN=60;
 var CW=400,CF=268,C_RUN=125,C_GRAV=812,C_JV=359,C_FG=359,C_ANG=Math.PI/3,C_REL=46,C_SC=0.6,C_PS=0.62,C_SS=0.62;
-var C_HOLES=[118,236,330];
+var C_HOLES=[110,196,272];
+/* the glacier cliff: top surface C_CT from C_LX to the right edge; the overhanging lip is C_LX to C_BX,
+   its underside is C_LB; the cliff base face is at C_BX */
+var C_LX=305,C_BX=342,C_CT=100,C_LB=122,C_FR=4;
 var A_NAME={emp:'Emperor penguin',ade:'Adelie penguin',gen:'Gentoo penguin',wed:'Weddell seal'};
 function campLeft(){return Math.max(0,(S.campNext||0)-Date.now());}
 function mmss(ms){var s=Math.ceil(ms/1000),m=Math.floor(s/60);s=s%60;return m+':'+(s<10?'0':'')+s;}
@@ -2408,7 +2415,7 @@ function crand(a,b){return a+Math.random()*(b-a);}
 
 function campNew(){return {time:0,pre:1.6,over:false,idle:false,hearts:0,pen:0,seal:0,bops:0,hits:0,
  p:{x:70,y:CF,vx:0,vy:0,face:1,ground:true,air2:true,hold:false,inv:0,hurt:0,flip:0,toss:0,meter:null,reload:0,mv:0},
- an:[],fish:[],lying:[],birds:[],poops:[],splats:[],parts:[],pops:[],nextA:0.4,birdT:crand(3,5),hit:0};}
+ an:[],fish:[],cliff:0,birds:[],poops:[],splats:[],parts:[],pops:[],nextA:0.4,birdT:crand(3,5),hit:0};}
 
 /* ---------- sounds ---------- */
 function cSnd(k){if(k==='toss')tone(520,0.12,'triangle',0.08,980);else if(k==='flop')tone(150,0.08,'triangle',0.06,90);
@@ -2425,9 +2432,10 @@ function cPop(x,y,s,col,heart){G.pops.push({x:x,y:y,s:s,col:col||'#FFFFFF',life:
 /* ---------- Dr. Frost: run, jump, double jump ---------- */
 function cStep(p,dt,mv){p.flip=Math.max(0,p.flip-dt);p.inv=Math.max(0,p.inv-dt);p.hurt=Math.max(0,p.hurt-dt);p.toss=Math.max(0,p.toss-dt);p.reload=Math.max(0,p.reload-dt);
  if(p.hurt<=0){p.vx=mv*C_RUN;if(mv)p.face=mv>0?1:-1;}
- p.mv=mv;p.x=campClamp(p.x+p.vx*dt,10,CW-10);
+ p.mv=mv;var ox=p.x;p.x=campClamp(p.x+p.vx*dt,10,C_BX-6);
  if(!p.ground){p.vy=Math.min(p.vy+C_GRAV*dt,620);if(!p.hold&&p.vy<-187)p.vy=-187;p.y+=p.vy*dt;
-  if(p.y>=CF){p.y=CF;p.vy=0;p.ground=true;p.air2=true;}if(p.y<60){p.y=60;if(p.vy<0)p.vy=0;}}}
+  if(p.y>=CF){p.y=CF;p.vy=0;p.ground=true;p.air2=true;}if(p.y<60){p.y=60;if(p.vy<0)p.vy=0;}}
+ if(p.x+6>C_LX&&p.y-52<C_LB){if(ox+6<=C_LX)p.x=C_LX-6;else{p.y=C_LB+52;if(p.vy<0){p.vy=0;tone(180,0.06,'triangle',0.05);}}}}
 function campJump(){if(!G||G.over||G.idle||G.pre>0)return;var p=G.p;
  if(p.ground){p.ground=false;p.vy=-C_JV;p.hold=true;cSnd('jump');return;}
  if(!p.air2)return;p.air2=false;p.vy=-C_JV*0.85;p.hold=true;p.flip=0.3;cBurst(p.x,p.y-10,6,['#FFFFFF','#BFE6F5'],47,0,0.3);cSnd('jump2');}
@@ -2438,36 +2446,57 @@ function cHit(p,x,y,hw,hh){return Math.abs(p.x-x)<hw+6&&p.y>y-hh&&p.y-38<y+hh;}
 /* ---------- tossing fish (same arc as the basketball shots) ---------- */
 function campTossDown(){var p=G&&G.p;if(!p||G.over||G.idle||G.pre>0||p.reload>0)return;p.meter={p:0,dir:1};}
 function campTossUp(){var p=G&&G.p;if(!p||G.over||G.idle||!p.meter)return;var v=140+p.meter.p*230;
- G.fish.push({x:p.x+p.face*3,y:p.y-C_REL,vx:p.face*v*Math.cos(C_ANG),vy:-v*Math.sin(C_ANG),rot:0,bird:false});
+ G.fish.push({x:p.x+p.face*3,y:p.y-C_REL,vx:p.face*v*Math.cos(C_ANG),vy:-v*Math.sin(C_ANG),rot:0,bird:false,ground:false,rest:0,wig:0});
  p.meter=null;p.reload=0.3;p.toss=0.3;cSnd('toss');}
 function cMouth(a){if(a.kind==='wed')return {x:a.x+(a.flip?-1:1)*2,y:a.y-27};var H=(a.kind==='emp'?58:(a.kind==='gen'?47:42))*C_PS;return {x:a.x+(a.flip?-1:1)*H*0.15,y:a.y-H*0.86};}
-function cFeed(f){for(var i=0;i<G.an.length;i++){var a=G.an[i];if(a.st!=='wait')continue;var m=cMouth(a),dx=f.x-m.x,dy=f.y-m.y;
- if(dx*dx+dy*dy<16*16){var n=f.bird?2:1;a.st='happy';a.t=0;G.hearts+=n;if(a.kind==='wed')G.seal++;else G.pen++;
-  cPop(m.x,m.y-26,'+'+n,'#FF4F7A',true);if(f.bird)cPop(m.x,m.y-46,'SKUA BANK!','#FFD45A');cBurst(m.x,m.y,10,['#FF4F7A','#FFFFFF','#FFD45A'],70,40,0.6);cSnd('fed');return true;}}return false;}
+function cTouch(a,f){var m=cMouth(a),dx=f.x-m.x,dy=f.y-m.y;if(dx*dx+dy*dy<16*16)return true;
+ if(a.kind==='wed')return Math.abs(f.x-a.x)<13&&f.y>a.y-34&&f.y<a.y+2;
+ var H=(a.kind==='emp'?58:(a.kind==='gen'?47:42))*C_PS;return Math.abs(f.x-a.x)<10&&f.y>a.y-H&&f.y<a.y+2;}
+function cFeed(f){for(var i=0;i<G.an.length;i++){var a=G.an[i];if(a.st!=='wait'||!cTouch(a,f))continue;
+ var m=cMouth(a),n=(a.top?2:1)+(f.bird?1:0);a.st='happy';a.t=0;G.hearts+=n;if(a.kind==='wed')G.seal++;else{G.pen++;if(a.top)G.cliff++;}
+ cPop(m.x,m.y-26,'+'+n,'#FF4F7A',true);if(f.bird)cPop(m.x,m.y-46,'SKUA BANK!','#FFD45A');else if(a.top)cPop(m.x,m.y-46,'CLIFF TOP!','#FFD45A');
+ cBurst(m.x,m.y,10,['#FF4F7A','#FFFFFF','#FFD45A'],70,40,0.6);cSnd('fed');return true;}return false;}
 function cBonk(f,bd){var cx=bd.x,cy=bd.y+4,dx=f.x-cx,dy=f.y-cy,d=Math.sqrt(dx*dx+dy*dy);
  if(d>13||d===0||bd.hit>0)return;var nx=dx/d,ny=dy/d,vn=f.vx*nx+f.vy*ny;
  if(vn<0){f.vx-=1.7*vn*nx;f.vy-=1.7*vn*ny;}f.x=cx+nx*14;f.y=cy+ny*14;bd.hit=0.5;f.bird=true;
  cBurst(cx,cy,10,['#6E5640','#FFFFFF'],70,62,0.8);cSnd('squawk');
  if(bd.mode==='fly'){bd.mode='dive';bd.t=0;bd.vx=bd.dir*bd.sp;bd.vy=0;cPop(cx,cy-14,'SQUAWK!','#FF6B5A');}}
-function cFishStep(f,h){var i;f.vy+=C_FG*h;f.x+=f.vx*h;f.y+=f.vy*h;f.rot=Math.atan2(f.vy,f.vx);
- for(i=0;i<G.birds.length;i++)cBonk(f,G.birds[i]);
+function cHoleAt(x){for(var i=0;i<C_HOLES.length;i++)if(Math.abs(x-C_HOLES[i])<11)return C_HOLES[i];return -1;}
+function cFishStep(f,h){var i,px=f.x,py=f.y,R=C_FR;
+ f.vy+=C_FG*h;f.x+=f.vx*h;f.y+=f.vy*h;
+ if(!f.ground)for(i=0;i<G.birds.length;i++)cBonk(f,G.birds[i]);
+ /* the glacier: lip face, cliff face, underside of the overhang */
+ if(px<=C_LX-R&&f.x>C_LX-R&&f.y>C_CT-R&&f.y<C_LB+R){f.x=C_LX-R;f.vx=-Math.abs(f.vx)*0.45;cSnd('flop');}
+ if(px<=C_BX-R&&f.x>C_BX-R&&f.y>C_LB){f.x=C_BX-R;f.vx=-Math.abs(f.vx)*0.45;cSnd('flop');}
+ if(f.x>C_LX-R&&f.x<C_BX&&py>=C_LB+R&&f.y<C_LB+R){f.y=C_LB+R;f.vy=Math.abs(f.vy)*0.35;cSnd('flop');}
+ if(f.x<R){f.x=R;f.vx=Math.abs(f.vx)*0.5;}if(f.x>CW-R){f.x=CW-R;f.vx=-Math.abs(f.vx)*0.5;}
+ /* land, bounce, then slide on the slippery ice */
+ var surf=(f.x>=C_LX&&py<=C_CT-R+0.5)?C_CT:CF;f.ground=false;
+ if(f.vy>=0&&f.y>=surf-R){f.y=surf-R;
+  if(f.vy>60){if(f.vy>110)cSnd('flop');f.vy=-f.vy*0.42;f.vx*=0.85;f.wig=0.4;}
+  else{f.vy=0;f.ground=true;f.vx*=Math.pow(0.55,h);if(Math.abs(f.vx)<5)f.vx=0;}}
+ if(f.ground||f.wig>0)f.rot=f.vx<0?Math.PI:0;else f.rot=Math.atan2(f.vy,f.vx);
+ f.wig=Math.max(0,f.wig-h);
  if(cFeed(f))return 'fed';
- if(f.y>=CF-3){G.lying.push({x:f.x,y:CF-3,vx:f.vx*0.25,life:1.6,flip:f.vx<0});cSnd('flop');return 'land';}
- if(f.x<-30||f.x>CW+30)return 'gone';return '';}
+ if(surf===CF&&f.y>=CF-R-1){var hx=cHoleAt(f.x);if(hx>=0){cBurst(hx,CF-3,10,['#BFE6F5','#FFFFFF','#1D4560'],60,120,0.5);tone(300,0.12,'sine',0.08,120);cPop(hx,CF-30,'PLOP!','#BFE6F5');return 'gone';}}
+ if(f.ground&&f.vx===0){f.rest+=h;if(f.rest>1.4)return 'gone';}else f.rest=0;
+ return '';}
 
 /* ---------- penguins and seals ---------- */
 function cSpawn(){var i,n=0;for(i=0;i<G.an.length;i++)if(G.an[i].st!=='out')n++;if(n>=(G.time>30?4:3))return;
  var free=[];for(i=0;i<C_HOLES.length;i++){var used=false;for(var j=0;j<G.an.length;j++)if(Math.abs(G.an[j].tx-C_HOLES[i])<40)used=true;if(!used&&Math.abs(C_HOLES[i]-G.p.x)>60)free.push(C_HOLES[i]);}
+ var top=0;for(i=0;i<G.an.length;i++)if(G.an[i].top&&G.an[i].st!=='out')top++;
+ if(!top&&Math.random()<0.35){var tx=crand(326,384);G.an.push({kind:['emp','ade','gen'][Math.floor(Math.random()*3)],top:true,x:CW+30,tx:tx,y:C_CT,st:'in',t:0,p:1,wait:8,flip:true,slide:true});return;}
  if(free.length&&Math.random()<0.4){var hx=free[Math.floor(Math.random()*free.length)];G.an.push({kind:'wed',x:hx,tx:hx,y:CF,st:'in',t:0,p:0,wait:6.5,flip:G.p.x<hx});return;}
- var x=0,ok=false,k;for(k=0;k<25&&!ok;k++){x=crand(30,370);ok=Math.abs(x-G.p.x)>70;for(i=0;i<G.an.length;i++)if(Math.abs(G.an[i].tx-x)<45)ok=false;for(i=0;i<C_HOLES.length;i++)if(Math.abs(C_HOLES[i]-x)<26)ok=false;}
- if(!ok)return;var ks=['emp','ade','gen'],from=Math.random()<0.5?-30:CW+30;
- G.an.push({kind:ks[Math.floor(Math.random()*3)],x:from,tx:x,y:CF,st:'in',t:0,p:1,wait:7,flip:from>0,slide:true});}
+ var x=0,ok=false,k;for(k=0;k<25&&!ok;k++){x=crand(30,288);ok=Math.abs(x-G.p.x)>70;for(i=0;i<G.an.length;i++)if(Math.abs(G.an[i].tx-x)<45)ok=false;for(i=0;i<C_HOLES.length;i++)if(Math.abs(C_HOLES[i]-x)<26)ok=false;}
+ if(!ok)return;var ks=['emp','ade','gen'];
+ G.an.push({kind:ks[Math.floor(Math.random()*3)],x:-30,tx:x,y:CF,st:'in',t:0,p:1,wait:7,flip:false,slide:true});}
 function cAnimals(dt){var i,a;G.nextA-=dt;if(G.nextA<=0){cSpawn();G.nextA=1.1+Math.random()*1.2;}
  for(i=G.an.length-1;i>=0;i--){a=G.an[i];a.t+=dt;
   if(a.st==='in'){if(a.kind==='wed'){a.p+=dt/0.6;if(a.p>=1){a.p=1;a.st='wait';a.t=0;}}else{var d=a.tx-a.x,sp=150*dt;if(Math.abs(d)<=sp){a.x=a.tx;a.st='wait';a.t=0;a.slide=false;}else{a.x+=(d>0?1:-1)*sp;a.flip=d<0;}}}
   else if(a.st==='wait'){a.flip=G.p.x<a.x;if(a.t>a.wait){a.st='out';a.t=0;}}
   else if(a.st==='happy'){if(a.t>0.9){a.st='out';a.t=0;}}
-  else{if(a.kind==='wed'){a.p-=dt/0.6;if(a.p<=0)G.an.splice(i,1);}else{a.slide=true;var ex=a.x<CW/2?-1:1;a.flip=ex<0;a.x+=ex*150*dt;if(a.x<-40||a.x>CW+40)G.an.splice(i,1);}}}}
+  else{if(a.kind==='wed'){a.p-=dt/0.6;if(a.p<=0)G.an.splice(i,1);}else{a.slide=true;var ex=a.top?1:-1;a.flip=ex<0;a.x+=ex*150*dt;if(a.x<-40||a.x>CW+40)G.an.splice(i,1);}}}}
 
 /* ---------- skuas: fly over and poop; a fish hit makes one swoop at you; jump on it to bop it ---------- */
 function cBirds(dt){var i,p=G.p;
@@ -2487,7 +2516,7 @@ function cBirds(dt){var i,p=G.p;
   if(bd.x<-40||bd.x>CW+40||bd.y<-30)G.birds.splice(i,1);}
  for(i=G.poops.length-1;i>=0;i--){var pp=G.poops[i],gone=false;pp.vy=Math.min(250,pp.vy+406*dt);pp.y+=pp.vy*dt;
   if(Math.abs(pp.x-p.x)<9&&pp.y>p.y-40&&pp.y<p.y+2){if(cHurt(pp.x,'SPLAT!'))G.hit=1.6;gone=true;}
-  if(!gone&&pp.y>=CF){G.splats.push({x:pp.x,y:CF,t:2});gone=true;}
+  var pf=pp.x>=C_LX?C_CT:CF;if(!gone&&pp.y>=pf){G.splats.push({x:pp.x,y:pf,t:2});gone=true;}
   if(gone)G.poops.splice(i,1);}
  for(i=G.splats.length-1;i>=0;i--){G.splats[i].t-=dt;if(G.splats[i].t<=0)G.splats.splice(i,1);}}
 
@@ -2503,7 +2532,7 @@ function campUpdate(dt){var i,p=G.p;
  if(p.meter){p.meter.p+=p.meter.dir*dt/(p.ground?1.4:0.55);if(p.meter.p>=1){p.meter.p=1;p.meter.dir=-1;}else if(p.meter.p<=0){p.meter.p=0;p.meter.dir=1;}}
  cAnimals(dt);cBirds(dt);
  for(i=G.fish.length-1;i>=0;i--){var r='';for(var k=0;k<3&&!r;k++)r=cFishStep(G.fish[i],dt/3);if(r)G.fish.splice(i,1);}
- for(i=G.lying.length-1;i>=0;i--){var l=G.lying[i];l.x+=l.vx*dt;l.vx*=Math.pow(0.05,dt);l.life-=dt;if(l.life<=0)G.lying.splice(i,1);}}
+}
 
 /* ---------- start and end ---------- */
 function openCamp(){if(campLeft()>0){sfx.bad();$('campNote').textContent='Dr. Frost says: back to work! The camp opens again in '+mmss(campLeft())+'.';return;}
@@ -2515,7 +2544,7 @@ function campStart(){ac();sfx.click();S.campNext=Date.now()+(CAMP_LEN*1000)+CAMP
 function campEnd(){G.over=true;G.time=CAMP_LEN;G.p.meter=null;S.campNext=Date.now()+CAMP_COOL;var nb=G.hearts>(S.campBest||0);if(nb)S.campBest=G.hearts;save();
  $('campCtl').style.display='none';$('campEnd').style.display='block';
  $('campRes').textContent='You earned '+G.hearts+' heart'+(G.hearts===1?'':'s')+'!'+(nb&&G.hearts>0?' New best!':'');
- $('campStat').textContent='Penguins fed: '+G.pen+'.  Seals fed: '+G.seal+'.  Skuas bopped: '+G.bops+'.  Skua hits: '+G.hits+'.  Your best: '+(S.campBest||0)+' hearts.';
+ $('campStat').textContent='Penguins fed: '+G.pen+' ('+G.cliff+' on the cliff).  Seals fed: '+G.seal+'.  Skuas bopped: '+G.bops+'.  Skua hits: '+G.hits+'.  Your best: '+(S.campBest||0)+' hearts.';
  sfx.good();say('Time to get to work!',WHO.frost.pitch,'frost');}
 
 /* ---------- drawing ---------- */
@@ -2525,9 +2554,20 @@ function campBg(c,t){var i;sky(c,400,215,'#6FA9D6','#DDF0FA');
  var g=c.createRadialGradient(300,48,3,300,48,40);g.addColorStop(0,'rgba(255,248,220,1)');g.addColorStop(1,'rgba(255,248,220,0)');c.fillStyle=g;c.fillRect(255,5,90,90);c.fillStyle='#FFF7DE';circ(c,300,48,9);
  c.fillStyle='#B9D6E8';c.beginPath();c.moveTo(0,206);c.lineTo(50,186);c.lineTo(95,200);c.lineTo(150,178);c.lineTo(205,198);c.lineTo(260,182);c.lineTo(320,196);c.lineTo(400,184);c.lineTo(400,215);c.lineTo(0,215);c.closePath();c.fill();
  var gi=c.createLinearGradient(0,206,0,300);gi.addColorStop(0,'#EEF6FB');gi.addColorStop(1,'#D3E8F4');c.fillStyle=gi;c.fillRect(0,206,400,94);
- tent(c,48,226,0.8);rig(c,186,226,0.62);flag(c,262,228,'#E0523A',t);flag(c,388,232,'#2E9E5B',t);
+ tent(c,44,226,0.8);rig(c,170,226,0.62);flag(c,240,228,'#E0523A',t);
  c.strokeStyle='rgba(150,190,215,0.45)';c.lineWidth=1.2;for(i=0;i<10;i++){var sx=rnd(i+3)*380+10,sy=240+rnd(i+40)*50;c.beginPath();c.moveTo(sx-14,sy);c.quadraticCurveTo(sx,sy-4,sx+16,sy+1);c.stroke();}
  for(i=0;i<C_HOLES.length;i++){c.fillStyle='#F4FAFD';CE(c,C_HOLES[i],CF-2,20,6.5);c.fill();c.fillStyle='#1D4560';CE(c,C_HOLES[i],CF-2,16,5);c.fill();c.fillStyle='#0F2B40';CE(c,C_HOLES[i],CF-1.5,12,3.5);c.fill();}}
+function campCliff(c,t){var i,g=c.createLinearGradient(C_LX,0,CW,0);g.addColorStop(0,'#8CCBE8');g.addColorStop(1,'#5FA8CF');
+ var sh=c.createLinearGradient(C_LX-6,0,C_BX,0);sh.addColorStop(0,'rgba(30,70,100,0)');sh.addColorStop(1,'rgba(30,70,100,0.22)');c.fillStyle=sh;c.fillRect(C_LX-6,C_LB,C_BX-C_LX+6,CF-C_LB);
+ var sv=c.createLinearGradient(0,C_LB,0,C_LB+40);sv.addColorStop(0,'rgba(30,70,100,0.25)');sv.addColorStop(1,'rgba(30,70,100,0)');c.fillStyle=sv;c.fillRect(C_LX-2,C_LB,C_BX-C_LX+2,40);
+ c.fillStyle=g;c.beginPath();c.moveTo(C_BX,CF);c.lineTo(C_BX+3,C_LB+30);c.lineTo(C_BX-2,C_LB);
+ for(i=0;i<=7;i++){var xx=C_BX-2-(C_BX-2-C_LX)*i/7;c.lineTo(xx,C_LB+(i%2?5:0));}
+ c.lineTo(C_LX-3,C_CT+8);c.lineTo(C_LX+2,C_CT);c.lineTo(CW,C_CT);c.lineTo(CW,CF);c.closePath();c.fill();
+ c.strokeStyle='rgba(255,255,255,0.5)';c.lineWidth=1.2;c.beginPath();c.moveTo(C_BX+12,CF-6);c.lineTo(C_BX+18,C_LB+20);c.lineTo(C_BX+14,C_LB-6);c.moveTo(C_BX+34,CF-14);c.lineTo(C_BX+30,C_LB+10);c.moveTo(C_LX+14,C_CT+6);c.lineTo(C_LX+20,C_LB-2);c.stroke();
+ c.strokeStyle='rgba(30,70,110,0.35)';c.beginPath();c.moveTo(C_BX+46,C_CT+4);c.lineTo(C_BX+40,C_CT+40);c.lineTo(C_BX+48,C_CT+70);c.stroke();
+ c.fillStyle='#F4FAFD';c.beginPath();c.moveTo(C_LX-4,C_CT+2);c.quadraticCurveTo(C_LX+10,C_CT-7,C_LX+40,C_CT-4);c.quadraticCurveTo(C_LX+70,C_CT-8,CW,C_CT-5);c.lineTo(CW,C_CT+4);c.lineTo(C_LX-4,C_CT+4);c.closePath();c.fill();
+ c.fillStyle='#CFEBF8';for(i=0;i<6;i++){var ix=C_LX+4+i*6+rnd(i+7)*2,il=6+rnd(i+3)*9;c.beginPath();c.moveTo(ix-2,C_LB+1);c.lineTo(ix+2,C_LB+1);c.lineTo(ix,C_LB+1+il);c.closePath();c.fill();}
+ flag(c,392,C_CT,'#2E9E5B',t);}
 function campPeng(c,a,t,sc){var H=a.kind==='emp'?58:(a.kind==='gen'?47:42),bob=0;c.save();c.translate(a.x,a.y);c.scale(sc,sc);
  c.fillStyle='rgba(60,90,120,0.2)';CE(c,0,0,H*0.36,H*0.09);c.fill();
  if(a.flip)c.scale(-1,1);
@@ -2575,15 +2615,14 @@ function campFrost(c,t){var p=G.p,s=C_SC;if(p.inv>0&&Math.floor(p.inv*14)%2)retu
  if(!G.idle&&!G.over&&p.reload<=0){if(up)fishP(c,p.x+p.face*3,p.y-C_REL,0.8,-Math.PI/2);else fishP(c,p.x+p.face*11,p.y-18,0.75,p.face>0?0.4:Math.PI-0.4);}
  if(p.meter){var mx=p.x-p.face*24-3,my=p.y-62,hg=p.meter.p*34;c.fillStyle='#1F2229';rr(c,mx-1.5,my-1.5,9,37,3);c.fill();c.fillStyle='#4A5566';c.fillRect(mx,my,6,34);
   c.fillStyle=p.meter.p<0.5?'#2FC46A':(p.meter.p<0.8?'#FFC21A':'#FF4A1F');c.fillRect(mx,my+34-hg,6,hg);}}
-function campDraw(c,t){var i,a;campBg(c,t);
+function campDraw(c,t){var i,a;campBg(c,t);campCliff(c,t);
  for(i=0;i<G.splats.length;i++){var sp=G.splats[i];c.globalAlpha=Math.min(1,sp.t);c.fillStyle='#FFFFFF';CE(c,sp.x,sp.y-1,7,2.2);c.fill();c.fillStyle='#B8C2A0';circ(c,sp.x+1,sp.y-1.5,1.4);c.globalAlpha=1;}
- for(i=0;i<G.lying.length;i++){var l=G.lying[i];c.globalAlpha=Math.min(1,l.life*1.5);fishP(c,l.x,l.y,0.75,l.flip?Math.PI:0);c.globalAlpha=1;}
  for(i=0;i<G.an.length;i++){a=G.an[i];if(a.kind==='wed')campSeal(c,a,t,C_SS);else campPeng(c,a,t,C_PS);
   if(a.st==='wait'){var m=cMouth(a),by=m.y-22,blink=(a.wait-a.t<2)&&(Math.floor(t*6)%2===0);
    if(!blink){c.fillStyle='rgba(255,255,255,0.95)';circ(c,a.x,by,10);circ(c,a.x-3,by+11,2.2);c.strokeStyle='#8FB6CC';c.lineWidth=1;c.beginPath();c.arc(a.x,by,10,0,6.2832);c.stroke();fishP(c,a.x+1,by,0.6,0);}
-   if(G.idle||G.time<12)txt(c,A_NAME[a.kind],a.x,CF+16,'700 9px '+FONT,'#2A4A63','center');}}
+   if(G.idle||G.time<12)txt(c,A_NAME[a.kind],a.x,a.y+16,'700 9px '+FONT,'#2A4A63','center');}}
  campFrost(c,t);
- for(i=0;i<G.fish.length;i++){var f=G.fish[i];fishP(c,f.x,f.y,0.8,f.rot);}
+ for(i=0;i<G.fish.length;i++){var f=G.fish[i],wg=(f.ground&&f.vx!==0)||f.wig>0?Math.sin(t*30)*0.25:0;c.globalAlpha=f.rest>0.8?Math.max(0,(1.4-f.rest)/0.6):1;fishP(c,f.x,f.y,0.8,f.rot+wg);c.globalAlpha=1;}
  for(i=0;i<G.birds.length;i++){var bd=G.birds[i];c.save();c.translate(bd.x,bd.y);c.scale(0.55,0.55);if(bd.mode==='dive')c.rotate(bd.dir*0.25);campSkua(c,{x:0,y:0,vx:bd.dir,ph:bd.f});c.restore();
   if(bd.hit>0){c.fillStyle='#FFFFFF';star5(c,bd.x,bd.y-12,4);}}
  for(i=0;i<G.poops.length;i++){var pp=G.poops[i];c.fillStyle='#1F2229';circ(c,pp.x,pp.y,3.6);c.fillStyle='#FFFFFF';circ(c,pp.x,pp.y,2.6);c.fillStyle='#B8C2A0';circ(c,pp.x+0.6,pp.y+0.6,1);}
