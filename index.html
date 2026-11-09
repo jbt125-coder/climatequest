@@ -195,6 +195,13 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
 .campPanel p{font-size:15px;line-height:1.45;margin:6px 0;color:#DDEFF8;}
 .campPanel h2{margin:2px 0 6px 0;}
 .campBig{font-size:22px !important;font-weight:800;color:#FFD45A !important;}
+.langRow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;margin:2px 0 12px 0;}
+.langRow span{color:#8FC9E3;font-size:14px;font-weight:700;margin:0 10px 8px 0;}
+.langRow .chip{margin:0 8px 8px 0;}
+#setCard .langRow{justify-content:flex-start;margin:8px 0 0 0;}
+#setCard .langRow .chip{background:#DDEFF8;color:#0E1B2C;border-color:#B5D3E5;}
+#setCard .langRow .chip.sel{background:#FF7A2F;color:#1A0F08;border-color:#FF7A2F;}
+.ch .tx small.enOnly{color:#FFD45A;}
 </style>
 </head>
 <body>
@@ -208,18 +215,19 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
   <div id="scrSign" class="scr">
     <div class="cvwrap"><canvas id="heroCv"></canvas></div>
     <h1>Climate Quest</h1>
-    <p class="lead">Drill into ancient ice, follow the air, and build cities in the right climates.</p>
-    <label for="inFirst">First name</label>
+    <div class="langRow"><span id="lgLbl">Language / Idioma</span><button id="lgEn" class="chip">English</button><button id="lgEs" class="chip">Espa&ntilde;ol</button></div>
+    <p id="signLead" class="lead">Drill into ancient ice, follow the air, and build cities in the right climates.</p>
+    <label id="lbFirst" for="inFirst">First name</label>
     <input id="inFirst" type="text" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" maxlength="30" placeholder="First name">
-    <label for="inLast">Last name</label>
+    <label id="lbLast" for="inLast">Last name</label>
     <input id="inLast" type="text" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" maxlength="30" placeholder="Last name">
-    <label for="inPeriod">Class period</label>
+    <label id="lbPer" for="inPeriod">Class period</label>
     <select id="inPeriod">
-      <option value="">Choose your period</option>
+      <option id="optPer" value="">Choose your period</option>
       <option>1</option><option>2</option><option>3</option><option>4</option>
       <option>5</option><option>6</option><option>7</option><option>8</option>
     </select>
-    <div class="warn"><b>Spell your name correctly.</b> This is the name your teacher will see on your PDFs. Once you tap Start, your name is locked and you can't change it. If you change it later, your old PDFs will still show your old name, and you will have to complete those chapters again to get fresh PDFs.</div>
+    <div id="signWarn" class="warn"><b>Spell your name correctly.</b> This is the name your teacher will see on your PDFs. Once you tap Start, your name is locked and you can't change it. If you change it later, your old PDFs will still show your old name, and you will have to complete those chapters again to get fresh PDFs.</div>
     <button id="btnStart" class="big">Start</button>
     <p id="signMsg" class="msg"></p>
     <button id="btnSignCancel" class="link">Cancel and keep my name</button>
@@ -235,7 +243,7 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
 
   <div id="scrSoon" class="scr">
     <h2 id="soonTitle"></h2>
-    <p class="lead">This chapter is coming soon. Try another chapter for now.</p>
+    <p id="soonP" class="lead">This chapter is coming soon. Try another chapter for now.</p>
     <button id="btnSoonBack" class="big alt">Back to chapters</button>
   </div>
 
@@ -256,8 +264,8 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
   <div id="scrDrill" class="scr">
     <div class="hud">
       <b id="dCore"></b>
-      <div class="hudRow"><span>Depth: <b id="dDepth">0 m</b></span><span>Ice age: <b id="dAge">today</b></span></div>
-      <div class="heat"><span>Motor heat</span><div class="heatBar"><div id="heatFill"></div></div></div>
+      <div class="hudRow"><span><span id="dDepthL">Depth:</span> <b id="dDepth">0 m</b></span><span><span id="dAgeL">Ice age:</span> <b id="dAge">today</b></span></div>
+      <div class="heat"><span id="dHeatL">Motor heat</span><div class="heatBar"><div id="heatFill"></div></div></div>
     </div>
     <div class="cvwrap"><canvas id="drillCv"></canvas></div>
     <p id="dMsg" class="msg"></p>
@@ -498,7 +506,7 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
 
   <div id="scrIceLab" class="scr">
     <div class="labTop">
-      <div class="labTitle">CHAPTER 1 LAB: ICE CORE INVESTIGATION</div>
+      <div id="labTitleTx" class="labTitle">CHAPTER 1 LAB: ICE CORE INVESTIGATION</div>
       <div id="labStepTx" class="labStepTx"></div>
       <div id="labDots" class="labDots"></div>
     </div>
@@ -509,7 +517,7 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
   <div id="scrQuiz" class="scr"><div id="quizBody"></div></div>
 
   <div id="scrReport" class="scr">
-    <h2>My results</h2>
+    <h2 id="repH">My results</h2>
     <p id="repInfo" class="lead"></p>
     <div id="repList"></div>
     <div id="repOut">
@@ -517,7 +525,7 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
       <p id="repStatus" class="msg"></p>
       <button id="btnShare" class="big">Save or share as PDF</button>
       <button id="btnShareImg" class="big alt">Save or share as a picture</button>
-      <p class="note">Turn in the PDF or the picture in Canvas. You can also press and hold the page below to save it to Photos. Taking a screenshot works too, but the text will be small.</p>
+      <p id="repNote" class="note">Turn in the PDF or the picture in Canvas. You can also press and hold the page below to save it to Photos. Taking a screenshot works too, but the text will be small.</p>
       <div id="repPreview"></div>
     </div>
   </div>
@@ -525,12 +533,14 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
 
 <div id="setCard" class="overlay">
   <div class="card">
-    <h2>Settings</h2>
+    <h2 id="setH">Settings</h2>
     <button id="btnSound" class="big alt">Sound: On</button>
-    <p class="vnote">Story voices. Pick Daniel, Samantha, or Karen for each character, then tap Test.</p>
+    <p class="vnote">Language / Idioma</p>
+    <div class="langRow"><button id="sgEn" class="chip">English</button><button id="sgEs" class="chip">Espa&ntilde;ol</button></div>
+    <p id="setVN" class="vnote">Story voices. Pick Daniel, Samantha, or Karen for each character, then tap Test.</p>
     <div id="voiceRows"></div>
     <button id="btnVoiceReset" class="link">Reset voices (Daniel, Samantha, Karen)</button>
-    <p class="vnote">Code (for the teacher)</p>
+    <p id="setCN" class="vnote">Code (for the teacher)</p>
     <input id="inCode" type="password" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="Enter code">
     <button id="btnCode" class="big alt">Enter code</button>
     <p id="codeMsg" class="vnote"></p>
@@ -540,10 +550,10 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
 
 <div id="nameCard" class="overlay">
   <div class="card">
-    <h2>Is this correct?</h2>
+    <h2 id="nmH">Is this correct?</h2>
     <p class="nmShow" id="nmName"></p>
     <p class="nmPer" id="nmPer"></p>
-    <div class="warn">This is the name your teacher will see. Check the spelling of your first and last name. After you tap Yes, your name is locked.</div>
+    <div id="nmWarn" class="warn">This is the name your teacher will see. Check the spelling of your first and last name. After you tap Yes, your name is locked.</div>
     <button id="nmYes" class="big">Yes, that's me</button>
     <button id="nmNo" class="big alt">Go back and fix it</button>
   </div>
@@ -553,8 +563,9 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
   <div class="card">
     <div class="hpIco"><svg width="84" height="76" viewBox="0 0 84 76" fill="none"><path d="M12 48 V40 a30 30 0 0 1 60 0 V48" stroke="#0E1B2C" stroke-width="7" stroke-linecap="round"></path><rect x="5" y="42" width="18" height="30" rx="8" fill="#FF7A2F" stroke="#0E1B2C" stroke-width="3"></rect><rect x="61" y="42" width="18" height="30" rx="8" fill="#FF7A2F" stroke="#0E1B2C" stroke-width="3"></rect></svg></div>
     <h2 id="hpTitle" style="text-align:center;"></h2>
-    <p><b>Put on your headphones or earbuds and turn up the volume.</b> Dr. Frost, Sam, and Rosa read the story out loud, so you will want to hear it.</p>
-    <p class="vnote">No sound? Make sure your iPhone is not on silent, turn the volume up, and check that Sound is on in Settings (the cog at the top).</p>
+    <p id="hpP1"><b>Put on your headphones or earbuds and turn up the volume.</b> Dr. Frost, Sam, and Rosa read the story out loud, so you will want to hear it.</p>
+    <p id="hpP2" class="vnote">No sound? Make sure your iPhone is not on silent, turn the volume up, and check that Sound is on in Settings (the cog at the top).</p>
+    <p id="hpEn" class="warn" style="display:none;"></p>
     <button id="hpSound" class="big alt">Sound is off. Tap to turn it on.</button>
     <button id="hpGo" class="big">I'm ready. Start the story!</button>
     <button id="hpBack" class="link">Back to chapters</button>
@@ -577,6 +588,12 @@ var FONT='"Avenir Next","Avenir","Trebuchet MS",Helvetica,Arial,sans-serif';
 var KEY='climateQuest_v1';
 var S={name:'',first:'',last:'',period:'',res:{}};
 var V={on:true};
+/* Language. LANG is the student's choice (saved with Settings). Spanish covers the shared screens, Chapter 1,
+   and the Chapter 1 Lab. ENONLY is true while a Spanish speaker plays an English-only part (Chapters 2-8, camp),
+   so those keep English text and English voices. T(en,es) picks the right one. */
+var LANG='en',ENONLY=false,CURCH='';
+function ES(){return LANG==='es'&&!ENONLY;}
+function T(a,b){return ES()?b:a;}
 var cur='';
 var DPR=Math.min(window.devicePixelRatio||1,3);
 function $(id){return document.getElementById(id);}
@@ -600,6 +617,17 @@ var CH=[
  {id:'ch6',title:'Mountains and Rain Shadows',desc:'Push a cloud over a mountain.',ready:true},
  {id:'ch7',title:'City Planner',desc:'Match each city to the right climate.',ready:true},
  {id:'ch8',title:'Climate Spiral',desc:'1880 to today in one minute.',ready:true}
+];
+
+var CH_ES=[
+ ['Perforaci\u00F3n de n\u00FAcleos de hielo','Ant\u00E1rtida: perfora 800,000 a\u00F1os de hielo.'],
+ ['Luz solar y estaciones','Inclina la Tierra y mu\u00E9vela alrededor del Sol.'],
+ ['El balance de energ\u00EDa de la Tierra','Gases de efecto invernadero y albedo.'],
+ ['Ciclos orbitales y glaciaciones','C\u00F3mo los cambios en la \u00F3rbita de la Tierra traen glaciaciones.'],
+ ['El aire en movimiento','La convecci\u00F3n, el efecto Coriolis y las masas de aire.'],
+ ['Monta\u00F1as y sombras de lluvia','Empuja una nube sobre una monta\u00F1a.'],
+ ['Planificador de ciudades','Relaciona cada ciudad con el clima correcto.'],
+ ['Espiral del clima','De 1880 a hoy en un minuto.']
 ];
 
 /* ---------- audio ---------- */
@@ -626,13 +654,30 @@ var SKEY='climateQuest_settings';
 var VDEF={frost:'Daniel',sam:'Samantha',rosa:'Karen'};
 var VSET={frost:'Daniel',sam:'Samantha',rosa:'Karen'};
 var VSUG=[['Daniel','British, man'],['Samantha','US English, woman'],['Karen','Australian, woman']];
-function vOk(n){for(var i=0;i<VSUG.length;i++){if(VSUG[i][0]===n)return true;}return false;}
-function loadSet(){try{var r=localStorage.getItem(SKEY);if(r){var o=JSON.parse(r);if(o&&o.voice){for(var k in VSET){if(vOk(o.voice[k]))VSET[k]=o.voice[k];}}if(o&&o.sound===false)V.on=false;}}catch(e){}}
-function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify({voice:VSET,sound:V.on}));}catch(e){}}
-function enVoices(){if(!window.speechSynthesis)return [];var vs=speechSynthesis.getVoices()||[],out=[];for(var i=0;i<vs.length;i++){if(String(vs[i].lang).toLowerCase().indexOf('en')===0)out.push(vs[i]);}return out;}
-function voiceFor(who){var n=VSET[who||'frost'],vs=enVoices(),i;if(n){for(i=0;i<vs.length;i++){if(vs[i].name===n)return vs[i];}for(i=0;i<vs.length;i++){if(vs[i].name.indexOf(n)===0)return vs[i];}}return pickVoice();}
+/* Spanish voices built into iPhone (Settings > Accessibility > Spoken Content > Voices > Spanish).
+   Paulina and Monica are usually installed; Juan, Jorge, and Diego may need a free download. */
+var VDEF_ES={frost:'Juan',sam:'Paulina',rosa:'Monica'};
+var VSET_ES={frost:'Juan',sam:'Paulina',rosa:'Monica'};
+var VSUG_ES=[['Juan','M\u00E9xico, hombre'],['Paulina','M\u00E9xico, mujer'],['Monica','Espa\u00F1a, mujer'],['Jorge','Espa\u00F1a, hombre'],['Diego','Argentina, hombre']];
+var VFALL_ES={frost:['Juan','Jorge','Diego'],sam:['Paulina','Monica'],rosa:['Monica','Paulina']};
+function vList(){return ES()?VSUG_ES:VSUG;}
+function vSet(){return ES()?VSET_ES:VSET;}
+function vDisp(n){return n==='Monica'?'M\u00F3nica':n;}
+function vOk(n,L){L=L||VSUG;for(var i=0;i<L.length;i++){if(L[i][0]===n)return true;}return false;}
+function loadSet(){try{var r=localStorage.getItem(SKEY);if(r){var o=JSON.parse(r),k;if(o&&o.voice){for(k in VSET){if(vOk(o.voice[k]))VSET[k]=o.voice[k];}}if(o&&o.voiceEs){for(k in VSET_ES){if(vOk(o.voiceEs[k],VSUG_ES))VSET_ES[k]=o.voiceEs[k];}}if(o&&o.sound===false)V.on=false;if(o&&o.lang==='es')LANG='es';}}catch(e){}}
+function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify({voice:VSET,voiceEs:VSET_ES,sound:V.on,lang:LANG}));}catch(e){}}
+function fold(s){s=String(s||'');try{if(s.normalize)s=s.normalize('NFD');}catch(e){}return s.replace(/[\u0300-\u036f]/g,'');}
+function langVoices(pre){if(!window.speechSynthesis)return [];var vs=speechSynthesis.getVoices()||[],out=[];for(var i=0;i<vs.length;i++){if(String(vs[i].lang).toLowerCase().indexOf(pre)===0)out.push(vs[i]);}return out;}
+function enVoices(){return langVoices('en');}
+function findV(vs,n){var f=fold(n),i;if(!f)return null;for(i=0;i<vs.length;i++){if(fold(vs[i].name)===f)return vs[i];}for(i=0;i<vs.length;i++){if(fold(vs[i].name).indexOf(f)===0)return vs[i];}return null;}
+function voiceForEs(who){var vs=langVoices('es'),v,i,p;if(!vs.length)return null;v=findV(vs,VSET_ES[who]);if(v)return v;
+ var fb=VFALL_ES[who]||[];for(i=0;i<fb.length;i++){v=findV(vs,fb[i]);if(v)return v;}
+ var pr=['es-mx','es-us','es-419'];for(p=0;p<pr.length;p++){for(i=0;i<vs.length;i++){if(String(vs[i].lang).toLowerCase().replace('_','-')===pr[p])return vs[i];}}return vs[0];}
+function voiceFor(who){who=who||'frost';if(ES())return voiceForEs(who);var n=VSET[who],vs=enVoices(),i;if(n){for(i=0;i<vs.length;i++){if(vs[i].name===n)return vs[i];}for(i=0;i<vs.length;i++){if(vs[i].name.indexOf(n)===0)return vs[i];}}return pickVoice();}
 /* say() returns true when it starts speaking; cb (optional) runs when that line ends or fails. */
-function say(t,pitch,who,cb){if(!window.speechSynthesis)return false;speechSynthesis.cancel();if(!V.on)return false;var u=new SpeechSynthesisUtterance(subDig(t));u.rate=0.97;u.pitch=pitch||1;u.lang='en-US';var v=voiceFor(who);if(v){try{u.voice=v;u.lang=v.lang;}catch(e){u.lang='en-US';}}if(cb){u.onend=cb;u.onerror=cb;}speechSynthesis.speak(u);return true;}
+/* Spanish speech: drop thousands commas (800,000 -> 800000) and read decimals as "punto". */
+function sayTx(t){t=subDig(t);if(ES()){t=t.replace(/(\d),(?=\d{3}(\D|$))/g,'$1').replace(/(\d)\.(\d)/g,'$1 punto $2');}return t;}
+function say(t,pitch,who,cb){if(!window.speechSynthesis)return false;speechSynthesis.cancel();if(!V.on)return false;var u=new SpeechSynthesisUtterance(sayTx(t));u.rate=0.97;u.pitch=pitch||1;var lg=ES()?'es-MX':'en-US';u.lang=lg;var v=voiceFor(who);if(v){try{u.voice=v;u.lang=v.lang;}catch(e){u.lang=lg;}}if(cb){u.onend=cb;u.onerror=cb;}speechSynthesis.speak(u);return true;}
 function hush(){if(window.speechSynthesis){speechSynthesis.cancel();}}
 
 /* ---------- screens + loop ---------- */
@@ -640,7 +685,7 @@ var screens=['scrSign','scrMenu','scrSoon','scrStory','scrDrill','scrSeason','sc
 var raf=null,loopFn=null;
 function stopLoops(){loopFn=null;if(raf){cancelAnimationFrame(raf);}raf=null;stopDrillSnd();}
 function startLoop(fn){stopLoops();loopFn=fn;var last=0;function f(ts){if(loopFn!==fn)return;var dt=last?Math.min(0.05,(ts-last)/1000):0.016;last=ts;fn(dt,ts/1000);raf=requestAnimationFrame(f);}raf=requestAnimationFrame(f);}
-function show(id){stopLoops();hush();stClear();for(var i=0;i<screens.length;i++){$(screens[i]).style.display=(screens[i]===id)?'block':'none';}cur=id;$('btnHome').style.visibility=(id==='scrSign'||id==='scrMenu')?'hidden':'visible';$('coreCard').style.display='none';$('nameCard').style.display='none';$('hpCard').style.display='none';$(id).scrollTop=0;}
+function show(id){if(id==='scrMenu'||id==='scrReport'||id==='scrSign'||id==='scrIceLab')ENONLY=false;else if(id==='scrCamp')ENONLY=(LANG==='es');stopLoops();hush();stClear();$('btnHome').textContent=T('Chapters','Cap\u00EDtulos');for(var i=0;i<screens.length;i++){$(screens[i]).style.display=(screens[i]===id)?'block':'none';}cur=id;$('btnHome').style.visibility=(id==='scrSign'||id==='scrMenu')?'hidden':'visible';$('coreCard').style.display='none';$('nameCard').style.display='none';$('hpCard').style.display='none';$(id).scrollTop=0;}
 function setupCanvas(cv,lw,lh,maxHFrac){var w=cv.parentNode.clientWidth||360;var maxH=window.innerHeight*(maxHFrac||0.5);if(w*lh/lw>maxH){w=maxH*lw/lh;}var h=w*lh/lw;cv.style.width=Math.round(w)+'px';cv.style.height=Math.round(h)+'px';cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);var c=cv.getContext('2d');var k=cv.width/lw;c.setTransform(k,0,0,k,0,0);return c;}
 
 /* ---------- drawing helpers ---------- */
@@ -712,7 +757,7 @@ function drawSection(c,x,y,w,hIce,hBed,bubbles){
 var AGE_D=[0,500,1000,1500,2000,2500,2800,3000,3200,3300];
 var AGE_A=[0,18000,60000,120000,200000,310000,430000,560000,800000,800000];
 function ageAt(d){if(d<=0)return 0;for(var i=1;i<AGE_D.length;i++){if(d<=AGE_D[i]){var f=(d-AGE_D[i-1])/(AGE_D[i]-AGE_D[i-1]);return AGE_A[i-1]+f*(AGE_A[i]-AGE_A[i-1]);}}return 800000;}
-function ageStr(d){var a=ageAt(d);if(a<60)return 'today';if(a<10000){a=Math.round(a/100)*100;}else{a=Math.round(a/1000)*1000;}return 'about '+fmt(a)+' years';}
+function ageStr(d){var a=ageAt(d);if(a<60)return T('today','hoy');if(a<10000){a=Math.round(a/100)*100;}else{a=Math.round(a/1000)*1000;}return T('about '+fmt(a)+' years','unos '+fmt(a)+' a\u00F1os');}
 
 function drawCoreShape(c,x,y,w,h,sw,mode,seed){
  var g=c.createLinearGradient(0,y,0,y+h);g.addColorStop(0,'#F2FAFE');g.addColorStop(1,'#A9D3EA');
@@ -741,7 +786,7 @@ function sceneCamp(c,t){
 function flake(c,x,y,r,a){c.save();c.translate(x,y);c.rotate(a);c.beginPath();for(var k=0;k<3;k++){var an=k*Math.PI/3;c.moveTo(-Math.cos(an)*r,-Math.sin(an)*r);c.lineTo(Math.cos(an)*r,Math.sin(an)*r);}c.stroke();c.restore();}
 function sceneSnow(c,t){
  sky(c,400,300,'#CDE8F7','#EEF7FC');
- txt(c,'The weight of new snow squeezes the old snow',200,26,'700 13px '+FONT,'#123A55','center');
+ txt(c,T('The weight of new snow squeezes the old snow','El peso de la nieve nueva aplasta la nieve vieja'),200,26,'700 13px '+FONT,'#123A55','center');
  var X=[25,150,275],Y=42,W=100,H=190,i;
  c.fillStyle='#FFFFFF';c.fillRect(X[0],Y,W,H);c.strokeStyle='#8DB9D3';c.lineWidth=1.3;
  for(i=0;i<16;i++){flake(c,X[0]+12+rnd(i)*76,Y+12+rnd(i+30)*166,5,t*0.4+i);}
@@ -751,7 +796,7 @@ function sceneSnow(c,t){
  for(i=0;i<20;i++){var bx=X[2]+10+rnd(i+3)*80,by=Y+10+rnd(i+40)*170+Math.sin(t*2+i)*1.2,br=1.8+rnd(i+8)*3;c.fillStyle='rgba(240,250,255,0.9)';circ(c,bx,by,br);c.strokeStyle='#FFFFFF';c.beginPath();c.arc(bx,by,br,0,6.2832);c.stroke();}
  c.strokeStyle='#7FA9C4';c.lineWidth=1.5;for(i=0;i<3;i++){c.strokeRect(X[i],Y,W,H);}
  c.fillStyle='#FF7A2F';var ax=[137.5,262.5];for(i=0;i<2;i++){c.beginPath();c.moveTo(ax[i]-8,128);c.lineTo(ax[i]+7,137);c.lineTo(ax[i]-8,146);c.closePath();c.fill();}
- var names=['Snow','Firn','Ice'],subs=['fluffy, full of air','packed grains','air sealed in bubbles'],dep=['at the surface','tens of meters down','~50 to 120 m down'];
+ var names=T(['Snow','Firn','Ice'],['Nieve','Neviza','Hielo']),subs=T(['fluffy, full of air','packed grains','air sealed in bubbles'],['esponjosa, con aire','granos apretados','aire en burbujas']),dep=T(['at the surface','tens of meters down','~50 to 120 m down'],['en la superficie','decenas de metros','~50 a 120 m abajo']);
  for(i=0;i<3;i++){txt(c,names[i],X[i]+50,252,'800 15px '+FONT,'#123A55','center');txt(c,subs[i],X[i]+50,269,'600 10.5px '+FONT,'#2C4A63','center');txt(c,dep[i],X[i]+50,285,'600 10px '+FONT,'#4A6B85','center');}
 }
 function mol(c,k,x,y,a){c.save();c.translate(x,y);c.rotate(a);
@@ -770,12 +815,12 @@ function sceneBubbles(c,t){
  var M=[['co2',-28,-22],['n2',22,-30],['o2',-32,22],['ch4',24,20],['n2',-2,2],['co2',34,-4],['n2',-4,-40],['o2',4,40]];
  for(i=0;i<M.length;i++){mol(c,M[i][0],200+M[i][1]+Math.sin(t*1.3+i)*4,136+M[i][2]+Math.cos(t*1.1+i*2)*4,t*0.6+i);}
  c.strokeStyle='#2C4A63';c.lineWidth=6;c.beginPath();c.arc(200,136,108,0,6.2832);c.stroke();
- txt(c,'Ancient air trapped in a bubble',200,264,'800 13px '+FONT,'#123A55','center');
+ txt(c,T('Ancient air trapped in a bubble','Aire antiguo atrapado en una burbuja'),200,264,'800 13px '+FONT,'#123A55','center');
  c.fillStyle='#2B2B2B';circ(c,40,284,4);c.fillStyle='#E0523A';circ(c,32,284,3.5);circ(c,48,284,3.5);
- txt(c,'CO\u2082 carbon dioxide',58,288,'600 10.5px '+FONT,'#123A55');
+ var lf=T('600 10.5px ','600 9.5px ');txt(c,T('CO\u2082 carbon dioxide','CO\u2082 di\u00F3xido de carbono'),58,288,lf+FONT,'#123A55');
  c.fillStyle='#FFFFFF';circ(c,181,279,2.4);circ(c,191,279,2.4);circ(c,181,289,2.4);circ(c,191,289,2.4);c.fillStyle='#2B2B2B';circ(c,186,284,4);
- txt(c,'CH\u2084 methane',198,288,'600 10.5px '+FONT,'#123A55');
- c.fillStyle='#4F7FD9';circ(c,286,284,3.5);circ(c,293,284,3.5);txt(c,'N\u2082, O\u2082 air',301,288,'600 10.5px '+FONT,'#123A55');
+ txt(c,T('CH\u2084 methane','CH\u2084 metano'),198,288,lf+FONT,'#123A55');
+ c.fillStyle='#4F7FD9';circ(c,286,284,3.5);circ(c,293,284,3.5);txt(c,T('N\u2082, O\u2082 air','N\u2082, O\u2082 aire'),301,288,lf+FONT,'#123A55');
 }
 function sceneLayers(c,t){
  sky(c,400,300,'#9ACDEB','#DDF0FA');
@@ -785,14 +830,14 @@ function sceneLayers(c,t){
  c.strokeStyle='#2C4A63';c.lineWidth=1;c.strokeRect(X,Y,W,HI+HB);
  var d=(t*380)%3800;if(d>3270)d=3270;var yd=Y+d/3270*HI;
  c.fillStyle='#5E8FAE';c.fillRect(197,Y,6,yd-Y);c.fillStyle='#FF7A2F';c.fillRect(195,yd-7,10,8);
- txt(c,'Depth',X-6,26,'800 11px '+FONT,'#123A55','right');txt(c,'Age of ice',X+W+6,26,'800 11px '+FONT,'#123A55');
+ txt(c,T('Depth','Profundidad'),X-6,26,'800 11px '+FONT,'#123A55','right');txt(c,T('Age of ice','Antig\u00FCedad'),X+W+6,26,'800 11px '+FONT,'#123A55');
  var marks=[0,1000,2000,3000,3200];c.strokeStyle='#2C4A63';
  for(var i=0;i<marks.length;i++){var m=marks[i],yy=Y+m/3270*HI;c.beginPath();c.moveTo(X-4,yy);c.lineTo(X,yy);c.moveTo(X+W,yy);c.lineTo(X+W+4,yy);c.stroke();
   txt(c,fmt(m)+' m',X-6,yy+3.5,'600 10px '+FONT,'#123A55','right');
-  txt(c,m===0?'today':'~'+fmt(Math.round(ageAt(m)/1000)*1000)+' yr',X+W+6,yy+3.5,'600 10px '+FONT,'#123A55');}
- txt(c,'ash layer',X+W-4,Y+1300/3270*HI-3,'600 9px '+FONT,'#3E3A36','right');
- txt(c,'bedrock',X+W-4,Y+HI+13,'700 9px '+FONT,'#F4E6D4','right');
- txt(c,'Deeper ice = older ice',200,292,'800 13px '+FONT,'#123A55','center');
+  txt(c,m===0?T('today','hoy'):'~'+fmt(Math.round(ageAt(m)/1000)*1000)+T(' yr',' a\u00F1os'),X+W+6,yy+3.5,T('600 10px ','600 9.5px ')+FONT,'#123A55');}
+ txt(c,T('ash layer','capa de ceniza'),X+W-4,Y+1300/3270*HI-3,'600 9px '+FONT,'#3E3A36','right');
+ txt(c,T('bedrock','lecho de roca'),X+W-4,Y+HI+13,'700 9px '+FONT,'#F4E6D4','right');
+ txt(c,T('Deeper ice = older ice','Hielo m\u00E1s profundo = hielo m\u00E1s antiguo'),200,292,'800 13px '+FONT,'#123A55','center');
 }
 function sceneCore(c,t){
  c.fillStyle='#DCEFFA';c.fillRect(0,0,400,300);c.fillStyle='#C9DEEA';c.fillRect(0,190,400,110);
@@ -801,25 +846,25 @@ function sceneCore(c,t){
  var bob=Math.sin(t*1.5)*2;
  c.fillStyle='#8A97A6';c.fillRect(60,62+bob,240,26);c.fillStyle='#5B6775';c.fillRect(70,70+bob,230,10);
  c.fillStyle='#FF7A2F';for(var k=0;k<4;k++){c.beginPath();c.moveTo(300,62+bob+k*6.5);c.lineTo(312,65+bob+k*6.5);c.lineTo(300,68.5+bob+k*6.5);c.closePath();c.fill();}
- txt(c,'Hollow drill barrel with cutting teeth',180,52,'800 12px '+FONT,'#123A55','center');
+ txt(c,T('Hollow drill barrel with cutting teeth','Tubo hueco de perforaci\u00F3n con dientes'),180,52,'800 12px '+FONT,'#123A55','center');
  drawCoreShape(c,50,128,300,42,12,'bubbles',3);
- txt(c,'Ice core: a cylinder of ice about 10 cm across',200,222,'800 12px '+FONT,'#123A55','center');
- txt(c,'Pulled up a few meters at a time',200,240,'600 11px '+FONT,'#2C4A63','center');
+ txt(c,T('Ice core: a cylinder of ice about 10 cm across','N\u00FAcleo de hielo: cilindro de unos 10 cm de ancho'),200,222,'800 12px '+FONT,'#123A55','center');
+ txt(c,T('Pulled up a few meters at a time','Se saca unos pocos metros a la vez'),200,240,'600 11px '+FONT,'#2C4A63','center');
 }
 function drawScene(c,name,t){if(name==='camp')sceneCamp(c,t);else if(name==='snow')sceneSnow(c,t);else if(name==='bubbles')sceneBubbles(c,t);else if(name==='layers')sceneLayers(c,t);else if(name==='core')sceneCore(c,t);else drawScene2(c,name,t);}
 
 /* ---------- story engine ---------- */
-var WHO={frost:{n:'Dr. Frost',col:'#1F7E94',pitch:1.05},sam:{n:'Sam (new worker)',col:'#D9601C',pitch:0.8},rosa:{n:'Rosa (new worker)',col:'#A37F00',pitch:1.3}};
+var WHO={frost:{n:'Dr. Frost',es:'Dr. Frost',sh:'Dr. Frost',col:'#1F7E94',pitch:1.05},sam:{n:'Sam (new worker)',es:'Sam (en su primer d\u00EDa)',sh:'Sam',col:'#D9601C',pitch:0.8},rosa:{n:'Rosa (new worker)',es:'Rosa (en su primer d\u00EDa)',sh:'Rosa',col:'#A37F00',pitch:1.3}};
 var story=null,sIdx=0;
 /* No skipping: Next stays dim until the line has been spoken (or, with sound off, until there has
    been time to read it). Lines already heard unlock right away when a student goes Back. A backup timer
    makes sure Next always unlocks even if the device never reports that speech ended. */
 var stTimers=[];
 function stClear(){for(var i=0;i<stTimers.length;i++)clearTimeout(stTimers[i]);stTimers=[];}
-function stLock(on){var b=$('btnNext');b.disabled=on;b.className=on?'big wait':'big';$('nextNote').textContent=on?(V.on?'Listen to the whole line to unlock Next.':'Read the whole line to unlock Next.'):'';}
+function stLock(on){var b=$('btnNext');b.disabled=on;b.className=on?'big wait':'big';$('nextNote').textContent=on?(V.on?T('Listen to the whole line to unlock Next.','Escucha toda la l\u00EDnea para desbloquear Siguiente.'):T('Read the whole line to unlock Next.','Lee toda la l\u00EDnea para desbloquear Siguiente.')):'';}
 function stUnlock(tok){if(!story||tok!==story.tok)return;if(sIdx>story.max)story.max=sIdx;stLock(false);}
 function startStory(steps,onDone,last){stClear();story={steps:steps,done:onDone,last:last,max:-1,tok:0};sIdx=0;show('scrStory');var c=setupCanvas($('storyCv'),400,300,0.42);startLoop(function(dt,t){drawScene(c,story.steps[sIdx].sc,t);});renderStep();}
-function renderStep(){var st=story.steps[sIdx],w=WHO[st.who];$('spName').textContent=w.n;$('spName').style.color=w.col;$('spText').textContent=st.tx;$('stepCount').textContent=(sIdx+1)+' / '+story.steps.length;$('btnPrev').style.visibility=sIdx>0?'visible':'hidden';$('btnNext').textContent=(sIdx===story.steps.length-1)?(story.last||'Start'):'Next';
+function renderStep(){var st=story.steps[sIdx],w=WHO[st.who];$('spName').textContent=T(w.n,w.es);$('btnPrev').textContent=T('Back','Atr\u00E1s');$('btnReplay').textContent=T('Replay','Repetir');$('spName').style.color=w.col;$('spText').textContent=st.tx;$('stepCount').textContent=(sIdx+1)+' / '+story.steps.length;$('btnPrev').style.visibility=sIdx>0?'visible':'hidden';$('btnNext').textContent=(sIdx===story.steps.length-1)?(story.last||'Start'):T('Next','Siguiente');
  stClear();story.tok++;var tok=story.tok,words=st.tx.split(/\s+/).length,heard=sIdx<=story.max;stLock(!heard);
  if(heard){say(st.tx,w.pitch,st.who);return;}
  var minMs=Math.max(1500,words*230),gate={spoke:false,min:false};
@@ -846,23 +891,45 @@ var CH1_STEPS=[
  {sc:'camp',who:'frost',tx:"Your job: drill three ice cores, each one deeper than the last. Hold the drill button to drill. If the motor gets too hot, let go so it can cool down. Let's go!"}
 ];
 
+var CH1_STEPS_ES=[
+ {sc:'camp',who:'frost',tx:"\u00A1Bienvenido a la Ant\u00E1rtida, equipo! Soy el Dr. Frost. Ahora mismo estamos sobre un manto de hielo de m\u00E1s de 3 kil\u00F3metros de grosor."},
+ {sc:'camp',who:'sam',tx:"\u00BFTres kil\u00F3metros de hielo? \u00BFC\u00F3mo lleg\u00F3 todo esto hasta aqu\u00ED?"},
+ {sc:'camp',who:'frost',tx:"\u00A1Por la nieve! Aqu\u00ED nieva todos los a\u00F1os y la nieve casi nunca se derrite. La nieve nueva se acumula sobre la nieve vieja, a\u00F1o tras a\u00F1o, durante cientos de miles de a\u00F1os."},
+ {sc:'snow',who:'frost',tx:"El peso de la nieve nueva aplasta la nieve vieja que est\u00E1 debajo. Primero se compacta en una nieve vieja y granulosa llamada neviza. Despu\u00E9s se convierte en hielo s\u00F3lido."},
+ {sc:'snow',who:'frost',tx:"M\u00E1s o menos entre 50 y 120 metros de profundidad, los peque\u00F1os espacios de aire entre los granos quedan sellados. Se convierten en diminutas burbujas de aire atrapadas dentro del hielo."},
+ {sc:'bubbles',who:'frost',tx:"Cada burbuja es una muestra de aire antiguo. En el laboratorio medimos los gases que contiene, como el di\u00F3xido de carbono y el metano, para saber c\u00F3mo era la atm\u00F3sfera de la Tierra hace mucho tiempo."},
+ {sc:'bubbles',who:'frost',tx:"El hielo guarda otras pistas tambi\u00E9n. Unas formas especiales de hidr\u00F3geno y ox\u00EDgeno, llamadas is\u00F3topos, nos dicen qu\u00E9 tan c\u00E1lido o fr\u00EDo era el clima. Las capas de polvo y ceniza volc\u00E1nica registran tormentas de viento y erupciones."},
+ {sc:'layers',who:'rosa',tx:"Entonces, si la nieve se sigue acumulando, \u00BFel hielo m\u00E1s profundo debe ser el m\u00E1s antiguo?"},
+ {sc:'layers',who:'frost',tx:"\u00A1Exacto! El hielo m\u00E1s nuevo est\u00E1 arriba y el m\u00E1s antiguo est\u00E1 abajo. En lo profundo, el peso de todo ese hielo aplasta las capas y las hace cada vez m\u00E1s delgadas."},
+ {sc:'layers',who:'frost',tx:"En un lugar llamado Domo C, los cient\u00EDficos perforaron unos 3.2 kil\u00F3metros hacia abajo y sacaron hielo de unos 800,000 a\u00F1os de antig\u00FCedad."},
+ {sc:'layers',who:'rosa',tx:"\u00BF800,000 a\u00F1os? \u00A1Eso es m\u00E1s antiguo que nuestra especie!"},
+ {sc:'layers',who:'frost',tx:"\u00A1As\u00ED es! Los seres humanos modernos existen desde hace solo unos 300,000 a\u00F1os. El hielo muestra que el di\u00F3xido de carbono subi\u00F3 y baj\u00F3 entre unas 180 y 300 partes por mill\u00F3n durante las glaciaciones y los periodos c\u00E1lidos. Hoy supera las 420."},
+ {sc:'core',who:'frost',tx:"Nuestra perforadora es un tubo hueco con dientes afilados. Corta un cilindro de hielo de unos 10 cent\u00EDmetros de ancho, llamado n\u00FAcleo de hielo. Lo sacamos unos pocos metros a la vez."},
+ {sc:'camp',who:'frost',tx:"Tu tarea: perforar tres n\u00FAcleos de hielo, cada uno m\u00E1s profundo que el anterior. Mant\u00E9n presionado el bot\u00F3n para perforar. Si el motor se calienta demasiado, su\u00E9ltalo para que se enfr\u00EDe. \u00A1Vamos!"}
+];
+
 /* ---------- drill game ---------- */
 var CORES=[
  {target:500,mode:'bubbles',sw:22,title:'Core 1: about 18,000 years old',fact:"This ice formed near the end of the last ice age, when giant ice sheets covered much of North America. Look at all the tiny air bubbles. Each one holds a sample of air from that time."},
  {target:2000,mode:'crystal',sw:9,title:'Core 2: about 200,000 years old',fact:"The bubbles seem to vanish down here! The pressure is so high that the air gets squeezed into tiny crystals called clathrates. The air is still trapped, so scientists can still measure it. Notice the layers are squeezed thinner too."},
  {target:3200,mode:'crystal',sw:4,title:'Core 3: about 800,000 years old!',fact:"Jackpot! This ice is older than our species. Ice this deep holds a record of about eight ice-age cycles, and its air shows carbon dioxide never got close to today's level of over 420 parts per million."}
 ];
+var CORES_ES=[
+ {title:'N\u00FAcleo 1: unos 18,000 a\u00F1os de antig\u00FCedad',fact:"Este hielo se form\u00F3 cerca del final de la \u00FAltima glaciaci\u00F3n, cuando enormes mantos de hielo cubr\u00EDan gran parte de Am\u00E9rica del Norte. Mira todas las diminutas burbujas de aire. Cada una guarda una muestra del aire de esa \u00E9poca."},
+ {title:'N\u00FAcleo 2: unos 200,000 a\u00F1os de antig\u00FCedad',fact:"\u00A1Aqu\u00ED abajo las burbujas parecen desaparecer! La presi\u00F3n es tan alta que el aire queda comprimido en diminutos cristales llamados clatratos. El aire sigue atrapado, as\u00ED que los cient\u00EDficos todav\u00EDa pueden medirlo. F\u00EDjate que las capas tambi\u00E9n est\u00E1n m\u00E1s aplastadas."},
+ {title:'N\u00FAcleo 3: \u00A1unos 800,000 a\u00F1os de antig\u00FCedad!',fact:"\u00A1Premio mayor! Este hielo es m\u00E1s antiguo que nuestra especie. El hielo a esta profundidad guarda un registro de unos ocho ciclos de glaciaciones, y su aire muestra que el di\u00F3xido de carbono nunca se acerc\u00F3 al nivel actual de m\u00E1s de 420 partes por mill\u00F3n."}
+];
 var D={i:0,depth:0,start:0,heat:0,jam:0,hold:false,phase:'drill',pull:0,c:null};
 function dY(d){return 120+d/3270*335;}
-function startDrillGame(){show('scrDrill');D.i=0;D.depth=0;D.start=0;D.heat=0;D.jam=0;D.hold=false;D.phase='drill';D.pull=0;D.c=setupCanvas($('drillCv'),400,480,0.4);setDrillUI();startLoop(drillLoop);say("Hold the button to start drilling!",1.05);}
-function setDrillUI(){$('dCore').textContent='Ice core '+(D.i+1)+' of 3: drill to '+fmt(CORES[D.i].target)+' m';$('btnHold').style.display=(D.phase==='drill')?'block':'none';$('btnPull').style.display=(D.phase==='reached')?'block':'none';if(D.phase==='drill'){$('dMsg').textContent='';}}
+function startDrillGame(){show('scrDrill');D.i=0;D.depth=0;D.start=0;D.heat=0;D.jam=0;D.hold=false;D.phase='drill';D.pull=0;D.c=setupCanvas($('drillCv'),400,480,0.4);setDrillUI();startLoop(drillLoop);say(T("Hold the button to start drilling!","\u00A1Mant\u00E9n presionado el bot\u00F3n para empezar a perforar!"),1.05);}
+function setDrillUI(){$('dCore').textContent=T('Ice core '+(D.i+1)+' of 3: drill to '+fmt(CORES[D.i].target)+' m','N\u00FAcleo de hielo '+(D.i+1)+' de 3: perfora hasta '+fmt(CORES[D.i].target)+' m');$('dDepthL').textContent=T('Depth:','Profundidad:');$('dAgeL').textContent=T('Ice age:','Edad del hielo:');$('dHeatL').textContent=T('Motor heat','Calor del motor');$('btnHold').textContent=T('Hold to drill','Mant\u00E9n presionado');$('btnPull').textContent=T('Pull up the ice core','Sacar el n\u00FAcleo de hielo');$('btnHold').style.display=(D.phase==='drill')?'block':'none';$('btnPull').style.display=(D.phase==='reached')?'block':'none';if(D.phase==='drill'){$('dMsg').textContent='';}}
 function drillLoop(dt,t){
  var cr=CORES[D.i];
  if(D.phase==='drill'){
-  if(D.jam>0){D.jam-=dt;D.heat=Math.max(0,D.heat-32*dt);if(D.jam<=0){$('dMsg').textContent=D.hold?'':'Motor cooled. Hold to drill again.';if(D.hold)startDrillSnd();}}
+  if(D.jam>0){D.jam-=dt;D.heat=Math.max(0,D.heat-32*dt);if(D.jam<=0){$('dMsg').textContent=D.hold?'':T('Motor cooled. Hold to drill again.','El motor se enfri\u00F3. Mant\u00E9n presionado para seguir perforando.');if(D.hold)startDrillSnd();}}
   else if(D.hold){D.depth+=(cr.target-D.start)/8*dt;D.heat+=13*dt;
-   if(D.heat>=100){D.heat=100;D.jam=1.6;stopDrillSnd();sfx.buzz();$('dMsg').textContent='Motor too hot! Let go so it can cool down.';}
-   if(D.depth>=cr.target){D.depth=cr.target;D.phase='reached';D.hold=false;D.jam=0;$('btnHold').className='hold';stopDrillSnd();sfx.good();setDrillUI();$('dMsg').textContent='Target reached! Pull up the ice core.';}}
+   if(D.heat>=100){D.heat=100;D.jam=1.6;stopDrillSnd();sfx.buzz();$('dMsg').textContent=T('Motor too hot! Let go so it can cool down.','\u00A1El motor est\u00E1 muy caliente! Suelta el bot\u00F3n para que se enfr\u00EDe.');}
+   if(D.depth>=cr.target){D.depth=cr.target;D.phase='reached';D.hold=false;D.jam=0;$('btnHold').className='hold';stopDrillSnd();sfx.good();setDrillUI();$('dMsg').textContent=T('Target reached! Pull up the ice core.','\u00A1Llegaste a la meta! Saca el n\u00FAcleo de hielo.');}}
   else{D.heat=Math.max(0,D.heat-30*dt);}
  }else if(D.phase==='pull'){D.pull+=dt/1.6;if(D.pull>=1){D.pull=1;D.phase='card';showCoreCard();}}
  $('dDepth').textContent=fmt(D.depth)+' m';$('dAge').textContent=ageStr(D.depth);
@@ -880,7 +947,7 @@ function drawDrill(c,t){
  var i;c.strokeStyle='rgba(18,58,85,0.55)';c.lineWidth=1;
  for(i=0;i<=3000;i+=500){var y=dY(i);c.beginPath();c.moveTo(0,y);c.lineTo(8,y);c.stroke();if(i>0)txt(c,fmt(i)+' m',11,y+3.5,'600 10px '+FONT,'#123A55');}
  var ty=dY(CORES[D.i].target);c.strokeStyle='#FF7A2F';c.lineWidth=2;c.setLineDash([6,5]);c.beginPath();c.moveTo(60,ty);c.lineTo(400,ty);c.stroke();c.setLineDash([]);
- c.fillStyle='rgba(14,27,44,0.82)';rr(c,300,ty-20,94,17,6);c.fill();txt(c,'Target '+fmt(CORES[D.i].target)+' m',347,ty-8,'700 10px '+FONT,'#FFFFFF','center');
+ c.fillStyle='rgba(14,27,44,0.82)';rr(c,300,ty-20,94,17,6);c.fill();txt(c,T('Target ','Meta ')+fmt(CORES[D.i].target)+' m',347,ty-8,'700 10px '+FONT,'#FFFFFF','center');
  var yd=dY(D.depth);c.fillStyle='#5E8FAE';c.fillRect(196,120,8,Math.max(0,yd-120));
  if(D.phase==='pull'||D.phase==='card'){var top=dY(CORES[D.i].target)-(dY(CORES[D.i].target)-96)*D.pull;c.strokeStyle='#3B4654';c.lineWidth=2;c.beginPath();c.moveTo(200,40);c.lineTo(200,top);c.stroke();drawCoreShape(c,195,top,10,30,3,'bubbles',1);}
  else{c.strokeStyle='#3B4654';c.lineWidth=2;c.beginPath();c.moveTo(200,40);c.lineTo(200,yd-8);c.stroke();
@@ -890,12 +957,12 @@ function drawDrill(c,t){
 }
 function holdOn(e){if(e)e.preventDefault();ac();if(D.phase!=='drill')return;D.hold=true;$('btnHold').className='hold on';if(D.jam<=0){startDrillSnd();$('dMsg').textContent='';}}
 function holdOff(e){if(e)e.preventDefault();D.hold=false;$('btnHold').className='hold';stopDrillSnd();}
-function showCoreCard(){var cr=CORES[D.i];$('coreCard').style.display='block';$('ccTitle').textContent=cr.title;$('ccText').textContent=cr.fact;$('ccNext').textContent=(D.i<2)?'Drill the next core':'Take the quiz';
+function showCoreCard(){var cr=CORES[D.i],ct=T(cr,CORES_ES[D.i]);$('coreCard').style.display='block';$('ccTitle').textContent=ct.title;$('ccText').textContent=ct.fact;$('ccNext').textContent=(D.i<2)?T('Drill the next core','Perforar el siguiente n\u00FAcleo'):T('Take the quiz','Hacer el cuestionario');
  var c=setupCanvas($('coreCv'),600,190,0.3);c.fillStyle='#F4FAFD';c.fillRect(0,0,600,190);drawCoreShape(c,40,30,520,80,cr.sw,cr.mode,D.i*20+5);
  c.fillStyle='#F2C230';c.fillRect(40,135,520,22);c.strokeStyle='#5A4500';c.lineWidth=1;for(var k=0;k<=10;k++){var x=40+k*52;c.beginPath();c.moveTo(x,135);c.lineTo(x,k%5===0?151:145);c.stroke();}
  txt(c,'0',40,178,'700 14px '+FONT,'#123A55','center');txt(c,'50 cm',300,178,'700 14px '+FONT,'#123A55','center');txt(c,'1 m',560,178,'700 14px '+FONT,'#123A55','center');
- say(cr.title.replace(':','.')+'. '+cr.fact,1.05);}
-function nextCore(){sfx.click();hush();$('coreCard').style.display='none';if(D.i<2){D.start=CORES[D.i].target;D.i++;D.phase='drill';D.heat=0;D.jam=0;D.pull=0;setDrillUI();}else{startQuiz('ch1',CH1_QUIZ);}}
+ say(ct.title.replace(':','.')+'. '+ct.fact,1.05);}
+function nextCore(){sfx.click();hush();$('coreCard').style.display='none';if(D.i<2){D.start=CORES[D.i].target;D.i++;D.phase='drill';D.heat=0;D.jam=0;D.pull=0;setDrillUI();}else{startQuiz('ch1',T(CH1_QUIZ,CH1_QUIZ_ES));}}
 
 /* ---------- quiz backgrounds ---------- */
 function bgSheet(c){
@@ -925,58 +992,70 @@ var CH1_QUIZ=[
  {t:'text',q:'In your own words, explain how an ice core tells scientists about Earth\'s ancient atmosphere.'}
 ];
 
+var CH1_QUIZ_ES=[
+ {t:'mc',q:'\u00BFQu\u00E9 contienen las diminutas burbujas de aire de un n\u00FAcleo de hielo?',o:['Muestras de aire antiguo','Agua de mar derretida','Ox\u00EDgeno puro producido por el hielo','Vapor de agua de hoy'],a:0,why:'Cuando la nieve se convierte en hielo, el aire entre los granos queda sellado en burbujas. Ese aire es una muestra de la atm\u00F3sfera de cuando se form\u00F3 el hielo.'},
+ {t:'mc',q:'\u00BFD\u00F3nde est\u00E1 el hielo M\u00C1S ANTIGUO de un manto de hielo?',o:['Arriba','En el medio','Abajo, en el fondo','Todo el hielo tiene la misma edad'],a:2,why:'La nieve nueva se acumula sobre la nieve vieja, as\u00ED que el hielo m\u00E1s profundo es el m\u00E1s antiguo y el de arriba es el m\u00E1s nuevo.'},
+ {t:'mc',q:'\u00BFAproximadamente cu\u00E1ntos a\u00F1os atr\u00E1s llega el registro del n\u00FAcleo de hielo del Domo C?',o:['8,000 a\u00F1os','80,000 a\u00F1os','800,000 a\u00F1os','8 millones de a\u00F1os'],a:2,why:'El n\u00FAcleo del Domo C, en la Ant\u00E1rtida, mide unos 3.2 km de largo y guarda unos 800,000 a\u00F1os de historia del clima.'},
+ {t:'mc',q:'\u00BFQu\u00E9 convierte la nieve en hielo s\u00F3lido en un manto de hielo?',o:['El Sol la derrite todos los d\u00EDas','El peso de la nieve nueva la aplasta','El agua de mar se congela dentro de ella','El viento la empuja y forma bloques'],a:1,why:'El peso de la nieve de arriba compacta la nieve vieja y la convierte en neviza, y luego en hielo s\u00F3lido.'},
+ {t:'mc',q:'Comparado con el registro de 800,000 a\u00F1os del n\u00FAcleo de hielo, \u00BFcu\u00E1nto CO\u2082 hay en el aire hoy?',o:['Menos que nunca','M\u00E1s o menos el promedio','M\u00E1s que en cualquier momento del registro','Exactamente lo mismo'],a:2,why:'En el registro del n\u00FAcleo de hielo, el CO\u2082 se mantuvo entre unas 180 y 300 ppm. Hoy supera las 420 ppm.'},
+ {t:'mc',q:'\u00BFQu\u00E9 pista en el hielo les dice a los cient\u00EDficos qu\u00E9 tan c\u00E1lido o fr\u00EDo era el clima?',o:['El color de la perforadora','Los is\u00F3topos de hidr\u00F3geno y ox\u00EDgeno del hielo','Qu\u00E9 tan ruidosa es la perforadora','El tama\u00F1o del n\u00FAcleo de hielo'],a:1,why:'Unas formas especiales de los \u00E1tomos de hidr\u00F3geno y ox\u00EDgeno, llamadas is\u00F3topos, cambian con la temperatura, as\u00ED que funcionan como un term\u00F3metro antiguo.'},
+ {t:'label',q:'Etiqueta el manto de hielo. Toca una etiqueta y luego toca el c\u00EDrculo punteado donde va.',bg:'sheet',guide:true,labels:[{s:'Nieve',x:300,y:75,seg:[0,75,600,75],tol:36},{s:'Hielo m\u00E1s nuevo',x:300,y:150,seg:[0,150,600,150],tol:40},{s:'Hielo m\u00E1s antiguo',x:300,y:510,seg:[0,510,600,510],tol:42},{s:'Burbuja de aire',x:470,y:330,r:64}]},
+ {t:'draw',q:'Dibuja la perforadora bajando dentro del hielo. Luego encierra en un c\u00EDrculo d\u00F3nde encontrar\u00EDas las burbujas de aire M\u00C1S ANTIGUAS.',bg:'draw'},
+ {t:'text',q:'Con tus propias palabras, explica c\u00F3mo un n\u00FAcleo de hielo les ense\u00F1a a los cient\u00EDficos sobre la atm\u00F3sfera antigua de la Tierra.'}
+];
+
 /* ---------- quiz engine ---------- */
 var Q={ch:'',list:[],i:0,items:[]};
 function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined&&text!==null)e.textContent=text;return e;}
-function chTitle(id){for(var i=0;i<CH.length;i++){if(CH[i].id===id)return CH[i].title;}return id;}
+function chTitle(id){for(var i=0;i<CH.length;i++){if(CH[i].id===id)return ES()?CH_ES[i][0]:CH[i].title;}return id;}
 function startQuiz(ch,list){Q.ch=ch;Q.list=list;Q.i=0;Q.items=[];show('scrQuiz');renderQ();}
 function renderQ(){var b=$('quizBody');b.innerHTML='';$('scrQuiz').scrollTop=0;var q=Q.list[Q.i];
- b.appendChild(el('div','qhead',chTitle(Q.ch)+' quiz: question '+(Q.i+1)+' of '+Q.list.length));
+ b.appendChild(el('div','qhead',T(chTitle(Q.ch)+' quiz: question '+(Q.i+1)+' of '+Q.list.length,'Cuestionario: pregunta '+(Q.i+1)+' de '+Q.list.length)));
  b.appendChild(el('p','qtext',q.q));
  if(q.t==='mc')renderMC(b,q);else if(q.t==='text')renderText(b,q);else if(q.t==='label')renderLabel(b,q);else if(q.t==='draw')renderDraw(b,q);}
-function nextBtn(b){var n=el('button','big',Q.i<Q.list.length-1?'Next question':'See my results');n.onclick=function(){sfx.click();Q.i++;if(Q.i<Q.list.length)renderQ();else finishQuiz();};b.appendChild(n);}
+function nextBtn(b){var n=el('button','big',Q.i<Q.list.length-1?T('Next question','Siguiente pregunta'):T('See my results','Ver mis resultados'));n.onclick=function(){sfx.click();Q.i++;if(Q.i<Q.list.length)renderQ();else finishQuiz();};b.appendChild(n);}
 function renderMC(b,q){var btns=[];for(var i=0;i<q.o.length;i++){(function(i){var o=el('button','opt',String.fromCharCode(65+i)+'.  '+q.o[i]);o.onclick=function(){if(o.disabled)return;for(var k=0;k<btns.length;k++){btns[k].disabled=true;}btns[q.a].className='opt right';var ok=(i===q.a);if(!ok){o.className='opt wrong';sfx.bad();}else{sfx.good();}
- Q.items.push({t:'mc',q:q.q,ans:q.o[i],ok:ok,right:q.o[q.a]});b.appendChild(el('div','why',(ok?'Correct! ':'Not quite. ')+q.why));nextBtn(b);};btns.push(o);b.appendChild(o);})(i);}}
-function renderText(b,q){var ta=el('textarea');ta.placeholder='Type your answer here. Use complete sentences.';b.appendChild(ta);var m=el('p','msg','');var s=el('button','big','Save my answer');s.onclick=function(){var v=clean(ta.value).replace(/^\s+|\s+$/g,'');if(v.split(/\s+/).length<8){m.textContent='Write at least one full sentence (8 or more words).';sfx.bad();return;}ta.disabled=true;s.style.display='none';m.textContent='';sfx.good();Q.items.push({t:'text',q:q.q,ans:v,ok:null});b.appendChild(el('div','why','Saved. Your teacher will read this answer in your PDF.'));nextBtn(b);};b.appendChild(s);b.appendChild(m);}
+ Q.items.push({t:'mc',q:q.q,ans:q.o[i],ok:ok,right:q.o[q.a]});b.appendChild(el('div','why',(ok?T('Correct! ','\u00A1Correcto! '):T('Not quite. ','No exactamente. '))+q.why));nextBtn(b);};btns.push(o);b.appendChild(o);})(i);}}
+function renderText(b,q){var ta=el('textarea');ta.placeholder=T('Type your answer here. Use complete sentences.','Escribe tu respuesta aqu\u00ED. Usa oraciones completas.');b.appendChild(ta);var m=el('p','msg','');var s=el('button','big',T('Save my answer','Guardar mi respuesta'));s.onclick=function(){var v=clean(ta.value).replace(/^\s+|\s+$/g,'');if(v.split(/\s+/).length<8){m.textContent=T('Write at least one full sentence (8 or more words).','Escribe al menos una oraci\u00F3n completa (8 palabras o m\u00E1s).');sfx.bad();return;}ta.disabled=true;s.style.display='none';m.textContent='';sfx.good();Q.items.push({t:'text',q:q.q,ans:v,ok:null});b.appendChild(el('div','why',T('Saved. Your teacher will read this answer in your PDF.','Guardado. Tu docente leer\u00E1 esta respuesta en tu PDF.')));nextBtn(b);};b.appendChild(s);b.appendChild(m);}
 function cpos(cv,e){var r=cv.getBoundingClientRect();var p=(e.touches&&e.touches.length)?e.touches[0]:((e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e);return {x:(p.clientX-r.left)*cv.width/r.width,y:(p.clientY-r.top)*cv.height/r.height};}
 function drawBg(c,name){c.fillStyle='#FFFFFF';c.fillRect(0,0,600,620);if(name==='sheet')bgSheet(c);else if(name==='draw')bgDraw(c);else if(name==='sideJune')bgSideJune(c);else if(name==='sideDec')bgSideDec(c);else if(name==='energy')bgEnergy(c);else if(name==='gh')bgGH(c);else if(name==='cycles')bgCycles(c);else if(name==='iceaxis')bgIceAxis(c);else if(name==='cells')bgCells(c);else if(name==='breeze')bgBreeze(c);else if(name==='mtn')bgMtn(c);else if(name==='mtndraw')bgMtnDraw(c);else if(name==='climolbl')bgClimoLbl(c);else if(name==='climodraw')bgClimoDraw(c);else if(name==='spiral')bgSpiral(c);else if(name==='trend')bgTrend(c);}
 function lblOk(lb,p){if(lb.seg){var x1=lb.seg[0],y1=lb.seg[1],x2=lb.seg[2],y2=lb.seg[3],dx=x2-x1,dy=y2-y1,u=((p.x-x1)*dx+(p.y-y1)*dy)/(dx*dx+dy*dy);u=Math.max(0,Math.min(1,u));var ex=x1+u*dx-p.x,ey=y1+u*dy-p.y;return Math.sqrt(ex*ex+ey*ey)<(lb.tol||35);}var ddx=p.x-lb.x,ddy=p.y-lb.y;return Math.sqrt(ddx*ddx+ddy*ddy)<(lb.r||50);}
 function renderLabel(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=620;b.appendChild(cv);var c=cv.getContext('2d');var place=[],sel=-1,checked=false,chips=[];var i;for(i=0;i<q.labels.length;i++)place.push(null);
  function tag(s,x,y,col){c.font='700 20px '+FONT;var w=mtext(c,s)+20;var tx=Math.max(4,Math.min(596-w,x-w/2)),ty=y-44,above=true;if(ty<4){ty=y+14;above=false;}c.strokeStyle=col;c.lineWidth=2;c.beginPath();c.moveTo(x,y);c.lineTo(tx+w/2,above?ty+30:ty);c.stroke();c.fillStyle='rgba(14,27,44,0.9)';rr(c,tx,ty,w,30,9);c.fill();c.strokeStyle=col;c.lineWidth=2.5;rr(c,tx,ty,w,30,9);c.stroke();c.font='700 20px '+FONT;c.fillStyle='#FFFFFF';ftext(c,s,tx+10,ty+21);c.fillStyle=col;circ(c,x,y,7);c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.arc(x,y,7,0,6.2832);c.stroke();}
  function redraw(res){drawBg(c,q.bg);var k;if(q.guide&&!res){c.setLineDash([7,6]);c.lineWidth=3;for(k=0;k<q.labels.length;k++){c.strokeStyle='rgba(255,122,47,0.9)';c.beginPath();c.arc(q.labels[k].x,q.labels[k].y,20,0,6.2832);c.stroke();}c.setLineDash([]);}for(k=0;k<place.length;k++){if(place[k]){var col='#FF7A2F';if(res)col=res[k]?'#2E9E5B':'#E0312A';tag(q.labels[k].s,place[k].x,place[k].y,col);}}
-  if(res){for(k=0;k<place.length;k++){if(!res[k]){var lb=q.labels[k];if(lb.seg){c.setLineDash([8,6]);c.strokeStyle='#FF5A4A';c.lineWidth=4;c.beginPath();c.moveTo(lb.seg[0],lb.seg[1]);c.lineTo(lb.seg[2],lb.seg[3]);c.stroke();}c.setLineDash([5,4]);c.strokeStyle='#E0312A';c.lineWidth=3;c.beginPath();c.arc(q.labels[k].x,q.labels[k].y,22,0,6.2832);c.stroke();c.setLineDash([]);txt(c,q.labels[k].s+' goes here',q.labels[k].x,q.labels[k].y+40,'700 16px '+FONT,'#E0312A','center');}}}}
+  if(res){for(k=0;k<place.length;k++){if(!res[k]){var lb=q.labels[k];if(lb.seg){c.setLineDash([8,6]);c.strokeStyle='#FF5A4A';c.lineWidth=4;c.beginPath();c.moveTo(lb.seg[0],lb.seg[1]);c.lineTo(lb.seg[2],lb.seg[3]);c.stroke();}c.setLineDash([5,4]);c.strokeStyle='#E0312A';c.lineWidth=3;c.beginPath();c.arc(q.labels[k].x,q.labels[k].y,22,0,6.2832);c.stroke();c.setLineDash([]);txt(c,q.labels[k].s+T(' goes here',' va aqu\u00ED'),q.labels[k].x,q.labels[k].y+40,'700 16px '+FONT,'#E0312A','center');}}}}
  redraw(null);
  function chipCls(){for(var k=0;k<chips.length;k++){chips[k].className='chip'+(place[k]?' placed':'')+(k===sel?' sel':'');}}
- var row=el('div','chips');for(i=0;i<q.labels.length;i++){(function(i){var ch=el('button','chip',q.labels[i].s);ch.onclick=function(){if(checked)return;sfx.click();sel=i;chipCls();m.textContent='Now tap where "'+q.labels[i].s+'" belongs.';};chips.push(ch);row.appendChild(ch);})(i);}
- b.appendChild(row);var m=el('p','msg','Tap a label first.');b.appendChild(m);
- function tap(e){e.preventDefault();if(checked)return;if(sel<0){m.textContent='Tap a label button first, then tap the picture.';return;}var p=cpos(cv,e);place[sel]=p;sfx.click();redraw(null);var nxt=-1;for(var k=0;k<place.length;k++){if(!place[k]){nxt=k;break;}}sel=nxt;chipCls();m.textContent=nxt<0?'All labels placed. Tap Check, or tap a label to move it.':'Now place: '+q.labels[nxt].s;}
+ var row=el('div','chips');for(i=0;i<q.labels.length;i++){(function(i){var ch=el('button','chip',q.labels[i].s);ch.onclick=function(){if(checked)return;sfx.click();sel=i;chipCls();m.textContent=T('Now tap where "'+q.labels[i].s+'" belongs.','Ahora toca donde va "'+q.labels[i].s+'".');};chips.push(ch);row.appendChild(ch);})(i);}
+ b.appendChild(row);var m=el('p','msg',T('Tap a label first.','Primero toca una etiqueta.'));b.appendChild(m);
+ function tap(e){e.preventDefault();if(checked)return;if(sel<0){m.textContent=T('Tap a label button first, then tap the picture.','Primero toca un bot\u00F3n de etiqueta y luego toca la imagen.');return;}var p=cpos(cv,e);place[sel]=p;sfx.click();redraw(null);var nxt=-1;for(var k=0;k<place.length;k++){if(!place[k]){nxt=k;break;}}sel=nxt;chipCls();m.textContent=nxt<0?T('All labels placed. Tap Check, or tap a label to move it.','Ya colocaste todas las etiquetas. Toca Revisar, o toca una etiqueta para moverla.'):T('Now place: ','Ahora coloca: ')+q.labels[nxt].s;}
  cv.addEventListener('touchstart',tap,false);cv.addEventListener('mousedown',tap,false);
- var chk=el('button','big','Check my labels');chk.onclick=function(){var k;for(k=0;k<place.length;k++){if(!place[k]){m.textContent='Place every label first.';sfx.bad();return;}}checked=true;var res=[],n=0;for(k=0;k<place.length;k++){var dx=place[k].x-q.labels[k].x,dy=place[k].y-q.labels[k].y;res.push(lblOk(q.labels[k],place[k]));if(res[k])n++;}
+ var chk=el('button','big',T('Check my labels','Revisar mis etiquetas'));chk.onclick=function(){var k;for(k=0;k<place.length;k++){if(!place[k]){m.textContent=T('Place every label first.','Primero coloca todas las etiquetas.');sfx.bad();return;}}checked=true;var res=[],n=0;for(k=0;k<place.length;k++){var dx=place[k].x-q.labels[k].x,dy=place[k].y-q.labels[k].y;res.push(lblOk(q.labels[k],place[k]));if(res[k])n++;}
   redraw(res);chk.style.display='none';if(n===place.length)sfx.good();else sfx.bad();m.textContent='';
-  Q.items.push({t:'label',q:q.q,ans:n+' of '+place.length+' labels correct',ok:null,pts:n,max:place.length,img:cv.toDataURL('image/jpeg',0.75)});
-  b.appendChild(el('div','why',n+' of '+place.length+' labels in the right spot. Green tags are correct. Red circles show where any missed labels belong.'));nextBtn(b);};
+  Q.items.push({t:'label',q:q.q,ans:T(n+' of '+place.length+' labels correct',n+' de '+place.length+' etiquetas correctas'),ok:null,pts:n,max:place.length,img:cv.toDataURL('image/jpeg',0.75)});
+  b.appendChild(el('div','why',T(n+' of '+place.length+' labels in the right spot. Green tags are correct. Red circles show where any missed labels belong.',n+' de '+place.length+' etiquetas en el lugar correcto. Las etiquetas verdes est\u00E1n bien. Los c\u00EDrculos rojos muestran d\u00F3nde van las que fallaste.')));nextBtn(b);};
  b.appendChild(chk);}
-function renderDraw(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=600;b.appendChild(cv);var c=cv.getContext('2d');drawBg(c,q.bg);var cols=q.cols||[['Red','#E0312A'],['Black','#111418'],['Blue','#1F5FD1']];var col=cols[0][1],down=false,last=null,marks=0,done=false;
+function renderDraw(b,q){var cv=el('canvas','qcv');cv.width=600;cv.height=600;b.appendChild(cv);var c=cv.getContext('2d');drawBg(c,q.bg);var cols=q.cols||T([['Red','#E0312A'],['Black','#111418'],['Blue','#1F5FD1']],[['Rojo','#E0312A'],['Negro','#111418'],['Azul','#1F5FD1']]);var col=cols[0][1],down=false,last=null,marks=0,done=false;
  var tools=el('div','tools');var tb=[];
  for(var i=0;i<cols.length;i++){(function(i){var t=el('button','chip'+(i===0?' sel':''),cols[i][0]);t.onclick=function(){col=cols[i][1];for(var k=0;k<tb.length;k++)tb[k].className='chip'+(k===i?' sel':'');};tb.push(t);tools.appendChild(t);})(i);}
- var clr=el('button','chip','Clear');clr.onclick=function(){if(done)return;drawBg(c,q.bg);marks=0;};tools.appendChild(clr);b.appendChild(tools);
+ var clr=el('button','chip',T('Clear','Borrar todo'));clr.onclick=function(){if(done)return;drawBg(c,q.bg);marks=0;};tools.appendChild(clr);b.appendChild(tools);
  function st(e){e.preventDefault();if(done)return;down=true;last=cpos(cv,e);c.fillStyle=col;circ(c,last.x,last.y,2.5);}
  function mv(e){if(!down||done)return;e.preventDefault();var p=cpos(cv,e);c.strokeStyle=col;c.lineWidth=5;c.lineCap='round';c.beginPath();c.moveTo(last.x,last.y);c.lineTo(p.x,p.y);c.stroke();last=p;marks++;}
  function en(){down=false;}
  cv.addEventListener('touchstart',st,false);cv.addEventListener('touchmove',mv,false);cv.addEventListener('touchend',en,false);cv.addEventListener('mousedown',st,false);cv.addEventListener('mousemove',mv,false);window.addEventListener('mouseup',en,false);
- var m=el('p','msg','');var d=el('button','big','Done drawing');d.onclick=function(){if(marks<15){m.textContent='Add your drawing first.';sfx.bad();return;}done=true;d.style.display='none';tools.style.display='none';m.textContent='';sfx.good();Q.items.push({t:'draw',q:q.q,ans:'(drawing)',ok:null,img:cv.toDataURL('image/jpeg',0.75)});b.appendChild(el('div','why','Saved. Your drawing will be in your PDF for your teacher.'));nextBtn(b);};
+ var m=el('p','msg','');var d=el('button','big',T('Done drawing','Termin\u00E9 mi dibujo'));d.onclick=function(){if(marks<15){m.textContent=T('Add your drawing first.','Primero haz tu dibujo.');sfx.bad();return;}done=true;d.style.display='none';tools.style.display='none';m.textContent='';sfx.good();Q.items.push({t:'draw',q:q.q,ans:T('(drawing)','(dibujo)'),ok:null,img:cv.toDataURL('image/jpeg',0.75)});b.appendChild(el('div','why',T('Saved. Your drawing will be in your PDF for your teacher.','Guardado. Tu dibujo aparecer\u00E1 en tu PDF para tu docente.')));nextBtn(b);};
  b.appendChild(d);b.appendChild(m);}
 function finishQuiz(){var sc=0,tot=0;for(var i=0;i<Q.items.length;i++){var it=Q.items[i];if(it.t==='mc'){tot++;if(it.ok)sc++;}else if(it.t==='label'){tot+=it.max;sc+=it.pts;}}
- S.res[Q.ch]={title:chTitle(Q.ch),items:Q.items,score:sc,total:tot,when:new Date().toLocaleString(),name:S.name,period:S.period};save();
+ S.res[Q.ch]={title:chTitle(Q.ch),items:Q.items,score:sc,total:tot,when:new Date().toLocaleString(),name:S.name,period:S.period,lang:ES()?'es':'en'};save();
  var pct=tot?Math.round(100*sc/tot):100,low=tot>0&&sc/tot<0.7;
- var b=$('quizBody');b.innerHTML='';b.appendChild(el('h2',null,chTitle(Q.ch)+' complete!'));b.appendChild(el('div','score',sc+' / '+tot));b.appendChild(el('p','lead','Auto-scored questions. Your written answer and drawing go into your PDF for your teacher to grade.'));
+ var b=$('quizBody');b.innerHTML='';b.appendChild(el('h2',null,T(chTitle(Q.ch)+' complete!','\u00A1Terminaste '+chTitle(Q.ch)+'!')));b.appendChild(el('div','score',sc+' / '+tot));b.appendChild(el('p','lead',T('Auto-scored questions. Your written answer and drawing go into your PDF for your teacher to grade.','Preguntas calificadas autom\u00E1ticamente. Tu respuesta escrita y tu dibujo van en tu PDF para que tu docente los califique.')));
  var ci=0;for(var q2=0;q2<CH.length;q2++){if(CH[q2].id===Q.ch)ci=q2;}
- if(low){var bx=el('div','retry');bx.appendChild(el('b',null,'Try for at least 70%. '));bx.appendChild(document.createTextNode('You got '+pct+'%. You can do better! Play Chapter '+(ci+1)+' again: listen to the story, redo the activity, and retake the quiz. When you finish, your new score makes a fresh PDF.'));b.appendChild(bx);
-  var tr=el('button','big','Try Chapter '+(ci+1)+' again');tr.onclick=function(){sfx.click();startChapter(ci);};b.appendChild(tr);}
- else{b.appendChild(el('div','passed','Nice work! You scored '+pct+'%, which meets the 70% goal.'));}
- var p=el('button','big'+(low?' alt':''),'Get my Chapter '+(ci+1)+' results PDF');p.onclick=function(){sfx.click();openReport(ci);};b.appendChild(p);var m=el('button','big alt','Back to chapters');m.onclick=function(){sfx.click();openMenu();};b.appendChild(m);
- if(low){sfx.bad();say('You scored '+sc+' out of '+tot+'. That is '+pct+' percent. Try for at least 70 percent. Play the chapter again. You can do it!',1.05);}
- else{sfx.good();say('Great work! You scored '+sc+' out of '+tot+'. That is '+pct+' percent.',1.05);}}
+ if(low){var bx=el('div','retry');bx.appendChild(el('b',null,T('Try for at least 70%. ','Intenta sacar al menos 70%. ')));bx.appendChild(document.createTextNode(T('You got '+pct+'%. You can do better! Play Chapter '+(ci+1)+' again: listen to the story, redo the activity, and retake the quiz. When you finish, your new score makes a fresh PDF.','Sacaste '+pct+'%. \u00A1Puedes mejorar! Vuelve a jugar el Cap\u00EDtulo '+(ci+1)+': escucha la historia, repite la actividad y vuelve a hacer el cuestionario. Cuando termines, tu nueva calificaci\u00F3n crear\u00E1 un PDF nuevo.')));b.appendChild(bx);
+  var tr=el('button','big',T('Try Chapter '+(ci+1)+' again','Repetir el Cap\u00EDtulo '+(ci+1)));tr.onclick=function(){sfx.click();startChapter(ci);};b.appendChild(tr);}
+ else{b.appendChild(el('div','passed',T('Nice work! You scored '+pct+'%, which meets the 70% goal.','\u00A1Buen trabajo! Sacaste '+pct+'%, as\u00ED que cumpliste la meta de 70%.')));}
+ var p=el('button','big'+(low?' alt':''),T('Get my Chapter '+(ci+1)+' results PDF','Obtener el PDF de resultados del Cap\u00EDtulo '+(ci+1)));p.onclick=function(){sfx.click();openReport(ci);};b.appendChild(p);var m=el('button','big alt',T('Back to chapters','Volver a los cap\u00EDtulos'));m.onclick=function(){sfx.click();openMenu();};b.appendChild(m);
+ if(low){sfx.bad();say(T('You scored '+sc+' out of '+tot+'. That is '+pct+' percent. Try for at least 70 percent. Play the chapter again. You can do it!','Sacaste '+sc+' de '+tot+'. Eso es '+pct+' por ciento. Intenta sacar al menos 70 por ciento. Vuelve a jugar el cap\u00EDtulo. \u00A1T\u00FA puedes!'),1.05);}
+ else{sfx.good();say(T('Great work! You scored '+sc+' out of '+tot+'. That is '+pct+' percent.','\u00A1Excelente trabajo! Sacaste '+sc+' de '+tot+'. Eso es '+pct+' por ciento.'),1.05);}}
 
 /* ================= CHAPTER 2: SUNLIGHT AND SEASONS ================= */
 var TILT=23.44,RAD=Math.PI/180,DEG='\u00B0';
@@ -2472,7 +2551,7 @@ var C_LX=305,C_BX=342,C_CT=100,C_LB=122,C_FR=4;
 var A_NAME={emp:'Emperor penguin',ade:'Adelie penguin',gen:'Gentoo penguin',wed:'Weddell seal'};
 function campLeft(){return Math.max(0,(S.campNext||0)-Date.now());}
 function mmss(ms){var s=Math.ceil(ms/1000),m=Math.floor(s/60);s=s%60;return m+':'+(s<10?'0':'')+s;}
-function campBtn(){var b=$('btnCamp'),l=campLeft();if(l>0){b.textContent='Camp mini game: back in '+mmss(l);b.className='big wait';}else{b.textContent='Check on the camp (mini game)';b.className='big alt';$('campNote').textContent='';}}
+function campBtn(){var b=$('btnCamp'),l=campLeft();if(l>0){b.textContent=T('Camp mini game: back in ','Minijuego del campamento: vuelve en ')+mmss(l);b.className='big wait';}else{b.textContent=T('Check on the camp (mini game)','Visita el campamento (minijuego)');b.className='big alt';$('campNote').textContent='';}}
 function campClamp(v,a,b){return v<a?a:(v>b?b:v);}
 function crand(a,b){return a+Math.random()*(b-a);}
 
@@ -2598,7 +2677,7 @@ function campUpdate(dt){var i,p=G.p;
 }
 
 /* ---------- start and end ---------- */
-function openCamp(){if(campLeft()>0){sfx.bad();$('campNote').textContent='Dr. Frost says: back to work! The camp opens again in '+mmss(campLeft())+'.';return;}
+function openCamp(){if(campLeft()>0){sfx.bad();$('campNote').textContent=T('Dr. Frost says: back to work! The camp opens again in '+mmss(campLeft())+'.','El Dr. Frost dice: \u00A1a trabajar! El campamento abre otra vez en '+mmss(campLeft())+'.');return;}
  show('scrCamp');$('campIntro').style.display='block';$('campEnd').style.display='none';$('campCtl').style.display='none';
  campCtx=setupCanvas($('campCv'),400,300,0.42);G=campNew();G.idle=true;startLoop(function(dt,t){campDraw(campCtx,t);});}
 function campStart(){ac();sfx.click();S.campNext=Date.now()+(CAMP_LEN*1000)+CAMP_COOL;save();CK.l=CK.r=CK.u=CK.d=CK.a=CK.b=0;
@@ -2726,6 +2805,31 @@ var LAB_STEPS=['Introduction','Lab Materials','Draw Your Ice Core','Label the Ic
 var LAB_TITLE='ICE CORE INVESTIGATION: Unlocking Antarctica\'s Climate History';
 var LAB_INTRO='Today, you are a climate scientist! Scientists drill deep into the ice sheets of Antarctica and Greenland to collect ice cores. These cores contain clues about Earth\'s past climate. By examining different layers, scientists can investigate past environmental conditions, volcanic eruptions, snowfall patterns, and even ancient atmospheres.';
 var LAB_INTRO2='Your mission is to examine a simulated ice core made from frozen ice in a Pringles can. Carefully observe its layers, measure its sections, look for air bubbles, and discuss what your discoveries might tell scientists about Earth\'s history.';
+var LAB_COLS_ES=['Rojo','Verde','Azul','Morado','Negro'];
+var LAB_SIZES_ES=['Fino','Mediano','Ancho'];
+var LAB_LBL_ES=[
+ {s:'Hielo m\u00E1s nuevo',d:'En la parte de arriba del n\u00FAcleo de hielo. Es la nieve y el hielo m\u00E1s recientes que se acumularon.'},
+ {s:'Capa de ceniza volc\u00E1nica',d:'En alg\u00FAn lugar del medio. La ceniza de una erupci\u00F3n volc\u00E1nica subi\u00F3 al aire y despu\u00E9s cay\u00F3 sobre el hielo. En nuestro modelo, es la capa azul o morada.'},
+ {s:'Hielo m\u00E1s antiguo',d:'Hacia la parte de abajo del n\u00FAcleo de hielo. Es hielo que se acumul\u00F3 mucho antes.'},
+ {s:'Estr\u00EDas de hielo comprimido',d:'Cerca del fondo. Peque\u00F1as l\u00EDneas o bandas rojas y verdes representan capas anuales aplastadas. Las capas profundas pueden hacerse m\u00E1s delgadas por el enorme peso del hielo que tienen encima.'}];
+var LAB_MEAS_ES=['Largo total del n\u00FAcleo de hielo completo','Capa de hielo m\u00E1s nuevo (arriba)','Capa de ceniza volc\u00E1nica','Capas de hielo del medio','Estr\u00EDas comprimidas (cerca del fondo)'];
+var LAB_Q_ES=[
+ {h:'Capas del n\u00FAcleo de hielo',q:'\u00BFPor qu\u00E9 crees que el hielo m\u00E1s nuevo est\u00E1 arriba y el hielo m\u00E1s antiguo est\u00E1 cerca del fondo?'},
+ {h:'Ceniza volc\u00E1nica',q:'\u00BFQu\u00E9 evidencia ves que podr\u00EDa representar una capa de ceniza volc\u00E1nica? \u00BFPor qu\u00E9 esta capa podr\u00EDa ser \u00FAtil para los cient\u00EDficos?'},
+ {h:'Estr\u00EDas comprimidas',q:'\u00BFQu\u00E9 diferencias notas entre las capas de hielo m\u00E1s grandes y las estr\u00EDas m\u00E1s peque\u00F1as cerca del fondo? \u00BFQu\u00E9 podr\u00EDa explicar estas diferencias?'},
+ {h:'Investigaci\u00F3n de burbujas de aire',q:'Observa con atenci\u00F3n tu n\u00FAcleo de hielo. \u00BFPuedes ver burbujas de aire atrapadas dentro del hielo? Describe su tama\u00F1o, forma, ubicaci\u00F3n y apariencia.'},
+ {h:'Burbujas de aire y aire antiguo',q:'Si los cient\u00EDficos descubrieran burbujas de aire atrapadas en un n\u00FAcleo de hielo antiguo, \u00BFqu\u00E9 les dir\u00EDa eso sobre el aire de cuando se form\u00F3 ese hielo? \u00BFQu\u00E9 podr\u00EDan aprender al estudiar los gases que contienen, y c\u00F3mo les ayudar\u00EDa eso a entender el clima del pasado de la Tierra?'},
+ {h:'Evidencia de la historia de la Tierra',q:'Imagina que los cient\u00EDficos descubrieron una capa poco com\u00FAn de ceniza volc\u00E1nica en lo profundo de un n\u00FAcleo de hielo de la Ant\u00E1rtida. \u00BFQu\u00E9 les podr\u00EDa decir esto sobre la historia de la Tierra? \u00BFC\u00F3mo podr\u00EDan usar esta capa para investigar sucesos del pasado?'},
+ {h:'Piensa como un cient\u00EDfico',q:'Si fueras parte del equipo cient\u00EDfico que estudia este n\u00FAcleo de hielo, \u00BFqu\u00E9 pregunta te gustar\u00EDa investigar despu\u00E9s? Expl\u00EDcale tu razonamiento a tu compa\u00F1ero(a) de laboratorio y anota lo que conversaron.'}];
+var LAB_KIT_ES=['N\u00FAcleo de hielo congelado (hecho en una lata de Pringles)','Regla de un metro','iPhone o iPad para anotar observaciones','Compa\u00F1ero(a) de laboratorio'];
+var LAB_STEPS_ES=['Introducci\u00F3n','Materiales del laboratorio','Dibuja tu n\u00FAcleo de hielo','Etiqueta el n\u00FAcleo de hielo','Laboratorio de medici\u00F3n','Preguntas de investigaci\u00F3n','Discusi\u00F3n del equipo cient\u00EDfico','Revisi\u00F3n y hoja del laboratorio'];
+var LAB_INTRO_ES='\u00A1Hoy vas a investigar como lo hace un equipo de cient\u00EDficos del clima! Los cient\u00EDficos perforan muy profundo en los mantos de hielo de la Ant\u00E1rtida y Groenlandia para sacar n\u00FAcleos de hielo. Estos n\u00FAcleos contienen pistas sobre el clima del pasado de la Tierra. Al examinar las distintas capas, los cient\u00EDficos pueden investigar las condiciones ambientales del pasado, las erupciones volc\u00E1nicas, los patrones de nevadas e incluso las atm\u00F3sferas antiguas.';
+var LAB_INTRO2_ES='Tu misi\u00F3n es examinar un n\u00FAcleo de hielo simulado, hecho de hielo congelado en una lata de Pringles. Observa con cuidado sus capas, mide sus secciones, busca burbujas de aire y comenta lo que tus descubrimientos podr\u00EDan decirles a los cient\u00EDficos sobre la historia de la Tierra.';
+function lLBL(){return T(LAB_LBL,LAB_LBL_ES);}
+function lMEAS(){return T(LAB_MEAS,LAB_MEAS_ES);}
+function lQ(){return T(LAB_Q,LAB_Q_ES);}
+function lKIT(){return T(LAB_KIT,LAB_KIT_ES);}
+function lSTEPS(){return T(LAB_STEPS,LAB_STEPS_ES);}
 var LW=300,LH=600,LCX0=42,LCX1=258,LCY0=48,LCY1=562;
 var LB={step:0,tool:0,size:1,mode:'draw',sel:-1,st:null};
 
@@ -2752,106 +2856,106 @@ function labAll(){if(!S.lab)return false;for(var i=0;i<7;i++)if(!labDone(i))retu
 
 /* ---------- menu button (under Chapter 1) ---------- */
 function labMenuBtn(){var open=!!S.res.ch1,all=labAll(),bt=el('button','ch lab'+(open?'':' off'));bt.appendChild(el('span','num','Lab'));
- var tx=el('span','tx');tx.appendChild(el('b',null,'Chapter 1 Lab: Ice Core Investigation'));var sm=el('small',null,open?'Hands-on lab with a frozen ice core and a lab partner.':'Opens after you finish Chapter 1.');tx.appendChild(sm);bt.appendChild(tx);
- bt.appendChild(el('span','pill'+(all?' done':''),!open?'After Ch 1':(all?'Lab sheet ready':(S.lab?'In progress':'Start'))));
- bt.onclick=function(){if(!open){sfx.bad();sm.textContent='Finish Chapter 1 (story, drilling, and quiz) first. Then this lab opens.';sm.className='oldn';return;}sfx.click();ac();openIceLab();};return bt;}
+ var tx=el('span','tx');tx.appendChild(el('b',null,T('Chapter 1 Lab: Ice Core Investigation','Laboratorio del Cap\u00EDtulo 1: n\u00FAcleos de hielo')));var sm=el('small',null,open?T('Hands-on lab with a frozen ice core and a lab partner.','Laboratorio pr\u00E1ctico con un n\u00FAcleo de hielo congelado y un compa\u00F1ero(a) de laboratorio.'):T('Opens after you finish Chapter 1.','Se abre cuando termines el Cap\u00EDtulo 1.'));tx.appendChild(sm);bt.appendChild(tx);
+ bt.appendChild(el('span','pill'+(all?' done':''),!open?T('After Ch 1','Cap. 1 primero'):(all?T('Lab sheet ready','Hoja lista'):(S.lab?T('In progress','En progreso'):T('Start','Empezar')))));
+ bt.onclick=function(){if(!open){sfx.bad();sm.textContent=T('Finish Chapter 1 (story, drilling, and quiz) first. Then this lab opens.','Primero termina el Cap\u00EDtulo 1 (historia, perforaci\u00F3n y cuestionario). Luego se abre este laboratorio.');sm.className='oldn';return;}sfx.click();ac();openIceLab();};return bt;}
 function openIceLab(){var L=labData();show('scrIceLab');LB.step=Math.max(0,Math.min(7,L.step||0));LB.mode='draw';LB.sel=-1;labRender();}
 function labGo(i){if(i<0||i>7)return;sfx.click();var L=labData();LB.step=i;L.step=i;save();labRender();$('scrIceLab').scrollTop=0;}
 
 /* ---------- layout pieces ---------- */
 function labCard(h,txt2,cls){var d=el('div',cls||'lcard');if(h)d.appendChild(el('h3',null,h));if(txt2)d.appendChild(el('p',null,txt2));return d;}
-function labTalk(t){var d=el('div','talk');d.appendChild(el('b',null,'TALK WITH YOUR LAB PARTNER'));d.appendChild(el('span',null,t));return d;}
+function labTalk(t){var d=el('div','talk');d.appendChild(el('b',null,T('TALK WITH YOUR LAB PARTNER','HABLA CON TU COMPA\u00D1ERO(A) DE LABORATORIO')));d.appendChild(el('span',null,t));return d;}
 function labArt(host,lw,lh,fn,anim){var w=el('div','cvwrap'),cv=el('canvas');w.appendChild(cv);host.appendChild(w);var c=setupCanvas(cv,lw,lh,0.34);if(anim)startLoop(function(dt,t){fn(c,t);});else fn(c,0);}
 function labDots(){var d=$('labDots'),i;d.innerHTML='';for(i=0;i<8;i++){(function(i){var b=el('button','ldot'+(labDone(i)?' done':'')+(i===LB.step?' cur':''),String(i+1));b.onclick=function(){labGo(i);};d.appendChild(b);})(i);}}
 function labRender(){stopLoops();var b=$('labBody'),s=LB.step,L=labData();b.innerHTML='';
- $('labStepTx').textContent='Step '+(s+1)+' of 8: '+LAB_STEPS[s];labDots();
- $('labBack').style.visibility=s>0?'visible':'hidden';$('labNext').style.display=s<7?'block':'none';$('labNext').textContent=s<6?'Next: '+LAB_STEPS[s+1]:'Next: Review';
+ $('labStepTx').textContent=T('Step '+(s+1)+' of 8: ','Paso '+(s+1)+' de 8: ')+lSTEPS()[s];labDots();$('labTitleTx').textContent=T('CHAPTER 1 LAB: ICE CORE INVESTIGATION','LABORATORIO DEL CAP\u00CDTULO 1: N\u00DACLEOS DE HIELO');$('labBack').textContent=T('Back','Atr\u00E1s');
+ $('labBack').style.visibility=s>0?'visible':'hidden';$('labNext').style.display=s<7?'block':'none';$('labNext').textContent=s<6?T('Next: ','Siguiente: ')+lSTEPS()[s+1]:T('Next: Review','Siguiente: Revisi\u00F3n');
  if(s===0)labS0(b,L);else if(s===1)labS1(b,L);else if(s===2)labS2(b,L);else if(s===3)labS3(b,L);else if(s===4)labS4(b,L);else if(s===5)labS5(b,L);else if(s===6)labS6(b,L);else labS7(b,L);}
 function labInput(host,lab,val,ph,max,fn,area){var lb=el('label',null,lab);host.appendChild(lb);var i=el(area?'textarea':'input');if(!area)i.type='text';i.value=val;i.placeholder=ph;i.maxLength=max;i.setAttribute('autocomplete','off');i.setAttribute('spellcheck','true');
  i.addEventListener('input',function(){fn(i.value);labSave();labDots();},false);host.appendChild(i);return i;}
 
 /* step 1: introduction */
-function labS0(b,L){b.appendChild(el('h2',null,'You are a climate scientist!'));labArt(b,400,260,labArtDrill,true);
- b.appendChild(el('p','lead labP',LAB_INTRO));b.appendChild(el('p','lead labP',LAB_INTRO2));
- var rd=el('button','big alt','Read it to me');rd.onclick=function(){sfx.click();say(LAB_INTRO+' '+LAB_INTRO2,WHO.frost.pitch,'frost');};b.appendChild(rd);
- var c1=labCard('How scientists drill an ice core',null);var ol=el('ol');
- var steps=['A drill tower is set up on top of the ice sheet.','A hollow drill bit spins and cuts down into the ice. A long cylinder of ice, the core, is left inside the drill.','The core is pulled up in sections a few meters long, then stored frozen.','Scientists study its layers, dust and ash, and the tiny air bubbles trapped inside.'];
+function labS0(b,L){b.appendChild(el('h2',null,T('You are a climate scientist!','\u00A1Manos a la obra, equipo cient\u00EDfico!')));labArt(b,400,260,labArtDrill,true);
+ var i1=T(LAB_INTRO,LAB_INTRO_ES),i2=T(LAB_INTRO2,LAB_INTRO2_ES);b.appendChild(el('p','lead labP',i1));b.appendChild(el('p','lead labP',i2));
+ var rd=el('button','big alt',T('Read it to me','L\u00E9emelo en voz alta'));rd.onclick=function(){sfx.click();say(i1+' '+i2,WHO.frost.pitch,'frost');};b.appendChild(rd);
+ var c1=labCard(T('How scientists drill an ice core','C\u00F3mo perforan los cient\u00EDficos un n\u00FAcleo de hielo'),null);var ol=el('ol');
+ var steps=T(['A drill tower is set up on top of the ice sheet.','A hollow drill bit spins and cuts down into the ice. A long cylinder of ice, the core, is left inside the drill.','The core is pulled up in sections a few meters long, then stored frozen.','Scientists study its layers, dust and ash, and the tiny air bubbles trapped inside.'],['Se instala una torre de perforaci\u00F3n sobre el manto de hielo.','Una broca hueca gira y corta hacia abajo en el hielo. Un cilindro largo de hielo, el n\u00FAcleo, queda dentro de la perforadora.','El n\u00FAcleo se saca en secciones de unos pocos metros de largo y se guarda congelado.','Los cient\u00EDficos estudian sus capas, el polvo y la ceniza, y las diminutas burbujas de aire atrapadas dentro.']);
  for(var k=0;k<steps.length;k++)ol.appendChild(el('li',null,steps[k]));c1.appendChild(ol);b.appendChild(c1);
- b.appendChild(labCard('Our ice core is a model','Our classroom ice core shows the basic idea of a real ice core. It is not a real ice sample, and it cannot be dated. Real volcanic ash layers usually look dark gray or brown. In our model, the ash layer is colored so it is easy to spot.','lcard lnote'));
- var who=labCard('Your science team',null);who.appendChild(el('p',null,'Scientist: '+S.name+' (Period '+S.period+')'));b.appendChild(who);
- labInput(who,'Lab partner\'s first and last name',L.partner,'Partner\'s name',40,function(v){L.partner=clean(v);});}
+ b.appendChild(labCard(T('Our ice core is a model','Nuestro n\u00FAcleo de hielo es un modelo'),T('Our classroom ice core shows the basic idea of a real ice core. It is not a real ice sample, and it cannot be dated. Real volcanic ash layers usually look dark gray or brown. In our model, the ash layer is colored so it is easy to spot.','Nuestro n\u00FAcleo de hielo del sal\u00F3n muestra la idea b\u00E1sica de un n\u00FAcleo de hielo real. No es una muestra de hielo real y no se puede fechar. Las capas reales de ceniza volc\u00E1nica suelen verse gris oscuro o caf\u00E9. En nuestro modelo, la capa de ceniza tiene color para que sea f\u00E1cil de ver.'),'lcard lnote'));
+ var who=labCard(T('Your science team','Tu equipo cient\u00EDfico'),null);who.appendChild(el('p',null,T('Scientist: '+S.name+' (Period '+S.period+')','Cient\u00EDfico(a): '+S.name+' (Periodo '+S.period+')')));b.appendChild(who);
+ labInput(who,T('Lab partner\'s first and last name','Nombre y apellido de tu compa\u00F1ero(a) de laboratorio'),L.partner,T('Partner\'s name','Nombre de tu compa\u00F1ero(a)'),40,function(v){L.partner=clean(v);});}
 /* step 2: materials */
-function labS1(b,L){b.appendChild(el('h2',null,'Lab materials'));labArt(b,400,240,labArtKit,true);
- b.appendChild(el('p','lead labP','Check off each item when you have it at your lab station.'));
- for(var k=0;k<4;k++){(function(k){var r=el('button','kit'+(L.kit[k]?' on':''));r.appendChild(el('span','box',L.kit[k]?'OK':''));r.appendChild(el('span','kt',LAB_KIT[k]));
+function labS1(b,L){b.appendChild(el('h2',null,T('Lab materials','Materiales del laboratorio')));labArt(b,400,240,labArtKit,true);
+ b.appendChild(el('p','lead labP',T('Check off each item when you have it at your lab station.','Marca cada material cuando lo tengas en tu estaci\u00F3n de laboratorio.')));
+ for(var k=0;k<4;k++){(function(k){var r=el('button','kit'+(L.kit[k]?' on':''));r.appendChild(el('span','box',L.kit[k]?'OK':''));r.appendChild(el('span','kt',lKIT()[k]));
   r.onclick=function(){sfx.click();L.kit[k]=L.kit[k]?0:1;r.className='kit'+(L.kit[k]?' on':'');r.firstChild.textContent=L.kit[k]?'OK':'';save();labDots();};b.appendChild(r);})(k);}
- b.appendChild(labTalk('Decide who will hold the ice core and who will read the meter stick. Switch jobs halfway through.'));}
+ b.appendChild(labTalk(T('Decide who will hold the ice core and who will read the meter stick. Switch jobs halfway through.','Decidan qui\u00E9n sostendr\u00E1 el n\u00FAcleo de hielo y qui\u00E9n leer\u00E1 la regla. Cambien de tarea a la mitad.')));}
 /* step 3: drawing */
-function labS2(b,L){LB.mode='draw';b.appendChild(el('h2',null,'Draw your ice core'));
- b.appendChild(labCard(null,'Before labeling your ice core, carefully draw what you actually observe. Pay attention to different colors, layers, lines, patterns, and air bubbles. Do not guess what you should see. Record what is really there.','lcard lnote'));
+function labS2(b,L){LB.mode='draw';b.appendChild(el('h2',null,T('Draw your ice core','Dibuja tu n\u00FAcleo de hielo')));
+ b.appendChild(labCard(null,T('Before labeling your ice core, carefully draw what you actually observe. Pay attention to different colors, layers, lines, patterns, and air bubbles. Do not guess what you should see. Record what is really there.','Antes de etiquetar tu n\u00FAcleo de hielo, dibuja con cuidado lo que realmente observas. F\u00EDjate en los distintos colores, capas, l\u00EDneas, patrones y burbujas de aire. No adivines lo que deber\u00EDas ver. Registra lo que de verdad est\u00E1 ah\u00ED.'),'lcard lnote'));
  var tools=el('div','tools labTools'),cb=[],sb=[],k;
  function cls(){for(var q=0;q<cb.length;q++)cb[q].className='chip'+(LB.tool===q?' sel':'');for(q=0;q<sb.length;q++)sb[q].className='chip sz'+(LB.size===q?' sel':'');}
- for(k=0;k<=LAB_COLS.length;k++){(function(k){var t=el('button','chip');if(k<LAB_COLS.length){var sw=el('span','swatch');sw.style.background=LAB_COLS[k][1];t.appendChild(sw);t.appendChild(document.createTextNode(LAB_COLS[k][0]));}else t.appendChild(document.createTextNode('Eraser'));
+ for(k=0;k<=LAB_COLS.length;k++){(function(k){var t=el('button','chip');if(k<LAB_COLS.length){var sw=el('span','swatch');sw.style.background=LAB_COLS[k][1];t.appendChild(sw);t.appendChild(document.createTextNode(T(LAB_COLS[k][0],LAB_COLS_ES[k])));}else t.appendChild(document.createTextNode(T('Eraser','Borrador')));
   t.onclick=function(){sfx.click();LB.tool=k;cls();};cb.push(t);tools.appendChild(t);})(k);}
  b.appendChild(tools);var row2=el('div','tools');
- for(k=0;k<LAB_SIZES.length;k++){(function(k){var t=el('button','chip sz',LAB_SIZES[k][0]);t.onclick=function(){sfx.click();LB.size=k;cls();};sb.push(t);row2.appendChild(t);})(k);}
- var un=el('button','chip act','Undo'),cl=el('button','chip act','Clear'),clT=null;row2.appendChild(un);row2.appendChild(cl);b.appendChild(row2);cls();
+ for(k=0;k<LAB_SIZES.length;k++){(function(k){var t=el('button','chip sz',T(LAB_SIZES[k][0],LAB_SIZES_ES[k]));t.onclick=function(){sfx.click();LB.size=k;cls();};sb.push(t);row2.appendChild(t);})(k);}
+ var clW=T('Clear','Borrar todo'),un=el('button','chip act',T('Undo','Deshacer')),cl=el('button','chip act',clW),clT=null;row2.appendChild(un);row2.appendChild(cl);b.appendChild(row2);cls();
  var D=labCanvas(b);
  un.onclick=function(){if(!L.strokes.length)return;sfx.click();L.strokes.pop();D.replay();save();labDots();};
- cl.onclick=function(){if(clT){clearTimeout(clT);clT=null;L.strokes=[];D.replay();save();labDots();cl.textContent='Clear';cl.className='chip act';sfx.bad();return;}
-  sfx.click();cl.textContent='Tap again to clear';cl.className='chip act warnc';clT=setTimeout(function(){clT=null;cl.textContent='Clear';cl.className='chip act';},3000);};
- b.appendChild(el('p','note ctr','TOP of the ice core is at the top of the picture.'));
- b.appendChild(labTalk('Compare your drawing with your lab partner\'s drawing. Did you observe the same patterns? Did your partner notice something you missed?'));}
+ cl.onclick=function(){if(clT){clearTimeout(clT);clT=null;L.strokes=[];D.replay();save();labDots();cl.textContent=clW;cl.className='chip act';sfx.bad();return;}
+  sfx.click();cl.textContent=T('Tap again to clear','Toca otra vez para borrar');cl.className='chip act warnc';clT=setTimeout(function(){clT=null;cl.textContent=clW;cl.className='chip act';},3000);};
+ b.appendChild(el('p','note ctr',T('TOP of the ice core is at the top of the picture.','La PARTE DE ARRIBA del n\u00FAcleo de hielo est\u00E1 arriba en la imagen.')));
+ b.appendChild(labTalk(T('Compare your drawing with your lab partner\'s drawing. Did you observe the same patterns? Did your partner notice something you missed?','Compara tu dibujo con el de tu compa\u00F1ero(a). \u00BFObservaron los mismos patrones? \u00BFTu compa\u00F1ero(a) not\u00F3 algo que t\u00FA no viste?')));}
 /* step 4: labels */
-function labS3(b,L){LB.mode='label';b.appendChild(el('h2',null,'Label the ice core'));
- b.appendChild(labCard(null,'Find these 4 features on YOUR ice core. Tap a label, then tap the spot on your drawing where it belongs. Drag a numbered pin to move it.','lcard lnote'));
- var chips=[],k,m=el('p','msg','');
+function labS3(b,L){LB.mode='label';b.appendChild(el('h2',null,T('Label the ice core','Etiqueta el n\u00FAcleo de hielo')));
+ b.appendChild(labCard(null,T('Find these 4 features on YOUR ice core. Tap a label, then tap the spot on your drawing where it belongs. Drag a numbered pin to move it.','Encuentra estas 4 caracter\u00EDsticas en TU n\u00FAcleo de hielo. Toca una etiqueta y luego toca el lugar de tu dibujo donde va. Arrastra un marcador numerado para moverlo.'),'lcard lnote'));
+ var chips=[],k,m=el('p','msg',''),LL=lLBL(),allP=T('All 4 labels placed. Drag a pin to move it.','Ya colocaste las 4 etiquetas. Arrastra un marcador para moverlo.');
  function cls(){for(var q=0;q<chips.length;q++)chips[q].className='lchip'+(L.pins[q]?' placed':'')+(LB.sel===q?' sel':'');}
- for(k=0;k<4;k++){(function(k){var c2=el('button','lchip');c2.appendChild(el('span','pn',String(k+1)));var tt=el('span','lt');tt.appendChild(el('b',null,LAB_LBL[k].s));tt.appendChild(el('small',null,LAB_LBL[k].d));c2.appendChild(tt);
-  c2.onclick=function(){sfx.click();LB.sel=k;cls();m.textContent='Now tap your drawing where "'+LAB_LBL[k].s+'" is.';};chips.push(c2);b.appendChild(c2);})(k);}
+ for(k=0;k<4;k++){(function(k){var c2=el('button','lchip');c2.appendChild(el('span','pn',String(k+1)));var tt=el('span','lt');tt.appendChild(el('b',null,LL[k].s));tt.appendChild(el('small',null,LL[k].d));c2.appendChild(tt);
+  c2.onclick=function(){sfx.click();LB.sel=k;cls();m.textContent=T('Now tap your drawing where "'+LL[k].s+'" is.','Ahora toca tu dibujo donde est\u00E1 "'+LL[k].s+'".');};chips.push(c2);b.appendChild(c2);})(k);}
  b.appendChild(m);
- var D=labCanvas(b,function(){var nx=-1;for(var q=0;q<4;q++){if(!L.pins[q]){nx=q;break;}}LB.sel=nx;cls();m.textContent=nx<0?'All 4 labels placed. Drag a pin to move it.':'Next, tap a label: '+LAB_LBL[nx].s+'.';labDots();});
- LB.sel=-1;for(k=0;k<4;k++){if(!L.pins[k]){LB.sel=k;break;}}cls();m.textContent=LB.sel<0?'All 4 labels placed. Drag a pin to move it.':'Tap a label, then tap your drawing.';
- b.appendChild(labTalk('Which layer was the hardest to identify? Did you and your partner put the labels in the same places?'));}
+ var D=labCanvas(b,function(){var nx=-1;for(var q=0;q<4;q++){if(!L.pins[q]){nx=q;break;}}LB.sel=nx;cls();m.textContent=nx<0?allP:T('Next, tap a label: ','Ahora toca una etiqueta: ')+LL[nx].s+'.';labDots();});
+ LB.sel=-1;for(k=0;k<4;k++){if(!L.pins[k]){LB.sel=k;break;}}cls();m.textContent=LB.sel<0?allP:T('Tap a label, then tap your drawing.','Toca una etiqueta y luego toca tu dibujo.');
+ b.appendChild(labTalk(T('Which layer was the hardest to identify? Did you and your partner put the labels in the same places?','\u00BFQu\u00E9 capa fue la m\u00E1s dif\u00EDcil de identificar? \u00BFT\u00FA y tu compa\u00F1ero(a) pusieron las etiquetas en los mismos lugares?')));}
 /* step 5: measurements */
-function labS4(b,L){b.appendChild(el('h2',null,'Measurement lab'));labArt(b,400,250,labArtMeasure,false);
- b.appendChild(labCard(null,'Measure carefully! Your measurements should represent the actual ice core in front of you.','lcard lnote'));
- for(var k=0;k<5;k++){(function(k){var r=el('div','mrow');r.appendChild(el('label',null,(k+1)+'. '+LAB_MEAS[k]));var f=el('div','mflex');var i=el('input');i.type='text';i.setAttribute('inputmode','decimal');i.placeholder='Your measurement';i.maxLength=8;i.value=L.meas[k].v;
-  var ok=el('p','mok','');function chk(){ok.textContent=(L.meas[k].v&&!labNum(L.meas[k].v))?'Type a number, like 12.5':'';}
+function labS4(b,L){b.appendChild(el('h2',null,T('Measurement lab','Laboratorio de medici\u00F3n')));labArt(b,400,250,labArtMeasure,false);
+ b.appendChild(labCard(null,T('Measure carefully! Your measurements should represent the actual ice core in front of you.','\u00A1Mide con cuidado! Tus medidas deben representar el n\u00FAcleo de hielo real que tienes enfrente.'),'lcard lnote'));
+ for(var k=0;k<5;k++){(function(k){var r=el('div','mrow');r.appendChild(el('label',null,(k+1)+'. '+lMEAS()[k]));var f=el('div','mflex');var i=el('input');i.type='text';i.setAttribute('inputmode','decimal');i.placeholder=T('Your measurement','Tu medida');i.maxLength=8;i.value=L.meas[k].v;
+  var ok=el('p','mok','');function chk(){ok.textContent=(L.meas[k].v&&!labNum(L.meas[k].v))?T('Type a number, like 12.5','Escribe un n\u00FAmero, como 12.5'):'';}
   i.addEventListener('input',function(){L.meas[k].v=i.value.replace(/[^0-9.,]/g,'');if(i.value!==L.meas[k].v)i.value=L.meas[k].v;chk();labSave();labDots();},false);f.appendChild(i);
   var ub=[];['cm','mm'].forEach(function(u){var t=el('button','ubtn'+(L.meas[k].u===u?' on':''),u);t.onclick=function(){sfx.click();L.meas[k].u=u;for(var q=0;q<ub.length;q++)ub[q].className='ubtn'+(ub[q].textContent===u?' on':'');save();};ub.push(t);f.appendChild(t);});
   r.appendChild(f);r.appendChild(ok);chk();b.appendChild(r);})(k);}
- b.appendChild(labTalk('One partner reads the meter stick and the other checks it. Did you both get the same numbers? If not, measure again together.'));}
+ b.appendChild(labTalk(T('One partner reads the meter stick and the other checks it. Did you both get the same numbers? If not, measure again together.','Uno de ustedes lee la regla y el otro lo comprueba. \u00BFLos dos obtuvieron los mismos n\u00FAmeros? Si no, midan otra vez juntos.')));}
 /* step 6: questions */
-function labS5(b,L){b.appendChild(el('h2',null,'Investigation questions'));
- b.appendChild(labCard(null,'Use your own observations and your discussion with your partner. Write in complete sentences. There is no single right answer for many of these. Explain your thinking with evidence.','lcard lnote'));
- for(var k=0;k<LAB_Q.length;k++){(function(k){var c2=el('div','qcard');c2.appendChild(el('div','qn','QUESTION '+(k+1)+' - '+LAB_Q[k].h.toUpperCase()));c2.appendChild(el('p',null,LAB_Q[k].q));
-  var ta=el('textarea');ta.value=L.ans[k];ta.maxLength=700;ta.placeholder='Type your answer here.';ta.addEventListener('input',function(){L.ans[k]=ta.value;labSave();labDots();},false);c2.appendChild(ta);b.appendChild(c2);
-  if(k===0)b.appendChild(labTalk('Did your partner explain the layers the same way you did?'));
-  if(k===3)b.appendChild(labTalk('Did you both find air bubbles? Show each other where they are.'));
-  if(k===5)b.appendChild(labTalk('What do you think scientists could discover by studying this ice core?'));})(k);}}
+function labS5(b,L){b.appendChild(el('h2',null,T('Investigation questions','Preguntas de investigaci\u00F3n')));
+ b.appendChild(labCard(null,T('Use your own observations and your discussion with your partner. Write in complete sentences. There is no single right answer for many of these. Explain your thinking with evidence.','Usa tus propias observaciones y lo que conversaste con tu compa\u00F1ero(a). Escribe oraciones completas. Muchas de estas preguntas no tienen una sola respuesta correcta. Explica tu razonamiento con evidencia.'),'lcard lnote'));
+ var LQ=lQ();for(var k=0;k<LQ.length;k++){(function(k){var c2=el('div','qcard');c2.appendChild(el('div','qn',T('QUESTION ','PREGUNTA ')+(k+1)+' - '+LQ[k].h.toUpperCase()));c2.appendChild(el('p',null,LQ[k].q));
+  var ta=el('textarea');ta.value=L.ans[k];ta.maxLength=700;ta.placeholder=T('Type your answer here.','Escribe tu respuesta aqu\u00ED.');ta.addEventListener('input',function(){L.ans[k]=ta.value;labSave();labDots();},false);c2.appendChild(ta);b.appendChild(c2);
+  if(k===0)b.appendChild(labTalk(T('Did your partner explain the layers the same way you did?','\u00BFTu compa\u00F1ero(a) explic\u00F3 las capas de la misma manera que t\u00FA?')));
+  if(k===3)b.appendChild(labTalk(T('Did you both find air bubbles? Show each other where they are.','\u00BFLos dos encontraron burbujas de aire? Mu\u00E9strense d\u00F3nde est\u00E1n.')));
+  if(k===5)b.appendChild(labTalk(T('What do you think scientists could discover by studying this ice core?','\u00BFQu\u00E9 crees que podr\u00EDan descubrir los cient\u00EDficos al estudiar este n\u00FAcleo de hielo?')));})(k);}}
 /* step 7: team discussion */
-function labS6(b,L){var h=el('div','teamHead');h.appendChild(el('b',null,'SCIENTIST TEAM DISCUSSION'));h.appendChild(el('span',null,'Scientists work in teams because two sets of eyes catch more than one.'));b.appendChild(h);
- b.appendChild(labTalk('Look at the ice core together one more time. Point out one thing each of you noticed.'));
- var c2=el('div','qcard');c2.appendChild(el('div','qn','YOUR TEAM'));c2.appendChild(el('p',null,'Record something interesting your lab partner noticed that you missed at first. What was it, and why do you think you missed it?'));
- var ta=el('textarea');ta.value=L.team;ta.maxLength=700;ta.placeholder='Type your answer here.';ta.addEventListener('input',function(){L.team=ta.value;labSave();labDots();},false);c2.appendChild(ta);b.appendChild(c2);}
+function labS6(b,L){var h=el('div','teamHead');h.appendChild(el('b',null,T('SCIENTIST TEAM DISCUSSION','DISCUSI\u00D3N DEL EQUIPO CIENT\u00CDFICO')));h.appendChild(el('span',null,T('Scientists work in teams because two sets of eyes catch more than one.','Los cient\u00EDficos trabajan en equipo porque dos pares de ojos ven m\u00E1s que uno.')));b.appendChild(h);
+ b.appendChild(labTalk(T('Look at the ice core together one more time. Point out one thing each of you noticed.','Observen juntos el n\u00FAcleo de hielo una vez m\u00E1s. Cada uno se\u00F1ale una cosa que not\u00F3.')));
+ var c2=el('div','qcard');c2.appendChild(el('div','qn',T('YOUR TEAM','TU EQUIPO')));c2.appendChild(el('p',null,T('Record something interesting your lab partner noticed that you missed at first. What was it, and why do you think you missed it?','Anota algo interesante que tu compa\u00F1ero(a) not\u00F3 y que t\u00FA no viste al principio. \u00BFQu\u00E9 fue y por qu\u00E9 crees que no lo viste?')));
+ var ta=el('textarea');ta.value=L.team;ta.maxLength=700;ta.placeholder=T('Type your answer here.','Escribe tu respuesta aqu\u00ED.');ta.addEventListener('input',function(){L.team=ta.value;labSave();labDots();},false);c2.appendChild(ta);b.appendChild(c2);}
 /* step 8: review */
-function labS7(b,L){b.appendChild(el('h2',null,'Review your lab'));
- b.appendChild(el('p','lead labP','Tap any section to go back and change it. Your lab sheet unlocks when every section is done.'));
- for(var i=0;i<7;i++){(function(i){var d=labDone(i),r=el('button','ch');r.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,LAB_STEPS[i]));
-  tx.appendChild(el('small',null,labSum(i)));r.appendChild(tx);r.appendChild(el('span','pill'+(d?' done':''),d?'Done':'Not yet'));r.onclick=function(){labGo(i);};b.appendChild(r);})(i);}
- var pv=el('div','cvwrap'),im=el('img','labPrev');im.alt='Your labeled ice core drawing';im.src=labExport(2).toDataURL('image/jpeg',0.85);pv.appendChild(im);b.appendChild(pv);
- var all=labAll(),go=el('button','big','Make my lab sheet (PDF or picture)');go.disabled=!all;b.appendChild(go);
- var m=el('p','msg',all?'':'Finish the sections marked Not yet to unlock your lab sheet.');b.appendChild(m);
+function labS7(b,L){b.appendChild(el('h2',null,T('Review your lab','Revisa tu laboratorio')));
+ b.appendChild(el('p','lead labP',T('Tap any section to go back and change it. Your lab sheet unlocks when every section is done.','Toca cualquier secci\u00F3n para regresar y cambiarla. Tu hoja del laboratorio se desbloquea cuando termines todas las secciones.')));
+ for(var i=0;i<7;i++){(function(i){var d=labDone(i),r=el('button','ch');r.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,lSTEPS()[i]));
+  tx.appendChild(el('small',null,labSum(i)));r.appendChild(tx);r.appendChild(el('span','pill'+(d?' done':''),d?T('Done','Listo'):T('Not yet','Falta')));r.onclick=function(){labGo(i);};b.appendChild(r);})(i);}
+ var pv=el('div','cvwrap'),im=el('img','labPrev');im.alt=T('Your labeled ice core drawing','Tu dibujo del n\u00FAcleo de hielo con etiquetas');im.src=labExport(2).toDataURL('image/jpeg',0.85);pv.appendChild(im);b.appendChild(pv);
+ var all=labAll(),go=el('button','big',T('Make my lab sheet (PDF or picture)','Crear mi hoja del laboratorio (PDF o imagen)'));go.disabled=!all;b.appendChild(go);
+ var m=el('p','msg',all?'':T('Finish the sections marked Not yet to unlock your lab sheet.','Termina las secciones marcadas "Falta" para desbloquear tu hoja del laboratorio.'));b.appendChild(m);
  go.onclick=function(){if(!labAll())return;sfx.good();L.when=new Date().toLocaleString();L.name=S.name;L.period=S.period;save();openReport('lab');};}
 function labSum(i){var L=labData(),k,n=0;
- if(i===0)return L.partner?'Lab partner: '+L.partner:'Add your lab partner\'s name.';
- if(i===1){for(k=0;k<4;k++)if(L.kit[k])n++;return n+' of 4 materials checked.';}
- if(i===2)return labDone(2)?'Drawing saved.':'Draw what you see in your ice core.';
- if(i===3){for(k=0;k<4;k++)if(L.pins[k])n++;return n+' of 4 labels placed.';}
- if(i===4){for(k=0;k<5;k++)if(labNum(L.meas[k].v))n++;return n+' of 5 measurements.';}
- if(i===5){for(k=0;k<LAB_Q.length;k++)if(labWords(L.ans[k])>=5)n++;return n+' of '+LAB_Q.length+' questions answered.';}
- return labDone(6)?'Answered.':'Not answered yet.';}
+ if(i===0)return L.partner?T('Lab partner: ','Compa\u00F1ero(a) de laboratorio: ')+L.partner:T('Add your lab partner\'s name.','Agrega el nombre de tu compa\u00F1ero(a) de laboratorio.');
+ if(i===1){for(k=0;k<4;k++)if(L.kit[k])n++;return n+T(' of 4 materials checked.',' de 4 materiales marcados.');}
+ if(i===2)return labDone(2)?T('Drawing saved.','Dibujo guardado.'):T('Draw what you see in your ice core.','Dibuja lo que ves en tu n\u00FAcleo de hielo.');
+ if(i===3){for(k=0;k<4;k++)if(L.pins[k])n++;return n+T(' of 4 labels placed.',' de 4 etiquetas colocadas.');}
+ if(i===4){for(k=0;k<5;k++)if(labNum(L.meas[k].v))n++;return n+T(' of 5 measurements.',' de 5 medidas.');}
+ if(i===5){for(k=0;k<LAB_Q.length;k++)if(labWords(L.ans[k])>=5)n++;return n+T(' of ',' de ')+LAB_Q.length+T(' questions answered.',' preguntas respondidas.');}
+ return labDone(6)?T('Answered.','Respondida.'):T('Not answered yet.','Todav\u00EDa sin responder.');}
 
 /* ---------- the drawing canvas (draw mode: pens and eraser; label mode: place and drag pins) ---------- */
 function labCorePath(c){c.beginPath();c.rect(LCX0,LCY0,LCX1-LCX0,LCY1-LCY0);var rx=(LCX1-LCX0)/2,cx=(LCX0+LCX1)/2;
@@ -2863,7 +2967,7 @@ function labBg(c){var cx=(LCX0+LCX1)/2,rx=(LCX1-LCX0)/2;c.fillStyle='#F4FAFD';c.
  c.strokeStyle='#8DB9D3';c.lineWidth=2;c.beginPath();c.moveTo(LCX0,LCY0);c.lineTo(LCX0,LCY1);c.moveTo(LCX1,LCY0);c.lineTo(LCX1,LCY1);c.stroke();
  c.save();c.translate(cx,LCY1);c.scale(rx,16);c.beginPath();c.arc(0,0,1,0.02,Math.PI-0.02);c.restore();c.stroke();
  c.fillStyle='#EAF6FC';CE(c,cx,LCY0,rx,16);c.fill();c.strokeStyle='#8DB9D3';CE(c,cx,LCY0,rx,16);c.stroke();
- txt(c,'TOP',cx,LCY0-22,'800 13px '+FONT,'#4A6B85','center');txt(c,'BOTTOM',cx,LCY1+36,'800 13px '+FONT,'#4A6B85','center');}
+ txt(c,T('TOP','ARRIBA'),cx,LCY0-22,'800 13px '+FONT,'#4A6B85','center');txt(c,T('BOTTOM','ABAJO'),cx,LCY1+36,'800 13px '+FONT,'#4A6B85','center');}
 function labStroke(c,s,from){var p=s.p,n=p.length/2,i;if(!n)return;c.save();labCorePath(c);c.clip();
  if(s.c==='E'){c.globalCompositeOperation='destination-out';c.strokeStyle='#000000';c.fillStyle='#000000';}else{c.strokeStyle=s.c;c.fillStyle=s.c;}
  c.lineWidth=s.w;c.lineCap='round';c.lineJoin='round';
@@ -2906,7 +3010,7 @@ function labExport(K){var L=labData(),EW=540,cv=document.createElement('canvas')
  var ys=[],y;for(k=0;k<ord.length;k++){y=Math.max(L.pins[ord[k]].y,k?ys[k-1]+66:40);ys.push(y);}
  for(k=ord.length-1;k>=0;k--){if(ys[k]>LH-40)ys[k]=LH-40;if(k<ord.length-1&&ys[k]>ys[k+1]-66)ys[k]=ys[k+1]-66;}
  for(k=0;k<ord.length;k++){var i=ord[k],p=L.pins[i],ty=ys[k];c.strokeStyle='#FF7A2F';c.lineWidth=2;c.setLineDash([5,4]);c.beginPath();c.moveTo(p.x,p.y);c.lineTo(312,ty);c.stroke();c.setLineDash([]);
-  c.fillStyle='#0E1B2C';rr(c,312,ty-22,EW-318,44,10);c.fill();txt(c,String(i+1)+'. '+LAB_LBL[i].s,324,ty+6,'800 '+(LAB_LBL[i].s.length>20?15:17)+'px '+FONT,'#FFFFFF');}
+  c.fillStyle='#0E1B2C';rr(c,312,ty-22,EW-318,44,10);c.fill();var lt=String(i+1)+'. '+lLBL()[i].s,fz=17;c.font='800 '+fz+'px '+FONT;while(fz>11&&mtext(c,lt)>EW-318-22){fz--;c.font='800 '+fz+'px '+FONT;}txt(c,lt,324,ty+6,'800 '+fz+'px '+FONT,'#FFFFFF');}
  for(k=0;k<4;k++){if(L.pins[k])labPin(c,k,L.pins[k].x,L.pins[k].y,false);}
  return cv;}
 
@@ -2922,10 +3026,10 @@ function labArtDrill(c,t){var i,y,sp;sky(c,400,74,'#6FA9D6','#DDF0FA');c.fillSty
  var xs=[250,268,284,298,309,318,325,331,336,340,344,347,350,353,356];for(i=0;i<xs.length;i++){c.strokeStyle=i===6?'#6B6F7A':'rgba(90,140,180,0.6)';c.lineWidth=i===6?3:1;c.beginPath();c.moveTo(xs[i],57);c.lineTo(xs[i],71);c.stroke();}
  c.fillStyle='rgba(255,255,255,0.9)';for(i=0;i<9;i++)circ(c,244+rnd(i+11)*112,60+rnd(i+3)*8,0.9+rnd(i)*0.8);
  person(c,212,76,0.42,'#2A9DB5',{glasses:true,skin:'#E8B48F'},t);
- pill(c,'Drill tower',86,34,11,'#FFFFFF','center');pill(c,'Ice core',300,48,11,'#FFFFFF','center');
- pill(c,'Hollow drill bit',138,Math.min(232,d+12),10,'#FFD45A','right');
- pill(c,'Layers get thinner deeper down',395,200,10,'#BFE6F5','right');pill(c,'Bedrock',8,256,10,'#FFFFFF','left');
- txt(c,'Top (newest)',238,90,'700 9px '+FONT,'#2A4A63');txt(c,'(oldest)',362,90,'700 9px '+FONT,'#2A4A63','right');}
+ pill(c,T('Drill tower','Torre de perforaci\u00F3n'),T(86,92),34,11,'#FFFFFF','center');pill(c,T('Ice core','N\u00FAcleo de hielo'),300,48,11,'#FFFFFF','center');
+ pill(c,T('Hollow drill bit','Broca hueca'),138,Math.min(232,d+12),10,'#FFD45A','right');
+ pill(c,T('Layers get thinner deeper down','Las capas son m\u00E1s delgadas abajo'),395,200,10,'#BFE6F5','right');pill(c,T('Bedrock','Lecho de roca'),8,256,10,'#FFFFFF','left');
+ txt(c,T('Top (newest)','Arriba (nuevo)'),238,90,'700 9px '+FONT,'#2A4A63');txt(c,T('(oldest)','(antiguo)'),362,90,'700 9px '+FONT,'#2A4A63','right');}
 function labCore(c,x,y,w,h){var i;c.fillStyle='rgba(60,90,120,0.16)';CE(c,x+w/2+4,y+h+4,w/2+6,8);c.fill();
  var g=c.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'#D4ECF7');g.addColorStop(0.4,'#F8FCFF');g.addColorStop(1,'#C4E0EF');c.fillStyle=g;c.fillRect(x,y,w,h);CE(c,x+w/2,y+h,w/2,7);c.fill();
  c.fillStyle='rgba(123,63,196,0.55)';c.fillRect(x,y+h*0.36,w,h*0.07);
@@ -2940,41 +3044,45 @@ function labArtKit(c,t){var g=c.createLinearGradient(0,0,0,240);g.addColorStop(0
  labCore(c,40,58,56,136);labRuler(c,24,208,232,false);
  c.fillStyle='#1F2229';rr(c,150,100,62,96,10);c.fill();c.fillStyle='#DDF0FA';rr(c,155,108,52,80,5);c.fill();labCore(c,170,116,22,58);
  person(c,286,196,0.82,'#2A9DB5',{glasses:true,skin:'#E8B48F',wave:true},t);person(c,350,196,0.82,'#FF7A2F',{goggles:true,skin:'#C68A5E'},t);
- pill(c,'Frozen ice core',68,30,11,'#BFE6F5','center');pill(c,'Meter stick',140,234,11,'#FFD45A','center');pill(c,'iPhone or iPad',181,90,11,'#FFFFFF','center');pill(c,'Lab partners',318,92,11,'#6FE3A4','center');}
-function labArtMeasure(c){c.fillStyle='#F4FAFD';c.fillRect(0,0,400,250);txt(c,'How to measure',200,22,'800 15px '+FONT,'#0E1B2C','center');
+ pill(c,T('Frozen ice core','N\u00FAcleo de hielo'),68,30,11,'#BFE6F5','center');pill(c,T('Meter stick','Regla de un metro'),140,234,11,'#FFD45A','center');pill(c,T('iPhone or iPad','iPhone o iPad'),181,90,11,'#FFFFFF','center');pill(c,T('Lab partners','Equipo de laboratorio'),318,92,11,'#6FE3A4','center');}
+function labArtMeasure(c){c.fillStyle='#F4FAFD';c.fillRect(0,0,400,250);txt(c,T('How to measure','C\u00F3mo medir'),200,22,'800 15px '+FONT,'#0E1B2C','center');
  labCore(c,150,44,70,180);labRuler(c,250,44,180,true);
  c.strokeStyle='#E0312A';c.fillStyle='#E0312A';c.lineWidth=2;c.beginPath();c.moveTo(126,40);c.lineTo(126,231);c.stroke();arw(c,126,120,126,40,'#E0312A',2);arw(c,126,150,126,231,'#E0312A',2);
- txt(c,'Total',118,128,'800 13px '+FONT,'#B3261E','right');txt(c,'length',118,144,'800 13px '+FONT,'#B3261E','right');
+ txt(c,T('Total','Largo'),118,128,'800 13px '+FONT,'#B3261E','right');txt(c,T('length','total'),118,144,'800 13px '+FONT,'#B3261E','right');
  var a=44+180*0.36,bH=180*0.07;c.strokeStyle='#7B3FC4';c.lineWidth=2;c.setLineDash([4,3]);c.beginPath();c.moveTo(150,a);c.lineTo(282,a);c.moveTo(150,a+bH);c.lineTo(282,a+bH);c.stroke();c.setLineDash([]);
- txt(c,'Layer thickness:',290,a-2,'800 12px '+FONT,'#5A2A96');txt(c,'end minus start',290,a+13,'700 12px '+FONT,'#5A2A96');
- txt(c,'Put the 0 end',16,60,'700 12px '+FONT,'#2A4A63');txt(c,'at the TOP of',16,75,'700 12px '+FONT,'#2A4A63');txt(c,'the ice core.',16,90,'700 12px '+FONT,'#2A4A63');
+ if(ES()){txt(c,'Grosor de',290,a-2,'800 12px '+FONT,'#5A2A96');txt(c,'la capa: final',290,a+13,'700 12px '+FONT,'#5A2A96');txt(c,'menos inicio',290,a+28,'700 12px '+FONT,'#5A2A96');
+  txt(c,'Pon el 0',16,60,'700 12px '+FONT,'#2A4A63');txt(c,'en la PARTE',16,75,'700 12px '+FONT,'#2A4A63');txt(c,'DE ARRIBA del',16,90,'700 12px '+FONT,'#2A4A63');txt(c,'n\u00FAcleo.',16,105,'700 12px '+FONT,'#2A4A63');}
+ else{txt(c,'Layer thickness:',290,a-2,'800 12px '+FONT,'#5A2A96');txt(c,'end minus start',290,a+13,'700 12px '+FONT,'#5A2A96');
+ txt(c,'Put the 0 end',16,60,'700 12px '+FONT,'#2A4A63');txt(c,'at the TOP of',16,75,'700 12px '+FONT,'#2A4A63');txt(c,'the ice core.',16,90,'700 12px '+FONT,'#2A4A63');}
  txt(c,'10 mm = 1 cm',16,236,'800 12px '+FONT,'#2A4A63');}
 
 /* ---------- the 2-page lab sheet ---------- */
 function labPages(){var L=labData(),W=1224,H=1584,K=2,M=46,HEAD=128,i,k,pages=[],cs=[],who={n:L.name||S.name,p:L.period||S.period};
  for(i=0;i<2;i++){var cv=document.createElement('canvas');cv.width=W*K;cv.height=H*K;var c=cv.getContext('2d');c.setTransform(K,0,0,K,0,0);c.fillStyle='#FFFFFF';c.fillRect(0,0,W,H);
   c.fillStyle='#0E1B2C';c.fillRect(0,0,W,HEAD);c.fillStyle='#BFE6F5';c.fillRect(0,HEAD-6,W,6);
-  txt(c,'Chapter 1 Lab Sheet',M,34,'800 18px '+FONT,'#8FD3F0');txt(c,'Ice Core Investigation: Unlocking Antarctica\'s Climate History',M,70,'800 30px '+FONT,'#FFFFFF');
-  txt(c,'Name: '+clean(who.n)+'    |    Period '+who.p+'    |    Lab partner: '+clean(L.partner)+'    |    '+new Date().toLocaleDateString(),M,106,'600 18px '+FONT,'#DDEFF8');
-  txt(c,'Page '+(i+1)+' of 2',W-M,34,'700 17px '+FONT,'#8FD3F0','right');pages.push(cv);cs.push(c);}
+  txt(c,T('Chapter 1 Lab Sheet','Hoja del laboratorio del Cap\u00EDtulo 1'),M,34,'800 18px '+FONT,'#8FD3F0');
+  var hT=T('Ice Core Investigation: Unlocking Antarctica\'s Climate History','Investigaci\u00F3n de n\u00FAcleos de hielo: descubriendo la historia del clima de la Ant\u00E1rtida'),hz=30;c.font='800 '+hz+'px '+FONT;while(hz>18&&mtext(c,hT)>W-2*M){hz--;c.font='800 '+hz+'px '+FONT;}txt(c,hT,M,70,'800 '+hz+'px '+FONT,'#FFFFFF');
+  var hN=T('Name: ','Nombre: ')+clean(who.n)+'    |    '+T('Period ','Periodo ')+who.p+'    |    '+T('Lab partner: ','Compa\u00F1ero(a) de laboratorio: ')+clean(L.partner)+'    |    '+new Date().toLocaleDateString(),nz=18;c.font='600 '+nz+'px '+FONT;while(nz>12&&mtext(c,hN)>W-2*M){nz--;c.font='600 '+nz+'px '+FONT;}
+  txt(c,hN,M,106,'600 '+nz+'px '+FONT,'#DDEFF8');
+  txt(c,T('Page ','P\u00E1gina ')+(i+1)+T(' of 2',' de 2'),W-M,34,'700 17px '+FONT,'#8FD3F0','right');pages.push(cv);cs.push(c);}
  /* page 1: labeled drawing (left), measurements and label key (right) */
  var c1=cs[0],im=labExport(2),iw=600,ih=iw*im.height/im.width,y0=HEAD+30;
- txt(c1,'My ice core drawing (what I observed)',M,y0+10,'800 22px '+FONT,'#0E1B2C');c1.drawImage(im,M,y0+24,iw,ih);c1.strokeStyle='#9FB8CC';c1.lineWidth=2;c1.strokeRect(M,y0+24,iw,ih);
+ txt(c1,T('My ice core drawing (what I observed)','Mi dibujo del n\u00FAcleo de hielo (lo que observ\u00E9)'),M,y0+10,'800 22px '+FONT,'#0E1B2C');c1.drawImage(im,M,y0+24,iw,ih);c1.strokeStyle='#9FB8CC';c1.lineWidth=2;c1.strokeRect(M,y0+24,iw,ih);
  var rx=M+iw+40,rw=W-M-rx,y=y0+10;
  function head(c,t,x,yy,w){c.fillStyle='#BFE6F5';rr(c,x,yy-24,w,36,8);c.fill();txt(c,t,x+12,yy+1,'800 20px '+FONT,'#0E1B2C');}
- head(c1,'Measurements',rx,y,rw);y+=40;
- for(k=0;k<5;k++){c1.fillStyle=k%2?'#FFFFFF':'#F1F7FB';c1.fillRect(rx,y-22,rw,56);c1.font='700 16px '+FONT;var ls=wrapLines(c1,LAB_MEAS[k],rw-150);for(i=0;i<ls.length&&i<2;i++)txt(c1,ls[i],rx+10,y+(ls.length>1?i*20-4:6),'700 16px '+FONT,'#1C2B3A');
+ head(c1,T('Measurements','Medidas'),rx,y,rw);y+=40;
+ for(k=0;k<5;k++){c1.fillStyle=k%2?'#FFFFFF':'#F1F7FB';c1.fillRect(rx,y-22,rw,56);c1.font='700 16px '+FONT;var ls=wrapLines(c1,lMEAS()[k],rw-150);for(i=0;i<ls.length&&i<2;i++)txt(c1,ls[i],rx+10,y+(ls.length>1?i*20-4:6),'700 16px '+FONT,'#1C2B3A');
   txt(c1,String(L.meas[k].v).replace(',','.')+' '+L.meas[k].u,rx+rw-12,y+8,'800 20px '+FONT,'#0E1B2C','right');y+=56;}
- y+=30;head(c1,'Four labeled features',rx,y,rw);y+=38;
- for(k=0;k<4;k++){c1.fillStyle='#0E1B2C';circ(c1,rx+16,y-6,13);txt(c1,String(k+1),rx+16,y,'800 15px '+FONT,'#FFFFFF','center');txt(c1,LAB_LBL[k].s,rx+38,y,'800 17px '+FONT,'#0E1B2C');
-  txt(c1,L.pins[k]?'Placed by student on the drawing':'Not placed',rx+38,y+22,'600 14px '+FONT,'#4A6B85');y+=54;}
- y+=20;head(c1,'Lab materials',rx,y,rw);y+=36;c1.font='600 15px '+FONT;
- for(k=0;k<4;k++){var ml=wrapLines(c1,(L.kit[k]?'[x] ':'[  ] ')+LAB_KIT[k],rw-10);for(i=0;i<ml.length;i++){txt(c1,ml[i],rx+8,y,'600 15px '+FONT,'#1C2B3A');y+=21;}y+=4;}
- y+=16;c1.font='italic 600 14px '+FONT;var nl=wrapLines(c1,'Our classroom ice core is a model of a real ice core. It is not a real ice sample and cannot be dated.',rw-10);for(i=0;i<nl.length;i++){txt(c1,nl[i],rx+8,y,'italic 600 14px '+FONT,'#4A6B85');y+=19;}
+ y+=30;head(c1,T('Four labeled features','Cuatro caracter\u00EDsticas etiquetadas'),rx,y,rw);y+=38;
+ for(k=0;k<4;k++){c1.fillStyle='#0E1B2C';circ(c1,rx+16,y-6,13);txt(c1,String(k+1),rx+16,y,'800 15px '+FONT,'#FFFFFF','center');txt(c1,lLBL()[k].s,rx+38,y,'800 17px '+FONT,'#0E1B2C');
+  txt(c1,L.pins[k]?T('Placed by student on the drawing','Colocada por el estudiante en el dibujo'):T('Not placed','No colocada'),rx+38,y+22,'600 14px '+FONT,'#4A6B85');y+=54;}
+ y+=20;head(c1,T('Lab materials','Materiales del laboratorio'),rx,y,rw);y+=36;c1.font='600 15px '+FONT;
+ for(k=0;k<4;k++){var ml=wrapLines(c1,(L.kit[k]?'[x] ':'[  ] ')+lKIT()[k],rw-10);for(i=0;i<ml.length;i++){txt(c1,ml[i],rx+8,y,'600 15px '+FONT,'#1C2B3A');y+=21;}y+=4;}
+ y+=16;c1.font='italic 600 14px '+FONT;var nl=wrapLines(c1,T('Our classroom ice core is a model of a real ice core. It is not a real ice sample and cannot be dated.','Nuestro n\u00FAcleo de hielo del sal\u00F3n es un modelo de un n\u00FAcleo de hielo real. No es una muestra de hielo real y no se puede fechar.'),rw-10);for(i=0;i<nl.length;i++){txt(c1,nl[i],rx+8,y,'italic 600 14px '+FONT,'#4A6B85');y+=19;}
  /* questions and team discussion: they start in the open space at the bottom of page 1 and continue on
     page 2, shrinking the text step by step until everything fits on the 2 pages */
- var c2=cs[1],blocks=[];for(k=0;k<LAB_Q.length;k++)blocks.push({h:'Question '+(k+1)+' - '+LAB_Q[k].h,q:LAB_Q[k].q,a:L.ans[k]});
- blocks.push({h:'Scientist Team Discussion',q:'Something interesting my lab partner noticed that I missed at first:',a:L.team});
+ var c2=cs[1],blocks=[],LQ=lQ();for(k=0;k<LQ.length;k++)blocks.push({h:T('Question ','Pregunta ')+(k+1)+' - '+LQ[k].h,q:LQ[k].q,a:L.ans[k]});
+ blocks.push({h:T('Scientist Team Discussion','Discusi\u00F3n del equipo cient\u00EDfico'),q:T('Something interesting my lab partner noticed that I missed at first:','Algo interesante que mi compa\u00F1ero(a) de laboratorio not\u00F3 y que yo no vi al principio:'),a:L.team});
  var p1top=Math.max(y0+24+ih,y)+40,R=[{c:c1,top:p1top+44,bot:H-40},{c:c2,top:HEAD+34,bot:H-40}],tw=W-2*M,s,lay,fh,fq,fa,lh;
  for(s=1.25;s>=0.62;s-=0.03){lay=[];fh=Math.round(19*s);fq=Math.round(17*s);fa=Math.round(17*s);lh=Math.round(fa*1.38);var r=0,yy=R[0].top,fit=true;
   for(k=0;k<blocks.length;k++){c2.font='800 '+fh+'px '+FONT;var hq=wrapLines(c2,blocks[k].q,tw-24);c2.font='500 '+fa+'px '+FONT;var al=wrapLines(c2,clean(blocks[k].a).replace(/^\s+|\s+$/g,''),tw-40);
@@ -2982,42 +3090,44 @@ function labPages(){var L=labData(),W=1224,H=1584,K=2,M=46,HEAD=128,i,k,pages=[]
    if(yy+bh>R[r].bot){if(r===0){r=1;yy=R[1].top;}if(yy+bh>R[r].bot)fit=false;}
    lay.push({r:r,y:yy,hq:hq,al:al,bh:bh});yy+=bh+Math.round(10*s);}
   if(fit)break;}
- if(lay[0].r===0)head(c1,'Investigation questions',M,p1top+6,tw);
+ if(lay[0].r===0)head(c1,T('Investigation questions','Preguntas de investigaci\u00F3n'),M,p1top+6,tw);
  for(k=0;k<blocks.length;k++){var Lb=lay[k],by=Lb.y,cc=R[Lb.r].c;cc.fillStyle=k===blocks.length-1?'#FFF6E0':'#F1F7FB';rr(cc,M,by,tw,Lb.bh,10);cc.fill();cc.strokeStyle=k===blocks.length-1?'#E7B94A':'#C9DCE8';cc.lineWidth=1.5;rr(cc,M,by,tw,Lb.bh,10);cc.stroke();
   var ty=by+fh+6;txt(cc,blocks[k].h,M+12,ty,'800 '+fh+'px '+FONT,'#0E1B2C');ty+=6;
   for(i=0;i<Lb.hq.length;i++){ty+=Math.round(fq*1.32);txt(cc,Lb.hq[i],M+12,ty,'700 '+fq+'px '+FONT,'#2A4A63');}ty+=8;
   for(i=0;i<Lb.al.length;i++){ty+=lh;txt(cc,Lb.al[i],M+28,ty-4,'500 '+fa+'px '+FONT,'#111418');}}
  return pages;}
-function makeLabPdf(){var L=labData(),title='Chapter 1 Lab: Ice Core Investigation';pdfStart(title);
+function makeLabPdf(){var L=labData(),title=T('Chapter 1 Lab: Ice Core Investigation','Laboratorio del Cap\u00EDtulo 1: Investigaci\u00F3n de n\u00FAcleos de hielo');pdfStart(title);
  setTimeout(function(){pdfFinish(labPages,{n:L.name||S.name,p:L.period||S.period},'Ch1Lab');},30);}
 $('labBack').onclick=function(){labGo(LB.step-1);};
 $('labNext').onclick=function(){labGo(LB.step+1);};
 
 /* ---------- menu ---------- */
-function openMenu(){show('scrMenu');campBtn();$('campNote').textContent='';$('hello').textContent='Hi, '+S.name+' (Period '+S.period+'). Pick a chapter. Aim for 70% or higher on each quiz.';var L=$('chList');L.innerHTML='';
- for(var i=0;i<CH.length;i++){(function(i){var ch=CH[i];var r=S.res[ch.id];var bt=el('button','ch'+(ch.ready?'':' off'));bt.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,ch.title));tx.appendChild(el('small',null,ch.desc));bt.appendChild(tx);
-  bt.appendChild(el('span','pill'+(r?' done':''),r?('Score '+r.score+'/'+r.total):(ch.ready?'Start':'Soon')));
+function openMenu(){show('scrMenu');campBtn();$('campNote').textContent='';$('hello').textContent=T('Hi, '+S.name+' (Period '+S.period+'). Pick a chapter. Aim for 70% or higher on each quiz.','Hola, '+S.name+' (Periodo '+S.period+'). Elige un cap\u00EDtulo. Trata de sacar 70% o m\u00E1s en cada cuestionario.');var L=$('chList');L.innerHTML='';
+ for(var i=0;i<CH.length;i++){(function(i){var ch=CH[i];var r=S.res[ch.id];var bt=el('button','ch'+(ch.ready?'':' off'));bt.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,T(ch.title,CH_ES[i][0])));tx.appendChild(el('small',null,T(ch.desc,CH_ES[i][1])));if(ES()&&ch.id!=='ch1')tx.appendChild(el('small','enOnly','Solo en ingl\u00E9s por ahora'));bt.appendChild(tx);
+  bt.appendChild(el('span','pill'+(r?' done':''),r?(T('Score ','Puntos ')+r.score+'/'+r.total):(ch.ready?T('Start','Empezar'):T('Soon','Pronto'))));
   bt.onclick=function(){sfx.click();ac();startChapter(i);};L.appendChild(bt);if(i===0)L.appendChild(labMenuBtn());})(i);}}
 /* Every chapter start (menu or "Try again") goes through the headphones reminder card. */
 var hpNext=null;
-function startChapter(i){var ch=CH[i];ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=ch.title;return;}
- openMenu();hpNext=function(){launchChapter(i);};$('hpTitle').textContent='Chapter '+(i+1)+': '+ch.title;hpSoundBtn();$('hpCard').style.display='block';$('hpCard').scrollTop=0;
- say('Put on your headphones and turn up the volume so you can hear the story.',1.05);}
+function startChapter(i){var ch=CH[i];ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=T(ch.title,CH_ES[i][0]);return;}
+ openMenu();hpNext=function(){launchChapter(i);};$('hpTitle').textContent=T('Chapter '+(i+1)+': '+ch.title,'Cap\u00EDtulo '+(i+1)+': '+CH_ES[i][0]);hpSoundBtn();
+ var he=$('hpEn');if(LANG==='es'&&ch.id!=='ch1'){he.textContent='Este cap\u00EDtulo est\u00E1 solo en ingl\u00E9s por ahora. La historia, las voces y el cuestionario van a estar en ingl\u00E9s. (This chapter is in English for now.)';he.style.display='block';}else he.style.display='none';
+ $('hpCard').style.display='block';$('hpCard').scrollTop=0;
+ say(T('Put on your headphones and turn up the volume so you can hear the story.','Ponte los aud\u00EDfonos y sube el volumen para que puedas escuchar la historia.'),1.05);}
 function hpSoundBtn(){$('hpSound').style.display=V.on?'none':'block';}
-function launchChapter(i){var ch=CH[i];if(ch.id==='ch1')startStory(CH1_STEPS,startDrillGame,'Start drilling');else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');}
+function launchChapter(i){var ch=CH[i];CURCH=ch.id;ENONLY=(LANG==='es'&&ch.id!=='ch1');if(ch.id==='ch1'){startStory(T(CH1_STEPS,CH1_STEPS_ES),startDrillGame,T('Start drilling','Empezar a perforar'));story.ch1=true;}else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');}
 
 /* ---------- report + PDF ---------- */
 var pdfBlob=null,pdfName='';
 function openReport(pick){show('scrReport');var L=$('repList'),done=[],i;L.innerHTML='';$('repOut').style.display='none';pdfBlob=null;
  var curDone=[];for(i=0;i<CH.length;i++){if(S.res[CH[i].id]){done.push(i);if(resCur(S.res[CH[i].id]))curDone.push(i);}}
- $('repInfo').textContent=done.length?'Tap a chapter to make its results page. Then save it as a PDF or a picture and turn it in on Canvas. New PDFs are only made when you complete a chapter and its quiz again.':'Finish at least one chapter quiz first. Your results will show up here.';
- for(i=0;i<done.length;i++){(function(a){var r=S.res[CH[a].id],bt=el('button','ch');bt.appendChild(el('span','num',String(a+1)));var tx=el('span','tx');tx.appendChild(el('b',null,'Chapter '+(a+1)+' - '+CH[a].title+' PDF Results'));tx.appendChild(el('small',null,'Score '+r.score+' / '+r.total+(r.when?'   |   '+r.when:'')));
-  if(r.total&&r.score/r.total<0.7)tx.appendChild(el('small','oldn','Below 70%. Try this chapter again for a better score.'));
-  if(!resCur(r))tx.appendChild(el('small','oldn','Saved under the name '+r.name+' (Period '+r.period+'). This PDF keeps that name. Complete the chapter again for a PDF with your current name.'));bt.appendChild(tx);
-  bt.onclick=function(){sfx.click();selRep(bt);makePdf([a],1,'Chapter '+(a+1)+': '+CH[a].title,'Ch'+(a+1));};L.appendChild(bt);if(pick===a){selRep(bt);makePdf([a],1,'Chapter '+(a+1)+': '+CH[a].title,'Ch'+(a+1));}})(done[i]);}
- if(labAll()){var lb=el('button','ch');lb.appendChild(el('span','num','Lab'));var lt=el('span','tx');lt.appendChild(el('b',null,'Chapter 1 Lab - Ice Core Investigation Lab Sheet'));lt.appendChild(el('small',null,'2 pages: drawing, labels, measurements, and answers'+(S.lab.when?'   |   '+S.lab.when:'')));lb.appendChild(lt);
+ $('repInfo').textContent=done.length?T('Tap a chapter to make its results page. Then save it as a PDF or a picture and turn it in on Canvas. New PDFs are only made when you complete a chapter and its quiz again.','Toca un cap\u00EDtulo para crear su p\u00E1gina de resultados. Luego gu\u00E1rdala como PDF o como imagen y entr\u00E9gala en Canvas. Solo se crean PDF nuevos cuando completas otra vez un cap\u00EDtulo y su cuestionario.'):T('Finish at least one chapter quiz first. Your results will show up here.','Primero termina al menos un cuestionario de cap\u00EDtulo. Tus resultados aparecer\u00E1n aqu\u00ED.');
+ for(i=0;i<done.length;i++){(function(a){var r=S.res[CH[a].id],bt=el('button','ch');bt.appendChild(el('span','num',String(a+1)));var tx=el('span','tx');var ct=T('Chapter ','Cap\u00EDtulo ')+(a+1)+': '+chTitle(CH[a].id);tx.appendChild(el('b',null,T('Chapter '+(a+1)+' - '+CH[a].title+' PDF Results','Cap\u00EDtulo '+(a+1)+' - '+chTitle(CH[a].id)+': resultados en PDF')));tx.appendChild(el('small',null,T('Score ','Puntos ')+r.score+' / '+r.total+(r.when?'   |   '+r.when:'')));
+  if(r.total&&r.score/r.total<0.7)tx.appendChild(el('small','oldn',T('Below 70%. Try this chapter again for a better score.','Menos de 70%. Vuelve a jugar este cap\u00EDtulo para mejorar tu puntaje.')));
+  if(!resCur(r))tx.appendChild(el('small','oldn',T('Saved under the name '+r.name+' (Period '+r.period+'). This PDF keeps that name. Complete the chapter again for a PDF with your current name.','Guardado con el nombre '+r.name+' (Periodo '+r.period+'). Este PDF conserva ese nombre. Completa el cap\u00EDtulo otra vez para obtener un PDF con tu nombre actual.')));bt.appendChild(tx);
+  bt.onclick=function(){sfx.click();selRep(bt);makePdf([a],1,ct,'Ch'+(a+1));};L.appendChild(bt);if(pick===a){selRep(bt);makePdf([a],1,ct,'Ch'+(a+1));}})(done[i]);}
+ if(labAll()){var lb=el('button','ch');lb.appendChild(el('span','num',T('Lab','Lab')));var lt=el('span','tx');lt.appendChild(el('b',null,T('Chapter 1 Lab - Ice Core Investigation Lab Sheet','Laboratorio del Cap\u00EDtulo 1 - Hoja del laboratorio de n\u00FAcleos de hielo')));lt.appendChild(el('small',null,T('2 pages: drawing, labels, measurements, and answers','2 p\u00E1ginas: dibujo, etiquetas, medidas y respuestas')+(S.lab.when?'   |   '+S.lab.when:'')));lb.appendChild(lt);
   lb.onclick=function(){sfx.click();selRep(lb);makeLabPdf();};L.appendChild(lb);if(pick==='lab'){selRep(lb);makeLabPdf();}}
- if(curDone.length>1){var all=el('button','ch');all.appendChild(el('span','num','All'));var t2=el('span','tx');t2.appendChild(el('b',null,'All finished chapters in one PDF'));t2.appendChild(el('small',null,'Fits on 2 pages'+(curDone.length<done.length?'. Only chapters finished under your current name.':'')));all.appendChild(t2);all.onclick=function(){sfx.click();selRep(all);makePdf(curDone,2,'Climate Quest: Student Report','All');};L.appendChild(all);}}
+ if(curDone.length>1){var all=el('button','ch');all.appendChild(el('span','num',T('All','Todo')));var t2=el('span','tx');t2.appendChild(el('b',null,T('All finished chapters in one PDF','Todos los cap\u00EDtulos terminados en un PDF')));t2.appendChild(el('small',null,T('Fits on 2 pages','Cabe en 2 p\u00E1ginas')+(curDone.length<done.length?T('. Only chapters finished under your current name.','. Solo los cap\u00EDtulos terminados con tu nombre actual.'):'')));all.appendChild(t2);all.onclick=function(){sfx.click();selRep(all);makePdf(curDone,2,T('Climate Quest: Student Report','Climate Quest: informe del estudiante'),'All');};L.appendChild(all);}}
 function selRep(bt){var bs=$('repList').children;for(var i=0;i<bs.length;i++)bs[i].className='ch';bt.className='ch on';}
 function wrapLines(c,t,maxW){var out=[],ps=String(t).split('\n');for(var p=0;p<ps.length;p++){var ws=ps[p].split(' '),line='';for(var i=0;i<ws.length;i++){var test=line?line+' '+ws[i]:ws[i];if(mtext(c,test)>maxW&&line){out.push(line);line=ws[i];}else{line=test;}}out.push(line);}return out;}
 function loadImgs(cb){var list=[],i,j;for(i=0;i<CH.length;i++){var r=S.res[CH[i].id];if(!r)continue;for(j=0;j<r.items.length;j++){if(r.items[j].img)list.push(r.items[j]);}}var left=list.length;if(!left){cb();return;}for(i=0;i<list.length;i++){(function(it){var im=new Image();im.onload=im.onerror=function(){it._im=im;left--;if(left===0)cb();};im.src=it.img;})(list[i]);}}
@@ -3031,15 +3141,15 @@ function buildPages(only,maxP,title){var WH=repWho(only);var W=1224,H=1584,K=2,M
   function textB(t,font,col,lh,ind,keep,after){mc.font=font;var ls=wrapLines(mc,clean(t),CW-ind);for(var k=0;k<ls.length;k++){B.push({k:'line',t:ls[k],font:font,col:col,ind:ind,h:lh+(k===ls.length-1?(after||0):0),keep:keep||k<ls.length-1});}}
   function flush(){if(!pend.length)return;var iw=Math.min((CW-14)/2,262*s),ih=0,k;for(k=0;k<pend.length;k++){ih=Math.max(ih,iw*pend[k].im.height/pend[k].im.width);}B.push({k:'imgs',list:pend,iw:iw,ih:ih,cap:Math.round(13*s),h:ih+Math.round(20*s)+gap});pend=[];}
   for(var a=0;a<CH.length;a++){var r=S.res[CH[a].id];if(!r||(only&&only.indexOf(a)<0))continue;
-   B.push({k:'head',t:'Chapter '+(a+1)+': '+r.title,sc:'Score: '+r.score+' / '+r.total,fs:19*s,h:Math.round(34*s)+gap,keep:true});
+   B.push({k:'head',t:T('Chapter ','Cap\u00EDtulo ')+(a+1)+': '+chTitle(CH[a].id),sc:T('Score: ','Puntos: ')+r.score+' / '+r.total,fs:19*s,h:Math.round(34*s)+gap,keep:true});
    for(var b=0;b<r.items.length;b++){var it=r.items[b],qf=F(15.5*s,700),af=F(14*s,600),lq=Math.round(20*s),la=Math.round(18.5*s),ind=Math.round(16*s);
     if(!(it._im&&it._im.width))flush();
     textB((b+1)+'. '+it.q,qf,'#0E1B2C',lq,0,true);
-    if(it.t==='mc')textB('Answer: '+it.ans+(it.ok?'  (correct)':'  (incorrect; correct answer: '+it.right+')'),af,it.ok?'#1F7A45':'#B3261E',la,ind,false,gap);
+    if(it.t==='mc')textB(T('Answer: ','Respuesta: ')+it.ans+(it.ok?T('  (correct)','  (correcta)'):T('  (incorrect; correct answer: ','  (incorrecta; respuesta correcta: ')+it.right+')'),af,it.ok?'#1F7A45':'#B3261E',la,ind,false,gap);
     else if(it.t==='text')textB(it.ans,F(14*s,500),'#1C2B3A',la,ind,false,gap);
-    else if(it.t==='label')textB(it.ans+' (picture below)',af,'#1C2B3A',la,ind,true,gap);
-    else textB('(drawing below)',af,'#1C2B3A',la,ind,true,gap);
-    if(it._im&&it._im.width){pend.push({im:it._im,cap:it.t==='label'?'Label task':'Drawing'});if(pend.length===2)flush();}}
+    else if(it.t==='label')textB(it.ans+T(' (picture below)',' (imagen abajo)'),af,'#1C2B3A',la,ind,true,gap);
+    else textB(T('(drawing below)','(dibujo abajo)'),af,'#1C2B3A',la,ind,true,gap);
+    if(it._im&&it._im.width){pend.push({im:it._im,cap:it.t==='label'?T('Label task','Etiquetas'):T('Drawing','Dibujo')});if(pend.length===2)flush();}}
    flush();B[B.length-1].h+=Math.round(8*s);}
   return B;}
  function pack(B){var P=[],col=0,y=0,k;
@@ -3050,7 +3160,7 @@ function buildPages(only,maxP,title){var WH=repWho(only);var W=1224,H=1584,K=2,M
  var n=best.pages,pages=[],cvs=[];
  for(i=0;i<n;i++){var cv=document.createElement('canvas');cv.width=W*K;cv.height=H*K;var c=cv.getContext('2d');c.setTransform(K,0,0,K,0,0);c.fillStyle='#FFFFFF';c.fillRect(0,0,W,H);
   c.fillStyle='#0E1B2C';c.fillRect(0,0,W,HEAD);txt(c,title||'Climate Quest: Student Report',M,44,'800 30px '+FONT,'#BFE6F5');
-  txt(c,'Name: '+clean(WH.n)+'    |    Period '+WH.p+'    |    '+new Date().toLocaleDateString(),M,80,'600 19px '+FONT,'#FFFFFF');txt(c,'Page '+(i+1)+' of '+n,W-M,80,'600 19px '+FONT,'#BFE6F5','right');
+  txt(c,T('Name: ','Nombre: ')+clean(WH.n)+'    |    '+T('Period ','Periodo ')+WH.p+'    |    '+new Date().toLocaleDateString(),M,80,'600 19px '+FONT,'#FFFFFF');txt(c,T('Page ','P\u00E1gina ')+(i+1)+T(' of ',' de ')+n,W-M,80,'600 19px '+FONT,'#BFE6F5','right');
   c.fillStyle='#D5E3EC';c.fillRect(M+CW+G/2-1,TOP,2,colH);pages.push(cv);cvs.push(c);}
  for(i=0;i<best.P.length;i++){var p=best.P[i],b=p.b,cx=cvs[Math.floor(p.col/2)],x=M+(p.col%2)*(CW+G),y=TOP+p.y;
   if(b.k==='head'){var hh=b.h-Math.round(9*best.s),fz=b.fs;cx.font=F(fz,800);while(fz>10&&mtext(cx,b.t)+mtext(cx,b.sc)*0.9+36>CW){fz-=0.5;cx.font=F(fz,800);}cx.fillStyle='#BFE6F5';rr(cx,x,y,CW,hh,6);cx.fill();txt(cx,b.t,x+10,y+hh*0.68,F(fz,800),'#0E1B2C');txt(cx,b.sc,x+CW-10,y+hh*0.68,F(fz*0.9,800),'#0E1B2C','right');}
@@ -3068,66 +3178,70 @@ function buildPDF(jpgs){var n=jpgs.length,out='%PDF-1.4\n%'+String.fromCharCode(
  out+='trailer\n<< /Size '+size+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
  var u=new Uint8Array(out.length);for(k=0;k<out.length;k++)u[k]=out.charCodeAt(k)&255;return u;}
 var pageUrls=[];
-function pdfStart(title){$('repOut').style.display='block';$('repTitle').textContent=title;$('repStatus').textContent='Building your results page...';$('btnShare').style.display='none';$('btnShareImg').style.display='none';$('repPreview').innerHTML='';pdfBlob=null;pageUrls=[];}
+function pdfStart(title){$('repOut').style.display='block';$('repTitle').textContent=title;$('repStatus').textContent=T('Building your results page...','Creando tu p\u00E1gina de resultados...');$('btnShare').style.display='none';$('btnShareImg').style.display='none';$('repPreview').innerHTML='';pdfBlob=null;pageUrls=[];}
 function makePdf(only,maxP,title,tag){pdfStart(title);loadImgs(function(){pdfFinish(function(){return buildPages(only,maxP,title);},repWho(only),tag);});}
 function pdfFinish(fn,WH,tag){try{var pages=fn(),jpgs=[],pv=$('repPreview');pv.innerHTML='';
-  for(var i=0;i<pages.length;i++){var url=pages[i].toDataURL('image/jpeg',0.85);pageUrls.push(url);jpgs.push({w:pages[i].width,h:pages[i].height,d:atob(url.split(',')[1])});var im=el('img');im.src=url;im.alt='Results page '+(i+1);pv.appendChild(im);}
+  for(var i=0;i<pages.length;i++){var url=pages[i].toDataURL('image/jpeg',0.85);pageUrls.push(url);jpgs.push({w:pages[i].width,h:pages[i].height,d:atob(url.split(',')[1])});var im=el('img');im.src=url;im.alt=T('Results page ','P\u00E1gina de resultados ')+(i+1);pv.appendChild(im);}
   pdfBlob=new Blob([buildPDF(jpgs)],{type:'application/pdf'});pdfName='ClimateQuest_'+clean(WH.n).replace(/[^A-Za-z0-9]+/g,'_')+'_P'+WH.p+'_'+tag+'.pdf';
-  $('btnShare').style.display='block';$('btnShareImg').style.display='block';$('repStatus').textContent='Ready! ('+pages.length+' page'+(pages.length>1?'s':'')+')';sfx.good();
+  $('btnShare').style.display='block';$('btnShareImg').style.display='block';$('repStatus').textContent=T('Ready! ('+pages.length+' page'+(pages.length>1?'s':'')+')','\u00A1Listo! ('+pages.length+' p\u00E1gina'+(pages.length>1?'s':'')+')');sfx.good();
   setTimeout(function(){var o=$('repOut');$('scrReport').scrollTop=o.offsetTop-10;},50);}
- catch(e){$('repStatus').textContent='The PDF could not be built on this device. Press and hold the page below to save it instead.';}}
+ catch(e){$('repStatus').textContent=T('The PDF could not be built on this device. Press and hold the page below to save it instead.','No se pudo crear el PDF en este dispositivo. Mant\u00E9n presionada la p\u00E1gina de abajo para guardarla.');}}
 function durlBlob(u){var b=atob(u.split(',')[1]),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return new Blob([a],{type:'image/jpeg'});}
 function shareImg(){if(!pageUrls.length)return;var files=[],i,base=pdfName.replace(/\.pdf$/,'');
  try{for(i=0;i<pageUrls.length;i++)files.push(new File([durlBlob(pageUrls[i])],base+(pageUrls.length>1?'_page'+(i+1):'')+'.jpg',{type:'image/jpeg'}));}catch(e){files=[];}
- if(files.length&&navigator.canShare&&navigator.share&&navigator.canShare({files:files})){navigator.share({files:files,title:'Climate Quest results'}).then(function(){$('repStatus').textContent='Shared!';},function(){});return;}
+ if(files.length&&navigator.canShare&&navigator.share&&navigator.canShare({files:files})){navigator.share({files:files,title:'Climate Quest results'}).then(function(){$('repStatus').textContent=T('Shared!','\u00A1Compartido!');},function(){});return;}
  for(i=0;i<pageUrls.length;i++){var a=document.createElement('a');a.href=pageUrls[i];a.download=base+(pageUrls.length>1?'_page'+(i+1):'')+'.jpg';document.body.appendChild(a);a.click();document.body.removeChild(a);}
- setTimeout(function(){$('repStatus').textContent='If nothing saved, press and hold the page below and choose Save to Photos.';},1200);}
+ setTimeout(function(){$('repStatus').textContent=T('If nothing saved, press and hold the page below and choose Save to Photos.','Si no se guard\u00F3 nada, mant\u00E9n presionada la p\u00E1gina de abajo y elige guardarla en Fotos.');},1200);}
 function sharePdf(){if(!pdfBlob)return;var file=null;try{file=new File([pdfBlob],pdfName,{type:'application/pdf'});}catch(e){file=null;}
- if(file&&navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Climate Quest report'}).then(function(){$('repStatus').textContent='Shared!';},function(){});return;}
+ if(file&&navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Climate Quest report'}).then(function(){$('repStatus').textContent=T('Shared!','\u00A1Compartido!');},function(){});return;}
  var url=URL.createObjectURL(pdfBlob);var a=document.createElement('a');a.href=url;a.download=pdfName;document.body.appendChild(a);a.click();document.body.removeChild(a);
- setTimeout(function(){$('repStatus').textContent='If no download appeared, save the page images below instead.';},1200);}
+ setTimeout(function(){$('repStatus').textContent=T('If no download appeared, save the page images below instead.','Si no apareci\u00F3 ninguna descarga, guarda las im\u00E1genes de la p\u00E1gina de abajo.');},1200);}
 
 /* ---------- sign in ---------- */
 function openSign(){show('scrSign');$('inFirst').value=S.first;$('inLast').value=S.last;$('inPeriod').value=S.period;$('signMsg').textContent='';$('btnSignCancel').style.display=S.name?'block':'none';var c=setupCanvas($('heroCv'),400,300,0.32);startLoop(function(dt,t){sceneCamp(c,t);});}
 function nmTidy(v){return clean(v).replace(/\s+/g,' ').replace(/^\s+|\s+$/g,'');}
 var nmPend=null;
 function startApp(){ac();var f=nmTidy($('inFirst').value),l=nmTidy($('inLast').value),p=$('inPeriod').value;
- if(!/[A-Za-z]/.test(f)){$('signMsg').textContent='Type your first name.';sfx.bad();return;}
- if(!/[A-Za-z]/.test(l)){$('signMsg').textContent='Type your last name.';sfx.bad();return;}
- if(!p){$('signMsg').textContent='Choose your class period.';sfx.bad();return;}
- $('signMsg').textContent='';nmPend={f:f,l:l,p:p};$('nmName').textContent=f+' '+l;$('nmPer').textContent='Period '+p;$('nameCard').style.display='block';sfx.click();}
+ if(!/[A-Za-z]/.test(f)){$('signMsg').textContent=T('Type your first name.','Escribe tu nombre.');sfx.bad();return;}
+ if(!/[A-Za-z]/.test(l)){$('signMsg').textContent=T('Type your last name.','Escribe tu apellido.');sfx.bad();return;}
+ if(!p){$('signMsg').textContent=T('Choose your class period.','Elige tu periodo de clase.');sfx.bad();return;}
+ $('signMsg').textContent='';nmPend={f:f,l:l,p:p};$('nmName').textContent=f+' '+l;$('nmPer').textContent=T('Period ','Periodo ')+p;$('nameCard').style.display='block';sfx.click();}
 function nameYes(){if(!nmPend)return;S.first=nmPend.f;S.last=nmPend.l;S.name=nmPend.f+' '+nmPend.l;S.period=nmPend.p;nmPend=null;save();sfx.good();openMenu();}
 
 /* ---------- wire up ---------- */
 $('btnStart').onclick=startApp;
 $('btnHome').onclick=function(){sfx.click();openMenu();};
-$('btnSound').onclick=function(){V.on=!V.on;this.textContent='Sound: '+(V.on?'On':'Off');saveSet();hpSoundBtn();if(!V.on){hush();stopDrillSnd();}else{ac();sfx.click();}};
+function sndTx(){return T('Sound: ','Sonido: ')+(V.on?T('On','Activado'):T('Off','Desactivado'));}
+$('btnSound').onclick=function(){V.on=!V.on;this.textContent=sndTx();saveSet();hpSoundBtn();if(!V.on){hush();stopDrillSnd();}else{ac();sfx.click();}};
 var VSAMPLE={frost:"Hi team, I'm Dr. Frost. Let's find out how Earth's climate works.",sam:"Hi, I'm Sam. I have a lot of questions!",rosa:"Hi, I'm Rosa. This is going to be fun."};
-function buildVoiceRows(){var box=$('voiceRows'),vs=enVoices(),k,i,j;box.innerHTML='';
+var VSAMPLE_ES={frost:"Hola, equipo. Soy el Dr. Frost. Vamos a descubrir c\u00F3mo funciona el clima de la Tierra.",sam:"Hola, soy Sam. \u00A1Tengo muchas preguntas!",rosa:"Hola, soy Rosa. Esto va a ser divertido."};
+function buildVoiceRows(){var box=$('voiceRows'),es=ES(),vs=es?langVoices('es'):enVoices(),VL=vList(),VS=vSet(),VA=es?VSAMPLE_ES:VSAMPLE,k,i,j;box.innerHTML='';
+ $('setVN').textContent=T('Story voices. Pick Daniel, Samantha, or Karen for each character, then tap Test.','Voces de la historia. Elige una voz en espa\u00F1ol para cada personaje y toca Probar. \u00BFFalta una voz? En el iPhone ve a Configuraci\u00F3n > Accesibilidad > Contenido le\u00EDdo > Voces > Espa\u00F1ol y desc\u00E1rgala gratis.');
+ $('btnVoiceReset').textContent=T('Reset voices (Daniel, Samantha, Karen)','Restablecer voces (Juan, Paulina, M\u00F3nica)');
  var keys=['frost','sam','rosa'];
- for(k=0;k<keys.length;k++){(function(who){var row=el('div','vrow');row.appendChild(el('label',null,WHO[who].n.replace(' (new worker)','')+' voice'));
+ for(k=0;k<keys.length;k++){(function(who){var row=el('div','vrow');row.appendChild(el('label',null,T(WHO[who].sh+' voice','Voz de '+WHO[who].sh)));
   var line=el('div','row');var sel=el('select');
-  for(i=0;i<VSUG.length;i++){var found=false;for(j=0;j<vs.length;j++){if(vs[j].name.indexOf(VSUG[i][0])===0){found=true;break;}}
-   var o=el('option',null,VSUG[i][0]+' - '+VSUG[i][1]+(found||!vs.length?'':' (not on this device)'));o.value=VSUG[i][0];sel.appendChild(o);}
-  sel.value=VSET[who];
-  sel.onchange=function(){VSET[who]=sel.value;saveSet();say(VSAMPLE[who],WHO[who].pitch,who);};
-  var tb=el('button','sbtn','Test');tb.onclick=function(){ac();if(!V.on){$('btnSound').textContent='Sound: Off (turn on to test)';return;}say(VSAMPLE[who],WHO[who].pitch,who);};
+  for(i=0;i<VL.length;i++){var found=false;for(j=0;j<vs.length;j++){if(fold(vs[j].name).indexOf(VL[i][0])===0){found=true;break;}}
+   var o=el('option',null,vDisp(VL[i][0])+' - '+VL[i][1]+(found||!vs.length?'':T(' (not on this device)',' (no est\u00E1 en este dispositivo)')));o.value=VL[i][0];sel.appendChild(o);}
+  sel.value=VS[who];
+  sel.onchange=function(){VS[who]=sel.value;saveSet();say(VA[who],WHO[who].pitch,who);};
+  var tb=el('button','sbtn',T('Test','Probar'));tb.onclick=function(){ac();if(!V.on){$('btnSound').textContent=T('Sound: Off (turn on to test)','Sonido: Desactivado (act\u00EDvalo para probar)');return;}say(VA[who],WHO[who].pitch,who);};
   line.appendChild(sel);line.appendChild(tb);row.appendChild(line);box.appendChild(row);})(keys[k]);}}
-function openSettings(){sfx.click();$('btnSound').textContent='Sound: '+(V.on?'On':'Off');buildVoiceRows();$('codeMsg').textContent='';$('inCode').value='';$('setCard').style.display='block';}
+function openSettings(){sfx.click();$('btnSound').textContent=sndTx();langBtns();buildVoiceRows();$('codeMsg').textContent='';$('inCode').value='';$('setCard').style.display='block';}
 $('btnGear').onclick=openSettings;
 /* teacher code: reopens the camp mini game right away (clears the 10-minute cooldown) */
 $('btnCode').onclick=function(){var v=String($('inCode').value||'').replace(/\s+/g,'').toLowerCase();$('inCode').value='';
- if(v==='yourdadacademy'){S.campNext=0;save();campBtn();$('campNote').textContent='';sfx.good();$('codeMsg').textContent='Code accepted. The camp mini game is open.';}
- else{sfx.bad();$('codeMsg').textContent='That code did not work.';}};
+ if(v==='yourdadacademy'){S.campNext=0;save();campBtn();$('campNote').textContent='';sfx.good();$('codeMsg').textContent=T('Code accepted. The camp mini game is open.','C\u00F3digo aceptado. El minijuego del campamento est\u00E1 abierto.');}
+ else{sfx.bad();$('codeMsg').textContent=T('That code did not work.','Ese c\u00F3digo no funcion\u00F3.');}};
 $('btnSetDone').onclick=function(){sfx.click();hush();$('setCard').style.display='none';};
-$('btnVoiceReset').onclick=function(){VSET.frost=VDEF.frost;VSET.sam=VDEF.sam;VSET.rosa=VDEF.rosa;saveSet();buildVoiceRows();sfx.click();};
+$('btnVoiceReset').onclick=function(){if(ES()){VSET_ES.frost=VDEF_ES.frost;VSET_ES.sam=VDEF_ES.sam;VSET_ES.rosa=VDEF_ES.rosa;}else{VSET.frost=VDEF.frost;VSET.sam=VDEF.sam;VSET.rosa=VDEF.rosa;}saveSet();buildVoiceRows();sfx.click();};
 if(window.speechSynthesis&&'onvoiceschanged' in speechSynthesis){speechSynthesis.onvoiceschanged=function(){if($('setCard').style.display==='block')buildVoiceRows();};}
 $('btnSignCancel').onclick=function(){sfx.click();if(S.name&&S.period)openMenu();};
 $('nmYes').onclick=nameYes;
 $('nmNo').onclick=function(){sfx.click();nmPend=null;$('nameCard').style.display='none';$('inFirst').focus();};
 $('hpGo').onclick=function(){sfx.click();hush();$('hpCard').style.display='none';var f=hpNext;hpNext=null;if(f)f();};
 $('hpBack').onclick=function(){sfx.click();hush();hpNext=null;$('hpCard').style.display='none';};
-$('hpSound').onclick=function(){V.on=true;saveSet();ac();sfx.click();hpSoundBtn();say('Sound is on. Put on your headphones and turn up the volume.',1.05);};
+$('hpSound').onclick=function(){V.on=true;saveSet();ac();sfx.click();hpSoundBtn();say(T('Sound is on. Put on your headphones and turn up the volume.','El sonido est\u00E1 activado. Ponte los aud\u00EDfonos y sube el volumen.'),1.05);};
 $('btnSoonBack').onclick=function(){sfx.click();openMenu();};
 $('btnReport').onclick=function(){sfx.click();openReport(-1);};
 $('btnNext').onclick=function(){if(this.disabled)return;sfx.click();if(sIdx>=story.steps.length-1){story.done();}else{sIdx++;renderStep();}};
@@ -3135,7 +3249,7 @@ $('btnPrev').onclick=function(){sfx.click();if(sIdx>0){sIdx--;renderStep();}};
 $('btnReplay').onclick=function(){var st=story.steps[sIdx];if(sIdx<=story.max){say(st.tx,WHO[st.who].pitch,st.who);}else{renderStep();}};
 var hb=$('btnHold');hb.addEventListener('touchstart',holdOn,false);hb.addEventListener('touchend',holdOff,false);hb.addEventListener('touchcancel',holdOff,false);hb.addEventListener('mousedown',holdOn,false);hb.addEventListener('mouseup',holdOff,false);hb.addEventListener('mouseleave',function(){if(D.hold)holdOff();},false);
 hb.addEventListener('contextmenu',function(e){e.preventDefault();},false);
-$('btnPull').onclick=function(){if(D.phase!=='reached')return;D.phase='pull';D.pull=0;sfx.winch();$('btnPull').style.display='none';$('dMsg').textContent='Pulling up the core...';};
+$('btnPull').onclick=function(){if(D.phase!=='reached')return;D.phase='pull';D.pull=0;sfx.winch();$('btnPull').style.display='none';$('dMsg').textContent=T('Pulling up the core...','Sacando el n\u00FAcleo...');};
 $('ccNext').onclick=nextCore;
 $('btnCheck').onclick=seasonCheck;
 $('btnHint').onclick=function(){sfx.click();if(SE.done||SE.wait)return;$('misMsg').style.color='#FFD2B8';$('misMsg').textContent='Hint: '+MIS[SE.mi].hint;};
@@ -3209,7 +3323,42 @@ setInterval(function(){if(cur==='scrMenu')campBtn();},1000);
  document.addEventListener('keydown',function(e){if(cur!=='scrCamp'||typing(e))return;var k=KM[e.key];if(!k)return;e.preventDefault();if(!e.repeat)press(k);},false);
  document.addEventListener('keyup',function(e){var k=KM[e.key];if(k&&CK[k])release(k);},false);})();
 
-load();loadSet();
+/* ---------- language switch ---------- */
+/* Static page text: [id, Spanish, isHTML]. The English text is read from the page the first time. */
+var LTX=[
+ ['signLead','Perfora hielo antiguo, sigue el aire y construye ciudades en los climas correctos.'],
+ ['lbFirst','Nombre'],['lbLast','Apellido'],['lbPer','Periodo de clase'],['optPer','Elige tu periodo'],
+ ['signWarn','<b>Escribe tu nombre correctamente.</b> Este es el nombre que tu docente ver\u00E1 en tus PDF. Cuando toques Empezar, tu nombre quedar\u00E1 fijo y no podr\u00E1s cambiarlo. Si lo cambias despu\u00E9s, tus PDF anteriores seguir\u00E1n mostrando tu nombre anterior y tendr\u00E1s que completar esos cap\u00EDtulos otra vez para obtener PDF nuevos.',1],
+ ['btnStart','Empezar'],['btnSignCancel','Cancelar y mantener mi nombre'],
+ ['btnReport','Mis resultados (PDF)'],['soonP','Este cap\u00EDtulo llegar\u00E1 pronto. Por ahora prueba otro cap\u00EDtulo.'],['btnSoonBack','Volver a los cap\u00EDtulos'],
+ ['dDepthL','Profundidad:'],['dAgeL','Edad del hielo:'],['dHeatL','Calor del motor'],['btnHold','Mant\u00E9n presionado'],['btnPull','Sacar el n\u00FAcleo de hielo'],
+ ['labTitleTx','LABORATORIO DEL CAP\u00CDTULO 1: N\u00DACLEOS DE HIELO'],
+ ['repH','Mis resultados'],['btnShare','Guardar o compartir como PDF'],['btnShareImg','Guardar o compartir como imagen'],
+ ['repNote','Entrega el PDF o la imagen en Canvas. Tambi\u00E9n puedes mantener presionada la p\u00E1gina de abajo para guardarla en Fotos. Una captura de pantalla tambi\u00E9n funciona, pero el texto se ver\u00E1 peque\u00F1o.'],
+ ['setH','Configuraci\u00F3n'],['setCN','C\u00F3digo (para el docente)'],['btnCode','Ingresar c\u00F3digo'],['btnSetDone','Listo'],
+ ['nmH','\u00BFEst\u00E1 correcto?'],['nmWarn','Este es el nombre que ver\u00E1 tu docente. Revisa c\u00F3mo escribiste tu nombre y tu apellido. Cuando toques S\u00ED, tu nombre quedar\u00E1 fijo.'],['nmYes','S\u00ED, soy yo'],['nmNo','Regresar y corregirlo'],
+ ['hpP1','<b>Ponte tus aud\u00EDfonos o auriculares y sube el volumen.</b> El Dr. Frost, Sam y Rosa leen la historia en voz alta, as\u00ED que vas a querer escucharla.',1],
+ ['hpP2','\u00BFNo hay sonido? Aseg\u00FArate de que tu iPhone no est\u00E9 en silencio, sube el volumen y revisa que el sonido est\u00E9 activado en Configuraci\u00F3n (el engranaje de arriba).'],
+ ['hpSound','El sonido est\u00E1 apagado. Toca para activarlo.'],['hpGo','\u00A1Empezar la historia!'],['hpBack','Volver a los cap\u00EDtulos']];
+var LTX_EN={},LPH=[['inFirst','Nombre'],['inLast','Apellido'],['inCode','Escribe el c\u00F3digo']];
+function langBtns(){var es=LANG==='es';$('lgEn').className='chip'+(es?'':' sel');$('lgEs').className='chip'+(es?' sel':'');$('sgEn').className='chip'+(es?'':' sel');$('sgEs').className='chip'+(es?' sel':'');}
+function applyLang(){var es=LANG==='es',i,e,k;
+ for(i=0;i<LTX.length;i++){e=$(LTX[i][0]);if(!e)continue;k=LTX[i][2]?'innerHTML':'textContent';if(!LTX_EN.hasOwnProperty(LTX[i][0]))LTX_EN[LTX[i][0]]=e[k];e[k]=es?LTX[i][1]:LTX_EN[LTX[i][0]];}
+ for(i=0;i<LPH.length;i++){e=$(LPH[i][0]);if(!LTX_EN.hasOwnProperty('ph_'+LPH[i][0]))LTX_EN['ph_'+LPH[i][0]]=e.placeholder;e.placeholder=es?LPH[i][1]:LTX_EN['ph_'+LPH[i][0]];}
+ document.documentElement.lang=es?'es':'en';$('btnHome').textContent=T('Chapters','Cap\u00EDtulos');langBtns();}
+/* Switching language keeps the student's place: menus and the lab redraw, and a Chapter 1 story, drill, or quiz
+   swaps to the other language's copy (the copies have the same steps). Answers already saved stay as written. */
+function setLang(l){l=(l==='es')?'es':'en';sfx.click();if(LANG===l){langBtns();return;}LANG=l;saveSet();hush();
+ if(cur==='scrCamp'||(CURCH&&CURCH!=='ch1'&&cur!=='scrMenu'&&cur!=='scrReport'&&cur!=='scrSign'&&cur!=='scrIceLab'))ENONLY=(LANG==='es');
+ applyLang();if($('setCard').style.display==='block'){$('btnSound').textContent=sndTx();buildVoiceRows();$('codeMsg').textContent='';}
+ if(cur==='scrMenu')openMenu();else if(cur==='scrReport')openReport(-1);else if(cur==='scrIceLab')labRender();
+ else if(cur==='scrStory'&&story&&story.ch1){story.steps=T(CH1_STEPS,CH1_STEPS_ES);story.last=T('Start drilling','Empezar a perforar');renderStep();}
+ else if(cur==='scrDrill'){setDrillUI();if($('coreCard').style.display==='block')showCoreCard();}
+ else if(cur==='scrQuiz'&&Q.ch==='ch1'&&Q.i<Q.list.length){Q.list=T(CH1_QUIZ,CH1_QUIZ_ES);renderQ();}}
+$('lgEn').onclick=function(){setLang('en');};$('lgEs').onclick=function(){setLang('es');};
+$('sgEn').onclick=function(){setLang('en');};$('sgEs').onclick=function(){setLang('es');};
+
+load();loadSet();applyLang();
 if(S.name&&S.period){openMenu();}else{openSign();}
 })();
 </script>
