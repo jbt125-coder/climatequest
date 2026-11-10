@@ -380,7 +380,7 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     </div>
     <div class="cvwrap"><canvas id="cvCv"></canvas></div>
     <button id="cvHeat" class="big alt">Turn heat ON</button>
-    <p class="note">Red dots are warm air and blue dots are cool air. The heater warms air at the bottom left; air cools near the top of the tank.</p>
+    <p id="cvNote" class="note">Red dots are warm air and blue dots are cool air. The heater warms air at the bottom left; air cools near the top of the tank.</p>
   </div>
 
   <div id="scrCor" class="scr">
@@ -390,10 +390,10 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
       <div class="row"><button id="coHint" class="sbtn">Hint</button><button id="coCheck" class="big">Check</button></div>
       <p id="coMsg" class="msg"></p>
     </div>
-    <div id="coViews" class="tools"><button class="chip" data-v="N">North Pole</button><button class="chip" data-v="S">South Pole</button><button class="chip" data-v="E">Equator</button></div>
+    <div id="coViews" class="tools"><button id="coV1" class="chip" data-v="N">North Pole</button><button id="coV2" class="chip" data-v="S">South Pole</button><button id="coV3" class="chip" data-v="E">Equator</button></div>
     <div class="cvwrap"><canvas id="coCv"></canvas></div>
     <button id="coLaunch" class="big">Launch the air</button>
-    <p class="note">The spin is slowed way down and the Coriolis bend is exaggerated so you can see it. The real Earth turns once a day.</p>
+    <p id="coNote" class="note">The spin is slowed way down and the Coriolis bend is exaggerated so you can see it. The real Earth turns once a day.</p>
   </div>
 
   <div id="scrAm" class="scr">
@@ -405,7 +405,7 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     </div>
     <div class="cvwrap"><canvas id="amCv"></canvas></div>
     <div id="amChips" class="tools"></div>
-    <p class="note">c = continental (dry), m = maritime (moist), T = tropical (warm), P = polar (cold), A = arctic (very cold). Map and regions are approximate.</p>
+    <p id="amNote" class="note">c = continental (dry), m = maritime (moist), T = tropical (warm), P = polar (cold), A = arctic (very cold). Map and regions are approximate.</p>
   </div>
 
   <div id="scrFc" class="scr">
@@ -597,7 +597,7 @@ function T(a,b){return ES()?b:a;}
 /* Spanish copies of Chapters 2-8 keep the English structure; these helpers copy it and swap only the words.
    trSteps: story lines. trMis: adds .es {tx,hint,yes} to each mission; mT(x,k) reads the right one.
    trQuiz: copies a quiz list and swaps q, o, why, label names, and drawing color names. */
-var ESDONE={ch1:true,ch2:true,ch3:true,ch4:true};
+var ESDONE={ch1:true,ch2:true,ch3:true,ch4:true,ch5:true};
 function trSteps(en,es){var o=[],i;for(i=0;i<en.length;i++)o.push({sc:en[i].sc,who:en[i].who,tx:es[i]});return o;}
 function trMis(L,es){for(var i=0;i<L.length;i++)L[i].es={tx:es[i][0],hint:es[i][1],yes:es[i][2]};return L;}
 function mT(x,k){return (ES()&&x.es&&x.es[k]!==undefined)?x.es[k]:x[k];}
@@ -1944,30 +1944,30 @@ function mapXY(lo,la,x0,y0,w,h){return [x0+(lo+170)/120*w,y0+(80-la)/72*h];}
 
 /* ---- story scenes ---- */
 function sceneUneven(c,t){space(c,400,300,t);sunGlow(c,-40,150,50);drawSide(c,230,150,100,0,{rays:true,rayX:24});
- pill(c,'Direct rays: more heating',200,158,11,'#FFD45A','center');pill(c,'Slanted rays: less heating',230,32,11,'#8FC9E3','center');pill(c,'Slanted rays: less heating',230,282,11,'#8FC9E3','center');}
+ pill(c,T('Direct rays: more heating','Rayos directos: calientan m\u00E1s'),200,158,11,'#FFD45A','center');pill(c,T('Slanted rays: less heating','Rayos inclinados: calientan menos'),230,32,11,'#8FC9E3','center');pill(c,T('Slanted rays: less heating','Rayos inclinados: calientan menos'),230,282,11,'#8FC9E3','center');}
 function tankScene(c,t,x0,y0,w,h,on){c.fillStyle='#16283E';c.fillRect(x0,y0,w,h);c.strokeStyle='#8FC9E3';c.lineWidth=3;c.strokeRect(x0,y0,w,h);
  if(on){var fl=0.5+0.5*Math.sin(t*12);c.fillStyle='rgba(255,140,40,'+(0.6+0.3*fl).toFixed(2)+')';for(var k=0;k<4;k++){c.beginPath();var fx=x0+w*0.12+k*w*0.07;c.moveTo(fx-6,y0+h+14);c.quadraticCurveTo(fx,y0+h-2-fl*6,fx+6,y0+h+14);c.fill();}}
  c.fillStyle='#3E4A5A';c.fillRect(x0+w*0.08,y0+h+14,w*0.32,8);
  for(var i=0;i<26;i++){var a=(t*0.12+i/26)*6.2832,px=x0+w/2-Math.cos(a)*w*0.36,py=y0+h/2-Math.sin(a)*h*0.34,warm=0.5+0.5*Math.cos(a-0.5);c.fillStyle=mix('#4FA3E0','#FF5A4A',Math.max(0,Math.min(1,warm)));circ(c,px,py,4);}}
 function sceneConv(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);tankScene(c,t,60,40,280,190,true);
  arw(c,96,200,96,80,'#FF5A4A',3,12);arw(c,304,80,304,200,'#4FA3E0',3,12);arw(c,120,60,280,60,'rgba(255,255,255,0.7)',2,10);arw(c,280,214,120,214,'rgba(255,255,255,0.7)',2,10);
- pill(c,'warm air rises',96,140,11,'#FF8A80','center');pill(c,'cool air sinks',304,140,11,'#8FD3F0','center');txt(c,'heat',112,280,'800 12px '+FONT,'#FFB27E','center');
- txt(c,'Warm air is less dense, so it rises',260,276,'700 11px '+FONT,'#FFFFFF','center');}
+ pill(c,T('warm air rises','el aire c\u00E1lido sube'),96,140,11,'#FF8A80','center');pill(c,T('cool air sinks','el aire fresco baja'),304,140,11,'#8FD3F0','center');txt(c,T('heat','calor'),112,280,'800 12px '+FONT,'#FFB27E','center');
+ txt(c,T('Warm air is less dense, so it rises','El aire c\u00E1lido es menos denso, as\u00ED que sube'),260,276,'700 11px '+FONT,'#FFFFFF','center');}
 function sceneBreeze(c,t){sky(c,400,300,'#6FB6E8','#DDF0FA');sunGlow(c,340,40,20);
  c.fillStyle='#2F7FD1';c.fillRect(0,220,190,80);c.fillStyle='#C9A562';c.fillRect(190,214,210,86);c.fillStyle='#5E9E5A';c.fillRect(190,214,210,10);
  for(var k=0;k<4;k++){c.fillStyle='#2A6B38';circ(c,230+k*45,206,10);c.fillStyle='#5A3B22';c.fillRect(228+k*45,212,4,6);}
  var p=0.5+0.5*Math.sin(t*3);c.strokeStyle='rgba(255,120,40,'+(0.3+0.3*p).toFixed(2)+')';c.lineWidth=2;for(k=0;k<5;k++){c.beginPath();c.moveTo(220+k*36,200);c.quadraticCurveTo(226+k*36,190,220+k*36,180);c.stroke();}
  arw(c,290,190,290,80,'#FF5A4A',3.5,13);arw(c,270,62,110,62,'#FF9A5C',3,12);arw(c,90,80,90,190,'#4FA3E0',3.5,13);arw(c,110,204,260,204,'#3B7DDD',3.5,13);
- pill(c,'Land heats faster: air rises',300,40+0,11,'#B3261E','center');pill(c,'Cool sea breeze',150,190,11,'#1F5FA8','center');txt(c,'Ocean',60,262,'800 13px '+FONT,'#FFFFFF','center');txt(c,'Land',300,262,'800 13px '+FONT,'#3E2A12','center');}
+ pill(c,T('Land heats faster: air rises','La tierra se calienta m\u00E1s r\u00E1pido: el aire sube'),300,40+0,11,'#B3261E','center');pill(c,T('Cool sea breeze','Brisa marina fresca'),150,190,11,'#1F5FA8','center');txt(c,T('Ocean','Oc\u00E9ano'),60,262,'800 13px '+FONT,'#FFFFFF','center');txt(c,T('Land','Tierra'),300,262,'800 13px '+FONT,'#3E2A12','center');}
 function sceneStorm(c,t){sky(c,400,300,'#5E8FB8','#C9DCEA');c.fillStyle='#2F7FD1';c.fillRect(0,232,80,68);c.fillRect(320,232,80,68);c.fillStyle='#5E9E5A';c.fillRect(80,226,240,74);
  c.fillStyle='#F4F7FA';circ(c,200,110,44);circ(c,170,140,36);circ(c,232,140,36);circ(c,200,64,34);c.fillStyle='#8A97A6';rr(c,140,150,120,34,14);c.fill();
  c.strokeStyle='rgba(120,170,230,0.8)';c.lineWidth=2;for(var k=0;k<9;k++){var x=150+k*12,ph=(t*160+k*30)%50;c.beginPath();c.moveTo(x,186+ph*0.4);c.lineTo(x-4,200+ph*0.4);c.stroke();}
  if(Math.sin(t*2.3)>0.92){c.fillStyle='#FFE45A';c.beginPath();c.moveTo(214,150);c.lineTo(200,190);c.lineTo(210,190);c.lineTo(198,222);c.lineTo(224,180);c.lineTo(213,180);c.closePath();c.fill();}
  arw(c,30,216,130,216,'#3B7DDD',3.5,12);arw(c,370,216,270,216,'#3B7DDD',3.5,12);arw(c,200,214,200,190,'#FF5A4A',3,10);
- pill(c,'sea breeze',62,200,10.5,'#1F5FA8','center');pill(c,'sea breeze',338,200,10.5,'#1F5FA8','center');txt(c,'Gulf',40,272,'800 11px '+FONT,'#FFFFFF','center');txt(c,'Atlantic',360,272,'800 11px '+FONT,'#FFFFFF','center');txt(c,'Florida',200,268,'800 13px '+FONT,'#FFFFFF','center');}
+ pill(c,T('sea breeze','brisa marina'),62,200,10.5,'#1F5FA8','center');pill(c,T('sea breeze','brisa marina'),338,200,10.5,'#1F5FA8','center');txt(c,T('Gulf','Golfo'),40,272,'800 11px '+FONT,'#FFFFFF','center');txt(c,T('Atlantic','Atl\u00E1ntico'),360,272,'800 11px '+FONT,'#FFFFFF','center');txt(c,'Florida',200,268,'800 13px '+FONT,'#FFFFFF','center');}
 function sceneCells(c,t){space(c,400,300,t);cellGlobe(c,250,150,126,{winds:false,cellOff:56,cellRx:44,lat:true});
- txt(c,'Hadley',70,150-21+4,'800 10px '+FONT,'#FF9A5C','center');txt(c,'Ferrel',70,150-63+4,'800 10px '+FONT,'#6FE3A4','center');txt(c,'Polar',70,150-105+4,'800 10px '+FONT,'#BFE6F5','center');
- pill(c,'rising air: rain',250,140,10.5,'#6FE3A4','center');pill(c,'sinking air: deserts',250,108,10,'#FFB27E','center');}
+ txt(c,'Hadley',70,150-21+4,'800 10px '+FONT,'#FF9A5C','center');txt(c,'Ferrel',70,150-63+4,'800 10px '+FONT,'#6FE3A4','center');txt(c,T('Polar','Polar'),70,150-105+4,'800 10px '+FONT,'#BFE6F5','center');
+ pill(c,T('rising air: rain','aire que sube: lluvia'),250,140,10.5,'#6FE3A4','center');pill(c,T('sinking air: deserts','aire que baja: desiertos'),250,108,10,'#FFB27E','center');}
 function sceneCor(c,t){space(c,400,300,t);var cx=200,cy=158,R=120,W=0.6,tt=t%5,th=-W*Math.min(tt,1.6),i;
  c.save();c.translate(cx,cy);c.rotate(th);var g=c.createRadialGradient(-30,-30,10,0,0,R);g.addColorStop(0,'#5FA8E8');g.addColorStop(1,'#1F5FA8');c.fillStyle=g;circ(c,0,0,R);
  c.fillStyle='rgba(70,163,90,0.8)';CE(c,-40,-50,30,18);c.fill();CE(c,50,30,26,36);c.fill();c.strokeStyle='rgba(255,255,255,0.3)';c.lineWidth=1;for(i=1;i<4;i++){c.beginPath();c.arc(0,0,R*i/4,0,6.2832);c.stroke();}
@@ -1976,21 +1976,21 @@ function sceneCor(c,t){space(c,400,300,t);var cx=200,cy=158,R=120,W=0.6,tt=t%5,t
  c.restore();c.strokeStyle='rgba(255,255,255,0.7)';c.setLineDash([5,5]);c.lineWidth=2;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx,cy-R);c.stroke();c.setLineDash([]);
  var sp=Math.min(tt,1.6);c.fillStyle='#FFFFFF';circ(c,cx,cy-75*sp,5);
  c.strokeStyle='#FFD45A';c.lineWidth=2.5;c.beginPath();c.arc(cx,cy,R+12,-2.2,-0.9);c.stroke();arw(c,cx+Math.cos(-0.95)*(R+12),cy+Math.sin(-0.95)*(R+12),cx+Math.cos(-0.9)*(R+12)-2,cy+Math.sin(-0.9)*(R+12)-6,'#FFD45A',2.5,9);
- txt(c,'North Pole view',10,20,'800 12px '+FONT,'#FFFFFF');pill(c,tt>1.6?'lands RIGHT of the flag':'aimed at the flag',300,70,11,'#FF9A5C','center');pill(c,'straight path in space',300,272,10,'#FFFFFF','center');}
+ txt(c,T('North Pole view','Vista desde el Polo Norte'),10,20,'800 12px '+FONT,'#FFFFFF');pill(c,tt>1.6?T('lands RIGHT of the flag','cae a la DERECHA de la bandera'):T('aimed at the flag','apuntado a la bandera'),300,70,11,'#FF9A5C','center');pill(c,T('straight path in space','camino recto en el espacio'),300,272,10,'#FFFFFF','center');}
 function sceneBelts(c,t){space(c,400,300,t);cellGlobe(c,200,150,128,{cells:false,lat:true});
- pill(c,'Trade winds',200,150-21+4,10,'#FFD45A','center');pill(c,'Westerlies',200,150-64+4,10,'#FFD45A','center');pill(c,'Polar easterlies',200,150-106+4,10,'#FFD45A','center');
+ pill(c,T('Trade winds','Vientos alisios'),200,150-21+4,10,'#FFD45A','center');pill(c,T('Westerlies','Vientos del oeste'),200,150-64+4,10,'#FFD45A','center');pill(c,T('Polar easterlies','Vientos polares del este'),200,150-106+4,10,'#FFD45A','center');
  c.strokeStyle='rgba(255,255,255,0.85)';c.lineWidth=2.5;c.beginPath();for(var x=110;x<=290;x+=4){var y=150-78+Math.sin(x/22+t*1.5)*6;if(x===110)c.moveTo(x,y);else c.lineTo(x,y);}c.stroke();
- pill(c,'jet stream (high up)',330,58,10,'#FFFFFF','center');txt(c,'US weather usually moves west to east',200,290,'700 11px '+FONT,'#BFE6F5','center');}
+ pill(c,T('jet stream (high up)','corriente en chorro (muy arriba)'),330,58,10,'#FFFFFF','center');txt(c,T('US weather usually moves west to east','En EE. UU. el tiempo suele moverse de oeste a este'),200,290,'700 11px '+FONT,'#BFE6F5','center');}
 function sceneAirMass(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);naMap(c,0,0,400,250,0,t);
  for(var i=0;i<AM_REG.length;i++){var p=mapXY(AM_REG[i][1],AM_REG[i][2],0,0,400,250);amTag(c,AM_REG[i][0],p[0],p[1],12);}
- txt(c,'c = continental (dry)   m = maritime (moist)',200,268,'700 11px '+FONT,'#FFFFFF','center');txt(c,'T = tropical (warm)   P = polar (cold)   A = arctic',200,287,'700 11px '+FONT,'#FFFFFF','center');}
+ txt(c,T('c = continental (dry)   m = maritime (moist)','c = continental (seca)   m = mar\u00EDtima (h\u00FAmeda)'),200,268,'700 11px '+FONT,'#FFFFFF','center');txt(c,T('T = tropical (warm)   P = polar (cold)   A = arctic','T = tropical (c\u00E1lida)   P = polar (fr\u00EDa)   A = \u00E1rtica'),200,287,'700 11px '+FONT,'#FFFFFF','center');}
 function sceneFront(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);naMap(c,0,0,400,280,0,t);var f=(t*0.12)%1,ox=f*60,oy=f*70;
  var A=mapXY(-105,57,0,0,400,280);c.fillStyle='rgba(79,163,224,0.35)';CE(c,A[0]+ox*1.6,A[1]+oy*1.6,70,46);c.fill();amTag(c,'cP',A[0]+ox*1.6,A[1]+oy*1.6,13);
  var P=[],k;for(k=0;k<6;k++){var q=mapXY(-84-k*4,45-k*2.6,0,0,400,280);P.push(q[0]+ox*1.6,q[1]+oy*1.6);}frontLine(c,P,'cold',-1);
- pill(c,'cold front',P[0]+10,P[1]-14,10.5,'#8FD3F0','center');txt(c,'A winter cold front heading south',200,296,'700 11px '+FONT,'#FFFFFF','center');}
+ pill(c,T('cold front','frente fr\u00EDo'),P[0]+10,P[1]-14,10.5,'#8FD3F0','center');txt(c,T('A winter cold front heading south','Un frente fr\u00EDo de invierno que va hacia el sur'),200,296,'700 11px '+FONT,'#FFFFFF','center');}
 function sceneTeam5(c,t){sky(c,400,300,'#6FB6E8','#DDF0FA');c.fillStyle='#8FC77A';c.fillRect(0,250,400,50);cloud(c,90,70,1);cloud(c,300,100,0.8);
  person(c,90,292,0.66,'#2A9DB5',{glasses:true,clip:true,skin:'#E8B48F',wave:true},t);person(c,210,292,0.6,'#FF7A2F',{goggles:true,skin:'#C68A5E'},t);person(c,330,292,0.6,'#F2C230',{skin:'#F2C9A5'},t);
- pill(c,'Next: the Convection Tank',200,170,13,'#FFD45A','center');}
+ pill(c,T('Next: the Convection Tank','Sigue: el Tanque de Convecci\u00F3n'),200,170,13,'#FFD45A','center');}
 function drawScene5(c,name,t){
  if(name==='uneven')sceneUneven(c,t);else if(name==='conv')sceneConv(c,t);else if(name==='breeze')sceneBreeze(c,t);else if(name==='storm')sceneStorm(c,t);
  else if(name==='cells')sceneCells(c,t);else if(name==='cor')sceneCor(c,t);else if(name==='belts')sceneBelts(c,t);else if(name==='airmass')sceneAirMass(c,t);
@@ -2018,7 +2018,7 @@ var CH5_STEPS=[
 /* ---- Activity A: Convection Tank ---- */
 var CVT={x:30,y:30,w:340,h:240};
 var CV={c:null,heat:false,s:0,P:[],ang:0,la:null,tap:null,lbl:false,ms:null};
-function cvReset(){CV.P=[];for(var i=0;i<90;i++){CV.P.push({x:CVT.x+10+rnd(i+900)*(CVT.w-20),y:CVT.y+10+rnd(i+950)*(CVT.h-20),T:0.3});}CV.P[0].x=110;CV.P[0].y=220;CV.ang=0;CV.la=null;CV.s=0;CV.heat=false;CV.tap=null;CV.lbl=false;$('cvHeat').textContent='Turn heat ON';}
+function cvReset(){CV.P=[];for(var i=0;i<90;i++){CV.P.push({x:CVT.x+10+rnd(i+900)*(CVT.w-20),y:CVT.y+10+rnd(i+950)*(CVT.h-20),T:0.3});}CV.P[0].x=110;CV.P[0].y=220;CV.ang=0;CV.la=null;CV.s=0;CV.heat=false;CV.tap=null;CV.lbl=false;$('cvHeat').textContent=T('Turn heat ON','Encender el calor');}
 function cvLoop(dt,t){var i,p,A=95*CVT.h/Math.PI;CV.s=CV.heat?Math.min(1,CV.s+dt*0.35):Math.max(0,CV.s-dt*0.3);
  for(i=0;i<CV.P.length;i++){p=CV.P[i];var X=(p.x-CVT.x)/CVT.w,Y=(p.y-CVT.y)/CVT.h,u=CV.s*A*Math.PI/CVT.h*Math.sin(Math.PI*X)*Math.cos(Math.PI*Y),v=-CV.s*A*Math.PI/CVT.w*Math.cos(Math.PI*X)*Math.sin(Math.PI*Y);
   p.x+=(u+(rnd(i+t*7)-0.5)*6)*dt;p.y+=(v+(rnd(i*3+t*5)-0.5)*6)*dt;p.x=Math.max(CVT.x+5,Math.min(CVT.x+CVT.w-5,p.x));p.y=Math.max(CVT.y+5,Math.min(CVT.y+CVT.h-5,p.y));
@@ -2030,17 +2030,40 @@ function cvLoop(dt,t){var i,p,A=95*CVT.h/Math.PI;CV.s=CV.heat?Math.min(1,CV.s+dt
  c.strokeStyle='#8FC9E3';c.lineWidth=3;c.strokeRect(CVT.x,CVT.y,CVT.w,CVT.h);
  c.fillStyle='#3E4A5A';c.fillRect(CVT.x+10,CVT.y+CVT.h+4,120,8);
  if(CV.heat){var fl=0.5+0.5*Math.sin(t*14);c.fillStyle='rgba(255,140,40,'+(0.65+0.3*fl).toFixed(2)+')';for(var k=0;k<5;k++){var fx=CVT.x+22+k*24;c.beginPath();c.moveTo(fx-7,CVT.y+CVT.h+4);c.quadraticCurveTo(fx,CVT.y+CVT.h-10-fl*5,fx+7,CVT.y+CVT.h+4);c.fill();}}
- txt(c,CV.heat?'heater ON':'heater off',CVT.x+70,CVT.y+CVT.h+26,'800 11px '+FONT,CV.heat?'#FFB27E':'#9FC3D8','center');
- txt(c,'white ring = tracer: loops '+Math.floor(Math.abs(CV.ang)/6.2832),CVT.x+CVT.w,CVT.y+CVT.h+26,'700 10px '+FONT,'#FFFFFF','right');txt(c,'Air in a tank (side view)',CVT.x,22,'800 11px '+FONT,'#FFFFFF');
- if(CV.lbl){pill(c,'warm air rises',CVT.x+60,CVT.y+120,10.5,'#FF8A80','center');pill(c,'cool air sinks',CVT.x+CVT.w-60,CVT.y+120,10.5,'#8FD3F0','center');}
+ txt(c,CV.heat?T('heater ON','calentador ENCENDIDO'):T('heater off','calentador apagado'),CVT.x+70,CVT.y+CVT.h+26,'800 11px '+FONT,CV.heat?'#FFB27E':'#9FC3D8','center');
+ txt(c,T('white ring = tracer: loops ','anillo blanco = trazador: vueltas ')+Math.floor(Math.abs(CV.ang)/6.2832),CVT.x+CVT.w,CVT.y+CVT.h+26,'700 10px '+FONT,'#FFFFFF','right');txt(c,T('Air in a tank (side view)','Aire en un tanque (vista lateral)'),CVT.x,22,'800 11px '+FONT,'#FFFFFF');
+ if(CV.lbl){pill(c,T('warm air rises','el aire c\u00E1lido sube'),CVT.x+60,CVT.y+120,10.5,'#FF8A80','center');pill(c,T('cool air sinks','el aire fresco baja'),CVT.x+CVT.w-60,CVT.y+120,10.5,'#8FD3F0','center');}
  if(CV.tap){c.strokeStyle='#FFD45A';c.lineWidth=3;c.beginPath();c.arc(CV.tap.x,CV.tap.y,14,0,6.2832);c.stroke();}}
 function cvTouch(e){e.preventDefault();ac();var p=lpos($('cvCv'),e,400);if(p.x>CVT.x&&p.x<CVT.x+CVT.w&&p.y>CVT.y&&p.y<CVT.y+CVT.h){CV.tap={x:p.x,y:p.y};sfx.click();}}
+var CH5_STEPS_ES=trSteps(CH5_STEPS,[
+ "\u00A1Bienvenidos de nuevo, equipo! \u00BFRecuerdas el Cap\u00EDtulo 2? El ecuador recibe la luz solar m\u00E1s directa, y los polos reciben luz inclinada. As\u00ED que la Tierra se calienta de forma desigual, y ese calentamiento desigual es lo que hace que el aire se mueva.",
+ "\u00BFC\u00F3mo hace el calentamiento desigual que el aire se mueva?",
+ "Por convecci\u00F3n. El aire c\u00E1lido es menos denso, as\u00ED que sube. El aire m\u00E1s fresco y denso baja y se desliza para reemplazarlo. Juntos forman un circuito llamado corriente de convecci\u00F3n.",
+ "Puedes sentir esto en Florida en las tardes de verano. La tierra se calienta m\u00E1s r\u00E1pido que el agua. El aire sube sobre la tierra caliente, y el aire m\u00E1s fresco del oc\u00E9ano entra para reemplazarlo. Esa es la brisa marina.",
+ "\u00BFPor eso tenemos tantas tormentas el\u00E9ctricas en las tardes de verano?",
+ "\u00A1Muchas veces, s\u00ED! El aire que sube se enfr\u00EDa, y su vapor de agua se condensa en nubes altas. Las brisas marinas del Golfo y del Atl\u00E1ntico hasta pueden encontrarse en el centro del estado y provocar grandes tormentas.",
+ "La convecci\u00F3n tambi\u00E9n pasa a una escala gigante. Cada hemisferio tiene tres grandes circuitos de aire llamados celdas: la celda de Hadley, del ecuador hasta unos 30 grados; la celda de Ferrel, de unos 30 a 60; y la celda Polar, de unos 60 hasta el polo.",
+ "Cerca del ecuador, el aire sube, se enfr\u00EDa y deja caer mucha lluvia, as\u00ED que ah\u00ED crecen selvas tropicales. Alrededor de los 30 grados, el aire seco baja. Muchos de los grandes desiertos del mundo, como el Sahara, est\u00E1n ah\u00ED.",
+ "Entonces, \u00BFpor qu\u00E9 los vientos no soplan derecho hacia el norte y el sur?",
+ "\u00A1Porque la Tierra gira! Mientras el aire se mueve, la Tierra gira debajo de \u00E9l, as\u00ED que el camino del aire se curva. Esto es el efecto Coriolis. El aire en movimiento se desv\u00EDa a la derecha en el hemisferio norte y a la izquierda en el hemisferio sur. Es m\u00E1s fuerte cerca de los polos y es cero en el ecuador.",
+ "El efecto Coriolis convierte los vientos de la superficie en cinturones de viento: los vientos alisios, los vientos del oeste y los vientos polares del este. Los vientos del oeste son la raz\u00F3n por la que el tiempo en casi todo Estados Unidos se mueve de oeste a este. Muy arriba, r\u00EDos r\u00E1pidos de aire llamados corrientes en chorro ayudan a guiar las tormentas.",
+ "Una masa de aire es un enorme cuerpo de aire con m\u00E1s o menos la misma temperatura y humedad en todas partes. Las obtiene del lugar donde se forma. Las letras te lo dicen: c es continental y seca, m es mar\u00EDtima y h\u00FAmeda, T es tropical y c\u00E1lida, P es polar y fr\u00EDa, y A es \u00E1rtica, muy fr\u00EDa.",
+ "Entonces, \u00BFel aire c\u00E1lido y pegajoso de Florida es m T, del oc\u00E9ano?",
+ "\u00A1Exacto! El aire m T viene del Golfo de M\u00E9xico, el Caribe y el Atl\u00E1ntico. El aire c P viene de Canad\u00E1, fr\u00EDo y seco. El m P viene del norte del Pac\u00EDfico y del norte del Atl\u00E1ntico, fresco y h\u00FAmedo. El c T viene del norte de M\u00E9xico y del suroeste, caliente y seco. Y el c A viene del \u00C1rtico.",
+ "Las masas de aire viajan con los vientos y la corriente en chorro. Donde se encuentran dos masas de aire hay un frente: fr\u00EDo, c\u00E1lido, estacionario u ocluido. En invierno, un frente fr\u00EDo puede empujar aire c P hasta Florida. Detr\u00E1s del frente, la temperatura y la humedad bajan r\u00E1pido.",
+ "\u00A1Ahora vamos a probarlo! Vas a usar un tanque de convecci\u00F3n, lanzar aire sobre una Tierra que gira, ubicar las masas de aire en un mapa y ser pronosticador del tiempo."
+]);
 var CV_MIS=[
  {tx:'Turn the heat ON. Watch the white-ringed tracer bit of air. Wait until it makes one full loop around the tank.',hint:'Tap "Turn heat ON", then wait. The tracer should rise over the heater, cross the top, sink, and come back along the bottom.',ok:function(){return CV.heat&&Math.abs(CV.ang)>=6.2832;},yes:'A convection loop! Air over the heater warms (turns red), rises, cools at the top (turns blue), sinks, and flows back to the heater.'},
  {tx:'Keep the heat on. Tap the part of the tank where cool air is SINKING.',hint:'Watch where the blue bits of air move downward. It is the side away from the heater.',start:function(){CV.tap=null;},ok:function(){if(CV.tap&&CV.tap.x>=CVT.x+CVT.w*0.68&&CV.heat){CV.lbl=true;return true;}return false;},yes:'Right! Cool air is denser, so it sinks on the side away from the heat. Warm, less dense air rises over the heater.'},
  {tx:'Now turn the heat OFF. What happens to the convection loop?',hint:'Tap "Turn heat OFF" and wait a few seconds.',ok:function(){return !CV.heat&&CV.s<0.08;},yes:'Without heating, the loop slows down and stops. On Earth, the Sun is the heater, and uneven heating keeps the air moving.'}
 ];
-function startConv(){show('scrConv');cvReset();CV.c=setupCanvas($('cvCv'),400,300,0.42);CV.ms=misRun('cv',CV_MIS,'Next: Coriolis Launcher',startCor);startLoop(cvLoop);}
+trMis(CV_MIS,[
+ ['Enciende el calor. Observa la porci\u00F3n de aire trazadora con el anillo blanco. Espera hasta que d\u00E9 una vuelta completa por el tanque.','Toca "Encender el calor" y espera. El trazador debe subir sobre el calentador, cruzar por arriba, bajar y regresar por el fondo.','\u00A1Un circuito de convecci\u00F3n! El aire sobre el calentador se calienta (se pone rojo), sube, se enfr\u00EDa arriba (se pone azul), baja y regresa al calentador.'],
+ ['Deja el calor encendido. Toca la parte del tanque donde el aire fresco est\u00E1 BAJANDO.','Observa d\u00F3nde se mueven hacia abajo las porciones azules de aire. Es el lado lejos del calentador.','\u00A1Correcto! El aire fresco es m\u00E1s denso, as\u00ED que baja por el lado lejos del calor. El aire c\u00E1lido y menos denso sube sobre el calentador.'],
+ ['Ahora apaga el calor. \u00BFQu\u00E9 le pasa al circuito de convecci\u00F3n?','Toca "Apagar el calor" y espera unos segundos.','Sin calor, el circuito se hace m\u00E1s lento y se detiene. En la Tierra, el Sol es el calentador, y el calentamiento desigual mantiene el aire en movimiento.']
+]);
+function startConv(){show('scrConv');cvReset();CV.c=setupCanvas($('cvCv'),400,300,0.42);CV.ms=misRun('cv',CV_MIS,['Next: Coriolis Launcher','Sigue: Lanzador de Coriolis'],startCor);startLoop(cvLoop);}
 
 /* ---- Activity B: Coriolis Launcher ---- */
 var CO={c:null,view:'N',th:0,run:null,trk:[],res:'',done:{N:false,S:false,E:false},ms:null};
@@ -2050,12 +2073,12 @@ function coLaunch(){sfx.click();ac();CO.trk=[];CO.res='';CO.frozen=false;if(CO.v
  var tg=[0,-140],c0=Math.cos(CO.th),s0=Math.sin(CO.th),ax=tg[0]*c0-tg[1]*s0,ay=tg[0]*s0+tg[1]*c0,L=Math.sqrt(ax*ax+ay*ay);CO.run={t:0,vx:ax/L*85,vy:ay/L*85,th0:CO.th};tone(520,0.25,'triangle',0.06,900);}
 function coLoop(dt,t){var c=CO.c,i,r=CO.run;c.fillStyle='#0B1424';c.fillRect(0,0,400,400);space(c,400,400,t);
  if(CO.view==='E'){var lat;c.fillStyle='#1F5FA8';c.fillRect(0,50,400,300);c.fillStyle='rgba(70,163,90,0.8)';CE(c,90,120,50,26);c.fill();CE(c,300,290,60,30);c.fill();
-  for(lat=-20;lat<=20;lat+=10){var y=COY-lat*7;c.strokeStyle=lat===0?'#FFFFFF':'rgba(255,255,255,0.35)';c.lineWidth=lat===0?2.5:1;c.beginPath();c.moveTo(0,y);c.lineTo(400,y);c.stroke();txt(c,lat===0?'Equator':(Math.abs(lat)+DEG+(lat>0?'N':'S')),396,y-4,'700 10px '+FONT,'#FFFFFF','right');}
-  txt(c,'Equator view (map)',10,30,'800 13px '+FONT,'#FFFFFF');
+  for(lat=-20;lat<=20;lat+=10){var y=COY-lat*7;c.strokeStyle=lat===0?'#FFFFFF':'rgba(255,255,255,0.35)';c.lineWidth=lat===0?2.5:1;c.beginPath();c.moveTo(0,y);c.lineTo(400,y);c.stroke();txt(c,lat===0?T('Equator','Ecuador'):(Math.abs(lat)+DEG+(lat>0?'N':'S')),396,y-4,'700 10px '+FONT,'#FFFFFF','right');}
+  txt(c,T('Equator view (map)','Vista del ecuador (mapa)'),10,30,'800 13px '+FONT,'#FFFFFF');
   c.fillStyle='#FF7A2F';c.fillRect(358,COY-24,3,24);c.beginPath();c.moveTo(361,COY-24);c.lineTo(378,COY-18);c.lineTo(361,COY-12);c.closePath();c.fill();
   c.strokeStyle='rgba(255,255,255,0.7)';c.setLineDash([5,5]);c.lineWidth=2;c.beginPath();c.moveTo(40,COY);c.lineTo(360,COY);c.stroke();c.setLineDash([]);
   if(r){r.t+=dt;var la=(COY-r.y)/7,f=1.4*Math.sin(la*RAD),sp=Math.sqrt(r.vx*r.vx+r.vy*r.vy),a=Math.atan2(r.vy,r.vx)+f*dt;r.vx=Math.cos(a)*sp;r.vy=Math.sin(a)*sp;r.x+=r.vx*dt;r.y+=r.vy*dt;CO.trk.push([r.x,r.y]);
-   if(r.x>=360||r.t>4){CO.run=null;CO.done.E=true;CO.res='Straight! No Coriolis bending at the equator.';tone(660,0.15,'sine',0.1);}}
+   if(r.x>=360||r.t>4){CO.run=null;CO.done.E=true;CO.res=T('Straight! No Coriolis bending at the equator.','\u00A1Recto! No hay desv\u00EDo de Coriolis en el ecuador.');tone(660,0.15,'sine',0.1);}}
   c.strokeStyle='#FF7A2F';c.lineWidth=3.5;c.beginPath();for(i=0;i<CO.trk.length;i++){if(i===0)c.moveTo(CO.trk[i][0],CO.trk[i][1]);else c.lineTo(CO.trk[i][0],CO.trk[i][1]);}c.stroke();
   if(r){c.fillStyle='#FFFFFF';circ(c,r.x,r.y,6);}
   c.fillStyle='#FFFFFF';circ(c,40,COY,5);}
@@ -2068,26 +2091,31 @@ function coLoop(dt,t){var c=CO.c,i,r=CO.run;c.fillStyle='#0B1424';c.fillRect(0,0
   txt(c,CO.view,0,5,'800 14px '+FONT,'#FFFFFF','center');c.restore();
   c.strokeStyle='#FFD45A';c.lineWidth=2.5;var a0=-2.4,a1=-1.0;if(sg>0){a0=-1.0;a1=-2.4;}c.beginPath();c.arc(COX,COY,COR+14,Math.min(a0,a1),Math.max(a0,a1));c.stroke();
   arw(c,COX+Math.cos(a1+(sg<0?-0.06:0.06))*(COR+14),COY+Math.sin(a1+(sg<0?-0.06:0.06))*(COR+14),COX+Math.cos(a1)*(COR+14),COY+Math.sin(a1)*(COR+14),'#FFD45A',2.5,10);
-  txt(c,(CO.view==='N'?'North':'South')+' Pole view: Earth spins '+(sg<0?'counterclockwise':'clockwise'),10,22,'800 12px '+FONT,'#FFFFFF');
+  txt(c,ES()?('Vista desde el Polo '+(CO.view==='N'?'Norte':'Sur')+': la Tierra gira '+(sg<0?'al rev\u00E9s del reloj':'como el reloj')):((CO.view==='N'?'North':'South')+' Pole view: Earth spins '+(sg<0?'counterclockwise':'clockwise')),10,22,'800 '+T('12','11')+'px '+FONT,'#FFFFFF');
   if(r){r.t+=dt;var px=r.vx*r.t,py=r.vy*r.t,dth=CO.th,gx=px*Math.cos(-dth)-py*Math.sin(-dth),gy=px*Math.sin(-dth)+py*Math.cos(-dth);CO.trk.push([gx,gy]);
    c.strokeStyle='rgba(255,255,255,0.75)';c.setLineDash([5,5]);c.lineWidth=2;c.beginPath();c.moveTo(COX,COY);c.lineTo(COX+r.vx/85*COR,COY+r.vy/85*COR);c.stroke();c.setLineDash([]);
    c.fillStyle='#FFFFFF';circ(c,COX+px,COY+py,6);
-   if(Math.sqrt(px*px+py*py)>=140){CO.run=null;CO.res='It missed the flag to the '+((gx>0)?'RIGHT':'LEFT')+'!';CO.frozen=true;if(CO.view==='N')CO.done.N=true;else CO.done.S=true;tone(gx>0?700:500,0.2,'sine',0.1);CO.lastRun={vx:r.vx,vy:r.vy};}}
+   if(Math.sqrt(px*px+py*py)>=140){CO.run=null;CO.res=ES()?('\u00A1Pas\u00F3 a la '+((gx>0)?'DERECHA':'IZQUIERDA')+' de la bandera!'):('It missed the flag to the '+((gx>0)?'RIGHT':'LEFT')+'!');CO.frozen=true;if(CO.view==='N')CO.done.N=true;else CO.done.S=true;tone(gx>0?700:500,0.2,'sine',0.1);CO.lastRun={vx:r.vx,vy:r.vy};}}
   else if(CO.lastRun&&CO.trk.length){c.strokeStyle='rgba(255,255,255,0.45)';c.setLineDash([5,5]);c.lineWidth=2;c.beginPath();c.moveTo(COX,COY);c.lineTo(COX+CO.lastRun.vx/85*COR,COY+CO.lastRun.vy/85*COR);c.stroke();c.setLineDash([]);}}
- txt(c,'white dashes = straight path in space   orange = path on the ground',200,392,'700 9.5px '+FONT,'#BFE6F5','center');
- if(CO.res)pill(c,CO.res+(CO.frozen?' (spin paused)':''),200,380-12,12,'#FFD45A','center');}
+ txt(c,T('white dashes = straight path in space   orange = path on the ground','rayas blancas = camino recto en el espacio   anaranjado = camino en el suelo'),200,392,'700 9.5px '+FONT,'#BFE6F5','center');
+ if(CO.res)pill(c,CO.res+(CO.frozen?T(' (spin paused)',' (giro en pausa)'):''),200,380-12,12,'#FFD45A','center');}
 var CO_MIS=[
  {tx:'North Pole view: tap Launch. The air is aimed straight at the orange flag. Watch its path on the spinning ground.',hint:'Tap the Launch button and watch the orange path curve as Earth turns.',start:function(){coView('N');},ok:function(){return CO.done.N;},yes:'From space, the air moved in a straight line. But the ground turned under it, so on Earth its path curved to the RIGHT. That is the Coriolis effect in the Northern Hemisphere.'},
  {tx:'Switch to the South Pole view and launch again. Which way does it curve now?',hint:'Tap "South Pole", then Launch. From above the South Pole, Earth spins the other way.',start:function(){coView('S');},ok:function(){return CO.done.S;},yes:'It curved to the LEFT! In the Southern Hemisphere, the Coriolis effect bends moving air to the left.'},
  {tx:'Switch to the Equator view and launch the air along the equator.',hint:'Tap "Equator", then Launch.',start:function(){coView('E');},ok:function(){return CO.done.E;},yes:'No bending! The Coriolis effect is zero at the equator and strongest near the poles.'}
 ];
-function startCor(){show('scrCor');CO.done={N:false,S:false,E:false};CO.lastRun=null;CO.th=0;coView('N');CO.c=setupCanvas($('coCv'),400,400,0.46);CO.ms=misRun('co',CO_MIS,'Next: Air Mass Map',startAm);startLoop(coLoop);}
+trMis(CO_MIS,[
+ ['Vista desde el Polo Norte: toca Lanzar. El aire apunta directo a la bandera anaranjada. Observa su camino sobre el suelo que gira.','Toca el bot\u00F3n Lanzar y observa c\u00F3mo se curva el camino anaranjado mientras la Tierra gira.','Desde el espacio, el aire se movi\u00F3 en l\u00EDnea recta. Pero el suelo gir\u00F3 debajo de \u00E9l, as\u00ED que en la Tierra su camino se curv\u00F3 a la DERECHA. Ese es el efecto Coriolis en el hemisferio norte.'],
+ ['Cambia a la vista desde el Polo Sur y lanza otra vez. \u00BFHacia d\u00F3nde se curva ahora?','Toca "Polo Sur" y luego Lanzar. Visto desde arriba del Polo Sur, la Tierra gira hacia el otro lado.','\u00A1Se curv\u00F3 a la IZQUIERDA! En el hemisferio sur, el efecto Coriolis desv\u00EDa el aire en movimiento hacia la izquierda.'],
+ ['Cambia a la vista del ecuador y lanza el aire a lo largo del ecuador.','Toca "Ecuador" y luego Lanzar.','\u00A1No se desv\u00EDa! El efecto Coriolis es cero en el ecuador y m\u00E1s fuerte cerca de los polos.']
+]);
+function startCor(){show('scrCor');CO.done={N:false,S:false,E:false};CO.lastRun=null;CO.th=0;coView('N');CO.c=setupCanvas($('coCv'),400,400,0.46);CO.ms=misRun('co',CO_MIS,['Next: Air Mass Map','Sigue: Mapa de masas de aire'],startAm);startLoop(coLoop);}
 
 /* ---- Activity C: Air Mass Match ---- */
 var AM={c:null,tags:[],sel:-1,ms:null,res:null};
 var AM_T=[['cP',0],['cT',0],['cA',0],['mP',1],['mP',1],['mT',1],['mT',1]];
 function amXY(lo,la){return mapXY(lo,la,0,0,400,300);}
-function amChips(){var B=$('amChips'),i,m=AM.ms?AM.ms.i:0;B.innerHTML='';for(i=0;i<AM_T.length;i++){if(AM_T[i][1]!==m&&!(AM.ms&&AM.ms.done))continue;(function(i){var b=el('button','chip'+(AM.tags[i]?' placed':'')+(AM.sel===i?' sel':''),AM_T[i][0]);b.style.color=AM.sel===i?'#1A0F08':AMC[AM_T[i][0]];b.onclick=function(){sfx.click();AM.sel=i;amChips();$('amMsg').style.color='#FFD2B8';$('amMsg').textContent='Now tap where '+AM_T[i][0]+' air forms.';};B.appendChild(b);})(i);}}
+function amChips(){var B=$('amChips'),i,m=AM.ms?AM.ms.i:0;B.innerHTML='';for(i=0;i<AM_T.length;i++){if(AM_T[i][1]!==m&&!(AM.ms&&AM.ms.done))continue;(function(i){var b=el('button','chip'+(AM.tags[i]?' placed':'')+(AM.sel===i?' sel':''),AM_T[i][0]);b.style.color=AM.sel===i?'#1A0F08':AMC[AM_T[i][0]];b.onclick=function(){sfx.click();AM.sel=i;amChips();$('amMsg').style.color='#FFD2B8';$('amMsg').textContent=T('Now tap where '+AM_T[i][0]+' air forms.','Ahora toca donde se forma el aire '+AM_T[i][0]+'.');};B.appendChild(b);})(i);}}
 function amCheck(grp){var used={},bad=[],i,j,res={};for(i=0;i<AM_T.length;i++){if(AM_T[i][1]!==grp)continue;var p=AM.tags[i];if(!p){bad.push(AM_T[i][0]);continue;}var hit=-1;
   for(j=0;j<AM_REG.length;j++){if(AM_REG[j][0]!==AM_T[i][0]||used[j])continue;var q=amXY(AM_REG[j][1],AM_REG[j][2]),dx=p.x-q[0],dy=p.y-q[1];if(dx*dx+dy*dy<34*34){hit=j;break;}}
   if(hit<0)bad.push(AM_T[i][0]);else used[hit]=1;res[i]=hit>=0;}AM.res=res;return bad;}
@@ -2095,39 +2123,44 @@ function amLoop(dt,t){var c=AM.c,i;c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300)
  c.setLineDash([6,5]);c.lineWidth=2.5;for(i=0;i<AM_REG.length;i++){var q=amXY(AM_REG[i][1],AM_REG[i][2]);c.strokeStyle='rgba(255,214,90,0.85)';c.beginPath();c.arc(q[0],q[1],20,0,6.2832);c.stroke();}c.setLineDash([]);
  for(i=0;i<AM_T.length;i++){var p=AM.tags[i];if(!p)continue;amTag(c,AM_T[i][0],p.x,p.y,13);if(AM.res&&AM.res[i]!==undefined){c.fillStyle=AM.res[i]?'#6FE3A4':'#FF5A4A';circ(c,p.x+20,p.y-12,5);}}}
 function amTouch(e){e.preventDefault();ac();if(AM.sel<0){$('amMsg').textContent='Tap an air mass tag below first.';return;}var p=lpos($('amCv'),e,400);AM.tags[AM.sel]={x:p.x,y:p.y};AM.res=null;sfx.click();
- var m=AM.ms?AM.ms.i:0,nx=-1;for(var i=0;i<AM_T.length;i++){if(AM_T[i][1]===m&&!AM.tags[i]){nx=i;break;}}AM.sel=nx;amChips();$('amMsg').style.color='#FFD2B8';$('amMsg').textContent=nx<0?'All placed. Tap Check.':'Now place: '+AM_T[nx][0];}
+ var m=AM.ms?AM.ms.i:0,nx=-1;for(var i=0;i<AM_T.length;i++){if(AM_T[i][1]===m&&!AM.tags[i]){nx=i;break;}}AM.sel=nx;amChips();$('amMsg').style.color='#FFD2B8';$('amMsg').textContent=nx<0?T('All placed. Tap Check.','Todas colocadas. Toca Revisar.'):T('Now place: ','Ahora coloca: ')+AM_T[nx][0];}
 var AM_MIS=[
- {tx:'Continental air masses form over land. Tap a tag, then tap the dashed circle where it forms: cP (cold, dry), cT (hot, dry), and cA (arctic).',hint:'cP forms over central and northern Canada. cT forms over northern Mexico and the US Southwest. cA forms over the Arctic, at the top of the map.',start:function(){AM.sel=0;amChips();},ok:function(){var b=amCheck(0);AM_MIS[0].hint=b.length?'Check these: '+b.join(', ')+'. cP: central and northern Canada. cT: northern Mexico and the US Southwest. cA: the Arctic, at the top.':'';return !b.length;},yes:'Correct! Continental air is dry because it forms over land: cP over Canada, cT over the desert Southwest and northern Mexico, and cA over the frozen Arctic.'},
- {tx:'Maritime air masses form over oceans. Place both mP tags (cool, moist) and both mT tags (warm, humid).',hint:'mP forms over the cold North Pacific and North Atlantic. mT forms over the warm Gulf of Mexico and the subtropical Atlantic near the Caribbean.',start:function(){AM.sel=3;amChips();},ok:function(){var b=amCheck(1);AM_MIS[1].hint=b.length?'Check these: '+b.join(', ')+'. mP: the cold North Pacific and North Atlantic. mT: the warm Gulf of Mexico and the subtropical Atlantic.':'';return !b.length;},yes:'You mapped every air mass! mT air from the Gulf and Atlantic is Florida\'s usual warm, humid air.'}
+ {tx:'Continental air masses form over land. Tap a tag, then tap the dashed circle where it forms: cP (cold, dry), cT (hot, dry), and cA (arctic).',hint:'cP forms over central and northern Canada. cT forms over northern Mexico and the US Southwest. cA forms over the Arctic, at the top of the map.',start:function(){AM.sel=0;amChips();},ok:function(){var b=amCheck(0);if(AM_MIS[0].es)AM_MIS[0].es.hint=b.length?'Revisa estas: '+b.join(', ')+'. cP: el centro y el norte de Canad\u00E1. cT: el norte de M\u00E9xico y el suroeste de EE. UU. cA: el \u00C1rtico, arriba.':'';AM_MIS[0].hint=b.length?'Check these: '+b.join(', ')+'. cP: central and northern Canada. cT: northern Mexico and the US Southwest. cA: the Arctic, at the top.':'';return !b.length;},yes:'Correct! Continental air is dry because it forms over land: cP over Canada, cT over the desert Southwest and northern Mexico, and cA over the frozen Arctic.'},
+ {tx:'Maritime air masses form over oceans. Place both mP tags (cool, moist) and both mT tags (warm, humid).',hint:'mP forms over the cold North Pacific and North Atlantic. mT forms over the warm Gulf of Mexico and the subtropical Atlantic near the Caribbean.',start:function(){AM.sel=3;amChips();},ok:function(){var b=amCheck(1);if(AM_MIS[1].es)AM_MIS[1].es.hint=b.length?'Revisa estas: '+b.join(', ')+'. mP: el norte fr\u00EDo del Pac\u00EDfico y del Atl\u00E1ntico. mT: el c\u00E1lido Golfo de M\u00E9xico y el Atl\u00E1ntico subtropical.':'';AM_MIS[1].hint=b.length?'Check these: '+b.join(', ')+'. mP: the cold North Pacific and North Atlantic. mT: the warm Gulf of Mexico and the subtropical Atlantic.':'';return !b.length;},yes:'You mapped every air mass! mT air from the Gulf and Atlantic is Florida\'s usual warm, humid air.'}
 ];
-function startAm(){show('scrAm');AM.tags=[];AM.sel=0;AM.res=null;AM.ms=null;AM.c=setupCanvas($('amCv'),400,300,0.42);AM.ms=misRun('am',AM_MIS,'Next: Forecaster',startFc);amChips();startLoop(amLoop);}
+trMis(AM_MIS,[
+ ['Las masas de aire continentales se forman sobre tierra. Toca una etiqueta y luego toca el c\u00EDrculo punteado donde se forma: cP (fr\u00EDa y seca), cT (caliente y seca) y cA (\u00E1rtica).','La cP se forma sobre el centro y el norte de Canad\u00E1. La cT se forma sobre el norte de M\u00E9xico y el suroeste de EE. UU. La cA se forma sobre el \u00C1rtico, arriba del mapa.','\u00A1Correcto! El aire continental es seco porque se forma sobre tierra: la cP sobre Canad\u00E1, la cT sobre el desierto del suroeste y el norte de M\u00E9xico, y la cA sobre el \u00C1rtico congelado.'],
+ ['Las masas de aire mar\u00EDtimas se forman sobre los oc\u00E9anos. Coloca las dos etiquetas mP (fresca y h\u00FAmeda) y las dos etiquetas mT (c\u00E1lida y h\u00FAmeda).','La mP se forma sobre el norte fr\u00EDo del Pac\u00EDfico y del Atl\u00E1ntico. La mT se forma sobre el c\u00E1lido Golfo de M\u00E9xico y el Atl\u00E1ntico subtropical cerca del Caribe.','\u00A1Ubicaste todas las masas de aire! El aire mT del Golfo y del Atl\u00E1ntico es el aire c\u00E1lido y h\u00FAmedo de siempre en Florida.']
+]);
+function startAm(){show('scrAm');AM.tags=[];AM.sel=0;AM.res=null;AM.ms=null;AM.c=setupCanvas($('amCv'),400,300,0.42);AM.ms=misRun('am',AM_MIS,['Next: Forecaster','Sigue: Pronosticador'],startFc);amChips();startLoop(amLoop);}
 
 /* ---- Activity D: Forecaster ---- */
 var FC={c:null,t:'',h:'',ms:null,r:0};
 var FC_R=[
- {am:'cP',from:[-105,57],front:'cold',txt:'Winter: a cold front pushes cP air from Canada into Florida.',T:'Cooler',H:'Drier',yes:'Right! Behind the cold front, cold, dry cP air pours in. The temperature and humidity drop fast, and the sky usually clears.'},
- {am:'mT',from:[-91,25],front:'warm',txt:'A few days later, the wind shifts and mT air flows back in from the Gulf of Mexico.',T:'Warmer',H:'More humid',yes:'Yes! Warm, humid mT air from the Gulf brings back Florida\'s usual sticky feel.'},
- {am:'cA',from:[-115,73],front:'cold',txt:'A rare arctic outbreak: very cold cA air dives south behind a strong cold front.',T:'Cooler',H:'Drier',yes:'Right! Arctic air is very cold and dry. On rare occasions it brings freezing temperatures to Florida, which can damage crops like oranges.'}
+ {am:'cP',from:[-105,57],front:'cold',txe:'Invierno: un frente fr\u00EDo empuja aire cP de Canad\u00E1 hasta Florida.',yese:'\u00A1Correcto! Detr\u00E1s del frente fr\u00EDo entra aire cP fr\u00EDo y seco. La temperatura y la humedad bajan r\u00E1pido, y el cielo casi siempre se despeja.',txt:'Winter: a cold front pushes cP air from Canada into Florida.',T:'Cooler',H:'Drier',yes:'Right! Behind the cold front, cold, dry cP air pours in. The temperature and humidity drop fast, and the sky usually clears.'},
+ {am:'mT',from:[-91,25],front:'warm',txe:'Unos d\u00EDas despu\u00E9s, el viento cambia y el aire mT regresa desde el Golfo de M\u00E9xico.',yese:'\u00A1S\u00ED! El aire mT c\u00E1lido y h\u00FAmedo del Golfo trae de vuelta la sensaci\u00F3n pegajosa de siempre en Florida.',txt:'A few days later, the wind shifts and mT air flows back in from the Gulf of Mexico.',T:'Warmer',H:'More humid',yes:'Yes! Warm, humid mT air from the Gulf brings back Florida\'s usual sticky feel.'},
+ {am:'cA',from:[-115,73],front:'cold',txe:'Una rara ola de aire \u00E1rtico: aire cA muy fr\u00EDo baja hacia el sur detr\u00E1s de un frente fr\u00EDo fuerte.',yese:'\u00A1Correcto! El aire \u00E1rtico es muy fr\u00EDo y seco. En raras ocasiones trae temperaturas bajo cero a Florida, que pueden da\u00F1ar cultivos como las naranjas.',txt:'A rare arctic outbreak: very cold cA air dives south behind a strong cold front.',T:'Cooler',H:'Drier',yes:'Right! Arctic air is very cold and dry. On rare occasions it brings freezing temperatures to Florida, which can damage crops like oranges.'}
 ];
+var FC_OES={'Warmer':'M\u00E1s c\u00E1lido','Cooler':'M\u00E1s fresco','About the same':'Casi igual','More humid':'M\u00E1s h\u00FAmedo','Drier':'M\u00E1s seco'};
 function fcChips(){var B=[['fcTemp','t',['Warmer','Cooler','About the same']],['fcHum','h',['More humid','Drier','About the same']]];
- for(var k=0;k<2;k++){(function(id,key,opts){var box=$(id);box.innerHTML='';box.appendChild(el('span','fcl',key==='t'?'Temperature:':'Humidity:'));for(var i=0;i<opts.length;i++){(function(o){var b=el('button','chip'+(FC[key]===o?' sel':''),o);b.onclick=function(){sfx.click();FC[key]=o;fcChips();};box.appendChild(b);})(opts[i]);}})(B[k][0],B[k][1],B[k][2]);}}
+ for(var k=0;k<2;k++){(function(id,key,opts){var box=$(id);box.innerHTML='';box.appendChild(el('span','fcl',key==='t'?T('Temperature:','Temperatura:'):T('Humidity:','Humedad:')));for(var i=0;i<opts.length;i++){(function(o){var b=el('button','chip'+(FC[key]===o?' sel':''),T(o,FC_OES[o]));b.onclick=function(){sfx.click();FC[key]=o;fcChips();};box.appendChild(b);})(opts[i]);}})(B[k][0],B[k][1],B[k][2]);}}
 function fcLoop(dt,t){var c=FC.c,R=FC_R[FC.r];c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);naMap(c,0,0,400,300,0,t);
  var fl=amXY(-81.5,28.3),st=amXY(R.from[0],R.from[1]),f=Math.min(1,((t*0.18)%1.25)),x=st[0]+(fl[0]-st[0])*f,y=st[1]+(fl[1]-st[1])*f;
  c.fillStyle=mix('#0E1B2C',AMC[R.am],0.5);c.globalAlpha=0.5;CE(c,x,y,60,40);c.fill();c.globalAlpha=1;
  var dx=fl[0]-st[0],dy=fl[1]-st[1],L=Math.sqrt(dx*dx+dy*dy),ux=dx/L,uy=dy/L,P=[],k;for(k=-3;k<=3;k++){P.push(x+ux*48-uy*k*26,y+uy*48+ux*k*26);}
  frontLine(c,P,R.front,R.front==='cold'?-1:-1);amTag(c,R.am,x,y,14);
  c.strokeStyle='#FFD45A';c.lineWidth=3;c.beginPath();c.arc(fl[0],fl[1],14,0,6.2832);c.stroke();
- pill(c,R.front==='cold'?'cold front':'warm front',x+ux*48,y+uy*48-26,10,R.front==='cold'?'#8FD3F0':'#FF8A80','center');
- txt(c,'Round '+(FC.r+1)+' of '+FC_R.length,8,18,'800 12px '+FONT,'#FFFFFF');}
-var FC_MIS=[];(function(){for(var i=0;i<FC_R.length;i++){(function(i){FC_MIS.push({tx:FC_R[i].txt+' Predict the change in Florida\'s weather.',hint:'Think about where '+FC_R[i].am+' air forms. c = dry, m = moist, T = warm, P = cold, A = very cold.',start:function(){FC.r=i;FC.t='';FC.h='';fcChips();},ok:function(){return FC.t===FC_R[i].T&&FC.h===FC_R[i].H;},yes:FC_R[i].yes});})(i);}})();
-function startFc(){show('scrFc');FC.r=0;FC.t='';FC.h='';FC.c=setupCanvas($('fcCv'),400,300,0.4);FC.ms=misRun('fc',FC_MIS,'Take the quiz',function(){startQuiz('ch5',CH5_QUIZ);});startLoop(fcLoop);}
+ pill(c,R.front==='cold'?T('cold front','frente fr\u00EDo'):T('warm front','frente c\u00E1lido'),x+ux*48,y+uy*48-26,10,R.front==='cold'?'#8FD3F0':'#FF8A80','center');
+ txt(c,T('Round ','Ronda ')+(FC.r+1)+T(' of ',' de ')+FC_R.length,8,18,'800 12px '+FONT,'#FFFFFF');}
+var FC_MIS=[];(function(){for(var i=0;i<FC_R.length;i++){(function(i){FC_MIS.push({tx:FC_R[i].txt+' Predict the change in Florida\'s weather.',hint:'Think about where '+FC_R[i].am+' air forms. c = dry, m = moist, T = warm, P = cold, A = very cold.',start:function(){FC.r=i;FC.t='';FC.h='';fcChips();},ok:function(){return FC.t===FC_R[i].T&&FC.h===FC_R[i].H;},yes:FC_R[i].yes,es:{tx:FC_R[i].txe+' Predice el cambio en el tiempo de Florida.',hint:'Piensa en d\u00F3nde se forma el aire '+FC_R[i].am+'. c = seco, m = h\u00FAmedo, T = c\u00E1lido, P = fr\u00EDo, A = muy fr\u00EDo.',yes:FC_R[i].yese}});})(i);}})();
+function startFc(){show('scrFc');FC.r=0;FC.t='';FC.h='';FC.c=setupCanvas($('fcCv'),400,300,0.4);FC.ms=misRun('fc',FC_MIS,['Take the quiz','Hacer el cuestionario'],function(){startQuizL('ch5',CH5_QUIZ,CH5_QUIZ_ES);});startLoop(fcLoop);}
 
 /* ---- quiz backgrounds ---- */
 function bgCells(c){space(c,600,620,1);cellGlobe(c,370,310,210,{cellOff:100,cellRx:56,lat:true,fs:14});}
 function bgBreeze(c){sky(c,600,600,'#8EC5EE','#E4F2FB');sunGlow(c,520,70,34);
  c.fillStyle='#2F7FD1';c.fillRect(0,440,270,160);c.fillStyle='#C9A562';c.fillRect(270,430,330,170);c.fillStyle='#5E9E5A';c.fillRect(270,430,330,14);
  for(var k=0;k<5;k++){c.fillStyle='#5A3B22';c.fillRect(318+k*58,402,6,30);c.fillStyle='#2A6B38';circ(c,321+k*58,396,18);}
- txt(c,'Ocean (heats slowly)',135,540,'800 20px '+FONT,'#FFFFFF','center');txt(c,'Land (heats fast)',435,540,'800 20px '+FONT,'#3E2A12','center');txt(c,'Florida, summer afternoon',20,36,'800 20px '+FONT,'#0E1B2C');}
+ txt(c,T('Ocean (heats slowly)','Oc\u00E9ano (se calienta lento)'),135,540,'800 '+T('20','17')+'px '+FONT,'#FFFFFF','center');txt(c,T('Land (heats fast)','Tierra (se calienta r\u00E1pido)'),435,540,'800 '+T('20','17')+'px '+FONT,'#3E2A12','center');txt(c,T('Florida, summer afternoon','Florida, tarde de verano'),20,36,'800 20px '+FONT,'#0E1B2C');}
 
 var CH5_QUIZ=[
  {t:'mc',q:'Why does warm air rise?',o:['It is less dense than the cooler air around it','It is heavier than cool air','The Sun pulls it upward','Wind always blows upward'],a:0,why:'Warm air expands and becomes less dense, so cooler, denser air sinks below it and pushes it up. That is convection.'},
@@ -2140,6 +2173,17 @@ var CH5_QUIZ=[
  {t:'draw',q:'Draw the sea breeze convection loop. Use red for warm air rising over the land and blue for cool air sinking over the ocean and flowing onto shore.',bg:'breeze',cols:[['Red (warm)','#E0312A'],['Blue (cool)','#1F5FD1'],['Black','#111418']]},
  {t:'text',q:'Describe what happens to Florida\'s weather when a cP air mass arrives and why.'}
 ];
+var CH5_QUIZ_ES=trQuiz(CH5_QUIZ,[
+ {q:'\u00BFPor qu\u00E9 sube el aire c\u00E1lido?',o:['Es menos denso que el aire m\u00E1s fresco que lo rodea','Es m\u00E1s pesado que el aire fresco','El Sol lo jala hacia arriba','El viento siempre sopla hacia arriba'],why:'El aire c\u00E1lido se expande y se vuelve menos denso, as\u00ED que el aire m\u00E1s fresco y denso baja debajo de \u00E9l y lo empuja hacia arriba. Eso es la convecci\u00F3n.'},
+ {q:'\u00BFQu\u00E9 causa la brisa marina de la tarde en Florida?',o:['La tierra se calienta m\u00E1s r\u00E1pido que el agua, as\u00ED que el aire sube sobre la tierra y entra el aire fresco del mar','El oc\u00E9ano se calienta m\u00E1s r\u00E1pido que la tierra, as\u00ED que el aire sube sobre el oc\u00E9ano','La Luna jala el aire hacia la playa','Los huracanes empujan aire hacia la tierra todos los d\u00EDas'],why:'La tierra se calienta m\u00E1s r\u00E1pido que el agua. El aire c\u00E1lido sube sobre la tierra, y el aire m\u00E1s fresco y denso del oc\u00E9ano entra para tomar su lugar.'},
+ {q:'\u00BFQu\u00E9 pasa donde el aire baja, cerca de los 30 grados de latitud?',o:['El aire es seco, y ah\u00ED se forman muchos grandes desiertos','Llueve casi todos los d\u00EDas','Ah\u00ED crecen selvas tropicales','El aire sube y forma tormentas el\u00E9ctricas'],why:'En la celda de Hadley, el aire sube cerca del ecuador y baja cerca de los 30 grados. El aire que baja es seco, as\u00ED que muchos desiertos, como el Sahara, est\u00E1n cerca de los 30 grados.'},
+ {q:'En el hemisferio norte, el efecto Coriolis desv\u00EDa el aire en movimiento:',o:['Hacia la derecha','Hacia la izquierda','Directo hacia arriba','No desv\u00EDa el aire en el norte'],why:'Como la Tierra gira, el aire en movimiento se curva hacia la derecha en el hemisferio norte y hacia la izquierda en el hemisferio sur. El efecto es cero en el ecuador.'},
+ {q:'\u00BFQu\u00E9 trae una masa de aire mT?',o:['Aire c\u00E1lido y h\u00FAmedo de un oc\u00E9ano tropical','Aire fr\u00EDo y seco de Canad\u00E1','Aire caliente y seco de un desierto','Aire muy fr\u00EDo del \u00C1rtico'],why:'La m significa mar\u00EDtima (h\u00FAmeda, formada sobre el oc\u00E9ano) y la T significa tropical (c\u00E1lida). El aire mT del Golfo de M\u00E9xico es el aire de siempre en Florida.'},
+ {q:'\u00BFQu\u00E9 es un frente?',o:['El l\u00EDmite donde se encuentran dos masas de aire diferentes','La parte de adelante de un hurac\u00E1n','Un viento que siempre sopla desde el este','La parte de arriba de la atm\u00F3sfera'],why:'Un frente es donde se encuentran dos masas de aire. Los frentes fr\u00EDos, c\u00E1lidos, estacionarios y ocluidos muchas veces traen cambios en el tiempo.'},
+ {q:'Etiqueta las celdas de circulaci\u00F3n y los cinturones de viento del hemisferio norte. Toca una etiqueta y luego toca el c\u00EDrculo punteado donde va.',labels:['Celda de Hadley','Celda de Ferrel','Celda Polar','Vientos alisios','Vientos del oeste','Vientos polares del este']},
+ {q:'Dibuja el circuito de convecci\u00F3n de la brisa marina. Usa rojo para el aire c\u00E1lido que sube sobre la tierra y azul para el aire fresco que baja sobre el oc\u00E9ano y entra hacia la costa.',cols:['Rojo (c\u00E1lido)','Azul (fresco)','Negro']},
+ {q:'Describe qu\u00E9 le pasa al tiempo en Florida cuando llega una masa de aire cP, y por qu\u00E9.'}
+]);
 
 /* ================= CHAPTER 6: MOUNTAINS AND RAIN SHADOWS ================= */
 /* Mountain cross-section. Wind from the left by default (o.flip = wind from the right).
@@ -3249,7 +3293,7 @@ function startChapter(i){var ch=CH[i];ac();if(!ch.ready){show('scrSoon');$('soon
  $('hpCard').style.display='block';$('hpCard').scrollTop=0;
  say(T('Put on your headphones and turn up the volume so you can hear the story.','Ponte los aud\u00EDfonos y sube el volumen para que puedas escuchar la historia.'),1.05);}
 function hpSoundBtn(){$('hpSound').style.display=V.on?'none':'block';}
-function launchChapter(i){var ch=CH[i];CURCH=ch.id;ENONLY=(LANG==='es'&&!ESDONE[ch.id]);if(ch.id==='ch1'){startStory(T(CH1_STEPS,CH1_STEPS_ES),startDrillGame,T('Start drilling','Empezar a perforar'));story.ch1=true;}else if(ch.id==='ch2')startStoryL(CH2_STEPS,CH2_STEPS_ES,startSeasons,'Start the missions','Empezar las misiones');else if(ch.id==='ch3')startStoryL(CH3_STEPS,CH3_STEPS_ES,startLab,'Start the Photon Lab','Empezar el Laboratorio de Fotones');else if(ch.id==='ch4')startStoryL(CH4_STEPS,CH4_STEPS_ES,startOrbit,'Start the Orbit Lab','Empezar el Laboratorio de \u00D3rbitas');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');}
+function launchChapter(i){var ch=CH[i];CURCH=ch.id;ENONLY=(LANG==='es'&&!ESDONE[ch.id]);if(ch.id==='ch1'){startStory(T(CH1_STEPS,CH1_STEPS_ES),startDrillGame,T('Start drilling','Empezar a perforar'));story.ch1=true;}else if(ch.id==='ch2')startStoryL(CH2_STEPS,CH2_STEPS_ES,startSeasons,'Start the missions','Empezar las misiones');else if(ch.id==='ch3')startStoryL(CH3_STEPS,CH3_STEPS_ES,startLab,'Start the Photon Lab','Empezar el Laboratorio de Fotones');else if(ch.id==='ch4')startStoryL(CH4_STEPS,CH4_STEPS_ES,startOrbit,'Start the Orbit Lab','Empezar el Laboratorio de \u00D3rbitas');else if(ch.id==='ch5')startStoryL(CH5_STEPS,CH5_STEPS_ES,startConv,'Start the Convection Tank','Empezar el Tanque de Convecci\u00F3n');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');}
 
 /* ---------- report + PDF ---------- */
 var pdfBlob=null,pdfName='';
@@ -3403,7 +3447,9 @@ $('obCheck').onclick=function(){misCheck(ORB.ms);};$('obHint').onclick=function(
 (function(){var bs=$('obTabs').children;for(var i=0;i<bs.length;i++){bs[i].onclick=function(){sfx.click();obTab(this.getAttribute('data-t'));};}
  var ids=['obE','obT','obP'];for(var j=0;j<ids.length;j++){$(ids[j]).addEventListener('input',obRead,false);$(ids[j]).addEventListener('change',obRead,false);}})();
 $('cvCheck').onclick=function(){misCheck(CV.ms);};$('cvHint').onclick=function(){misHint(CV.ms);};
-$('cvHeat').onclick=function(){sfx.click();ac();CV.heat=!CV.heat;this.textContent=CV.heat?'Turn heat OFF':'Turn heat ON';};
+$('cvHeat').onclick=function(){sfx.click();ac();CV.heat=!CV.heat;this.textContent=CV.heat?T('Turn heat OFF','Apagar el calor'):T('Turn heat ON','Encender el calor');};
+LREF.scrConv=function(){$('cvHeat').textContent=CV.heat?T('Turn heat OFF','Apagar el calor'):T('Turn heat ON','Encender el calor');};
+LREF.scrFc=function(){fcChips();};LREF.scrAm=function(){amChips();};
 var cvc=$('cvCv');cvc.addEventListener('touchstart',cvTouch,false);cvc.addEventListener('mousedown',cvTouch,false);
 $('coCheck').onclick=function(){misCheck(CO.ms);};$('coHint').onclick=function(){misHint(CO.ms);};$('coLaunch').onclick=coLaunch;
 (function(){var bs=$('coViews').children;for(var i=0;i<bs.length;i++){bs[i].onclick=function(){sfx.click();coView(this.getAttribute('data-v'));};}})();
@@ -3483,6 +3529,9 @@ var LTX=[
  ['obNote','La M\u00E1quina de glaciaciones es un modelo simplificado. Las glaciaciones reales tambi\u00E9n dependen de retroalimentaciones como la de hielo-albedo y la del CO<sub>2</sub>.',1],
  ['grAgel','Cu\u00E1ndo:'],['grTl','Temperatura ant\u00E1rtica:'],['grDotl','Tu punto de CO<sub>2</sub>:',1],
  ['grNote','Datos reales, mostrados como promedios de 1,000 a\u00F1os. Temperatura: EPICA Domo C, Ant\u00E1rtida (Jouzel et al. 2007), como el cambio respecto al promedio de los \u00FAltimos 1,000 a\u00F1os. Las temperaturas de la Ant\u00E1rtida var\u00EDan m\u00E1s que el promedio mundial. CO<sub>2</sub>: compilaci\u00F3n de n\u00FAcleos de hielo ant\u00E1rticos (Bereiter et al. 2015), que termina cerca de 1850. Ambos de NOAA NCEI Paleoclimatolog\u00EDa.',1],
+ ['cvNote','Los puntos rojos son aire c\u00E1lido y los azules son aire fresco. El calentador calienta el aire abajo a la izquierda; el aire se enfr\u00EDa cerca de la parte de arriba del tanque.'],
+ ['coV1','Polo Norte'],['coV2','Polo Sur'],['coV3','Ecuador'],['coLaunch','Lanzar el aire'],['coNote','El giro est\u00E1 mucho m\u00E1s lento y el desv\u00EDo de Coriolis est\u00E1 exagerado para que puedas verlo. La Tierra real da una vuelta al d\u00EDa.'],
+ ['amNote','c = continental (seca), m = mar\u00EDtima (h\u00FAmeda), T = tropical (c\u00E1lida), P = polar (fr\u00EDa), A = \u00E1rtica (muy fr\u00EDa). El mapa y las regiones son aproximados.'],
  ['hpSound','El sonido est\u00E1 apagado. Toca para activarlo.'],['hpGo','\u00A1Empezar la historia!'],['hpBack','Volver a los cap\u00EDtulos']];
 var LTX_EN={},LPH=[['inFirst','Nombre'],['inLast','Apellido'],['inCode','Escribe el c\u00F3digo']];
 function langBtns(){var es=LANG==='es';$('lgEn').className='chip'+(es?'':' sel');$('lgEs').className='chip'+(es?' sel':'');$('sgEn').className='chip'+(es?'':' sel');$('sgEs').className='chip'+(es?' sel':'');}
