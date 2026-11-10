@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Climate Quest</title>
 <style>
-html,body{margin:0;padding:0;height:100%;background:#0E1B2C;color:#F4FAFD;font-family:"Avenir Next","Avenir","Trebuchet MS",Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;}
+html,body{margin:0;padding:0;height:100%;font-size:16px;text-size-adjust:100%;background:#0E1B2C;color:#F4FAFD;font-family:"Avenir Next","Avenir","Trebuchet MS",Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,0);}
 #app{position:fixed;left:0;right:0;top:0;bottom:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;}
 #bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#0A1522;border-bottom:1px solid #22384F;}
@@ -540,6 +540,9 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     <p id="setVN" class="vnote">Story voices. Pick Daniel, Samantha, or Karen for each character, then tap Test.</p>
     <div id="voiceRows"></div>
     <button id="btnVoiceReset" class="link">Reset voices (Daniel, Samantha, Karen)</button>
+    <p id="setFitH" class="vnote">Android screen fix: use this if the game looks zoomed in or the text is too big on an Android phone.</p>
+    <button id="btnFit" class="big alt">Android screen fix: Auto</button>
+    <div class="langRow"><span id="fitTsL">Text size: 100%</span><button id="btnTsDn" class="chip">A-</button><button id="btnTsUp" class="chip">A+</button></div>
     <p id="setCN" class="vnote">Code (for the teacher)</p>
     <input id="inCode" type="password" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="Enter code">
     <button id="btnCode" class="big alt">Enter code</button>
@@ -677,8 +680,33 @@ function vList(){return ES()?VSUG_ES:VSUG;}
 function vSet(){return ES()?VSET_ES:VSET;}
 function vDisp(n){return n==='Monica'?'M\u00F3nica':n;}
 function vOk(n,L){L=L||VSUG;for(var i=0;i<L.length;i++){if(L[i][0]===n)return true;}return false;}
-function loadSet(){try{var r=localStorage.getItem(SKEY);if(r){var o=JSON.parse(r),k;if(o&&o.voice){for(k in VSET){if(vOk(o.voice[k]))VSET[k]=o.voice[k];}}if(o&&o.voiceEs){for(k in VSET_ES){if(vOk(o.voiceEs[k],VSUG_ES))VSET_ES[k]=o.voiceEs[k];}}if(o&&o.sound===false)V.on=false;if(o&&o.lang==='es')LANG='es';if(o&&o.skip)V.skip=true;}}catch(e){}}
-function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify({voice:VSET,voiceEs:VSET_ES,sound:V.on,lang:LANG,skip:!!V.skip}));}catch(e){}}
+function loadSet(){try{var r=localStorage.getItem(SKEY);if(r){var o=JSON.parse(r),k;if(o&&o.voice){for(k in VSET){if(vOk(o.voice[k]))VSET[k]=o.voice[k];}}if(o&&o.voiceEs){for(k in VSET_ES){if(vOk(o.voiceEs[k],VSUG_ES))VSET_ES[k]=o.voiceEs[k];}}if(o&&o.sound===false)V.on=false;if(o&&o.lang==='es')LANG='es';if(o&&o.skip)V.skip=true;if(o&&(o.fit==='on'||o.fit==='off'))FIT.mode=o.fit;if(o&&o.ts>=70&&o.ts<=130)FIT.ts=o.ts;}}catch(e){}}
+function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify({voice:VSET,voiceEs:VSET_ES,sound:V.on,lang:LANG,skip:!!V.skip,fit:FIT.mode,ts:FIT.ts}));}catch(e){}}
+/* Android screen fix. Some Android browsers and app viewers ignore the viewport tag (the page is laid out about
+   980px wide and shown zoomed in), or blow up all text with the phone's font-size setting. FIT.mode: 'auto' (fix only
+   on Android, and only when one of those problems is measured), 'on' (always check and fix), 'off'. FIT.ts is an
+   extra text size (70 to 130%) for any phone. With the defaults, an iPhone is never changed. */
+var FIT={mode:'auto',ts:100},APPH=0,FIT_T=null,FIT_K=1,FIT_FS=[];
+function isAndroid(){return /Android/i.test(navigator.userAgent||'');}
+function appH(){return APPH||window.innerHeight;}
+/* How much the phone enlarges page text: rendered width of a test string over its canvas width (canvas text is never enlarged). */
+function textZoom(){try{var f='700 40px Arial,Helvetica,sans-serif',s=document.createElement('span'),c=document.createElement('canvas').getContext('2d'),w,m;
+ s.style.cssText='position:absolute;left:-9999px;top:0;white-space:nowrap;font:'+f;s.textContent='MMMMMMMMMM';document.body.appendChild(s);w=s.getBoundingClientRect().width;document.body.removeChild(s);
+ c.font=f;m=c.measureText('MMMMMMMMMM').width;return (m>0&&w>0)?w/m:1;}catch(e){return 1;}}
+function fitApply(){var on=FIT.mode==='on'||(FIT.mode==='auto'&&isAndroid()),st=$('fitCss'),css='',k=FIT.ts/100,i,j,ss,rs,r,f;
+ if(!st){st=document.createElement('style');st.id='fitCss';document.head.appendChild(st);}
+ APPH=0;
+ if(on){var vv=window.visualViewport,vw=vv?vv.width:window.innerWidth,vh=vv?vv.height:window.innerHeight,lw=document.documentElement.clientWidth;
+  if(lw>vw*1.15&&vw>200){vw=Math.floor(vw);vh=Math.floor(vh);APPH=vh;css='html,body{overflow:hidden!important;}#app,.overlay{right:auto!important;bottom:auto!important;width:'+vw+'px!important;height:'+vh+'px!important;}';}
+  var z=textZoom();if(z>1.05)k=k/z;}
+ if(st.textContent!==css)st.textContent=css;
+ if(Math.abs(k-FIT_K)<0.001)return;FIT_K=k;
+ /* Font sizes in the page's own style sheet are scaled from their original px values (saved the first time). */
+ for(i=0;i<document.styleSheets.length;i++){ss=document.styleSheets[i];if(ss.ownerNode===st)continue;try{rs=ss.cssRules;}catch(e){continue;}
+  if(!FIT_FS[i]){FIT_FS[i]=[];for(j=0;j<rs.length;j++){f=rs[j].style?String(rs[j].style.fontSize||''):'';FIT_FS[i].push(/^[\d.]+px$/.test(f)?parseFloat(f):0);}}
+  for(j=0;j<rs.length&&j<FIT_FS[i].length;j++){r=rs[j];if(FIT_FS[i][j])r.style.fontSize=(Math.round(FIT_FS[i][j]*k*10)/10)+'px';}}}
+function fitSoon(){if(FIT_T)clearTimeout(FIT_T);FIT_T=setTimeout(function(){FIT_T=null;fitApply();},250);}
+function fitUI(){$('btnFit').textContent=T('Android screen fix: ','Ajuste de pantalla Android: ')+(FIT.mode==='on'?T('On','Activado'):(FIT.mode==='off'?T('Off','Desactivado'):T('Auto','Autom\u00E1tico')));$('fitTsL').textContent=T('Text size: ','Tama\u00F1o del texto: ')+FIT.ts+'%';}
 function fold(s){s=String(s||'');try{if(s.normalize)s=s.normalize('NFD');}catch(e){}return s.replace(/[\u0300-\u036f]/g,'');}
 function langVoices(pre){if(!window.speechSynthesis)return [];var vs=speechSynthesis.getVoices()||[],out=[];for(var i=0;i<vs.length;i++){if(String(vs[i].lang).toLowerCase().indexOf(pre)===0)out.push(vs[i]);}return out;}
 function enVoices(){return langVoices('en');}
@@ -699,7 +727,7 @@ var raf=null,loopFn=null;
 function stopLoops(){loopFn=null;if(raf){cancelAnimationFrame(raf);}raf=null;stopDrillSnd();}
 function startLoop(fn){stopLoops();loopFn=fn;var last=0;function f(ts){if(loopFn!==fn)return;var dt=last?Math.min(0.05,(ts-last)/1000):0.016;last=ts;fn(dt,ts/1000);raf=requestAnimationFrame(f);}raf=requestAnimationFrame(f);}
 function show(id){if(id==='scrMenu'||id==='scrReport'||id==='scrSign'||id==='scrIceLab')ENONLY=false;else if(id==='scrCamp')ENONLY=(LANG==='es');stopLoops();hush();stClear();$('btnHome').textContent=T('Chapters','Cap\u00EDtulos');for(var i=0;i<screens.length;i++){$(screens[i]).style.display=(screens[i]===id)?'block':'none';}cur=id;$('btnHome').style.visibility=(id==='scrSign'||id==='scrMenu')?'hidden':'visible';$('coreCard').style.display='none';$('nameCard').style.display='none';$('hpCard').style.display='none';$(id).scrollTop=0;}
-function setupCanvas(cv,lw,lh,maxHFrac){var w=cv.parentNode.clientWidth||360;var maxH=window.innerHeight*(maxHFrac||0.5);if(w*lh/lw>maxH){w=maxH*lw/lh;}var h=w*lh/lw;cv.style.width=Math.round(w)+'px';cv.style.height=Math.round(h)+'px';cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);var c=cv.getContext('2d');var k=cv.width/lw;c.setTransform(k,0,0,k,0,0);return c;}
+function setupCanvas(cv,lw,lh,maxHFrac){var w=cv.parentNode.clientWidth||360;var maxH=appH()*(maxHFrac||0.5);if(w*lh/lw>maxH){w=maxH*lw/lh;}var h=w*lh/lw;cv.style.width=Math.round(w)+'px';cv.style.height=Math.round(h)+'px';cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);var c=cv.getContext('2d');var k=cv.width/lw;c.setTransform(k,0,0,k,0,0);return c;}
 
 /* ---------- drawing helpers ---------- */
 function CE(c,x,y,rx,ry){c.save();c.translate(x,y);c.scale(rx,ry);c.beginPath();c.arc(0,0,1,0,6.2832);c.restore();}
@@ -3302,7 +3330,7 @@ function labPaint(c,K,ox,oy){var L=labData(),ly=document.createElement('canvas')
  c.save();c.translate(ox||0,oy||0);c.scale(K,K);labBg(c);c.restore();
  c.drawImage(ly,ox||0,oy||0,LW*K,LH*K);}
 function labCanvas(host,onPin){var L=labData(),wrap=el('div','cvwrap'),cv=el('canvas','labCv');wrap.appendChild(cv);host.appendChild(wrap);
- var hw=host.clientWidth||330,w=Math.floor(Math.min(hw,window.innerHeight*0.64*LW/LH,420)),h=Math.round(w*LH/LW);
+ var hw=host.clientWidth||330,w=Math.floor(Math.min(hw,appH()*0.64*LW/LH,420)),h=Math.round(w*LH/LW);
  cv.style.width=w+'px';cv.style.height=h+'px';cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);var K=cv.width/LW,c=cv.getContext('2d');
  var bg=document.createElement('canvas');bg.width=cv.width;bg.height=cv.height;var bc=bg.getContext('2d');bc.setTransform(K,0,0,K,0,0);labBg(bc);
  var ly=document.createElement('canvas');ly.width=cv.width;ly.height=cv.height;var lc=ly.getContext('2d');lc.setTransform(K,0,0,K,0,0);
@@ -3547,7 +3575,7 @@ function buildVoiceRows(){var box=$('voiceRows'),es=ES(),vs=es?langVoices('es'):
   sel.onchange=function(){VS[who]=sel.value;saveSet();say(VA[who],WHO[who].pitch,who);};
   var tb=el('button','sbtn',T('Test','Probar'));tb.onclick=function(){ac();if(!V.on){$('btnSound').textContent=T('Sound: Off (turn on to test)','Sonido: Desactivado (act\u00EDvalo para probar)');return;}say(VA[who],WHO[who].pitch,who);};
   line.appendChild(sel);line.appendChild(tb);row.appendChild(line);box.appendChild(row);})(keys[k]);}}
-function openSettings(){sfx.click();$('btnSound').textContent=sndTx();langBtns();buildVoiceRows();$('codeMsg').textContent='';$('inCode').value='';$('setCard').style.display='block';}
+function openSettings(){sfx.click();$('btnSound').textContent=sndTx();fitUI();langBtns();buildVoiceRows();$('codeMsg').textContent='';$('inCode').value='';$('setCard').style.display='block';}
 $('btnGear').onclick=openSettings;
 /* teacher codes: 'yourdadacademy' reopens the camp mini game right away (clears the 10-minute cooldown);
    'skipper' turns story skipping on or off (Next works right away, before the line is read) */
@@ -3555,6 +3583,10 @@ $('btnCode').onclick=function(){var v=String($('inCode').value||'').replace(/\s+
  if(v==='yourdadacademy'){S.campNext=0;save();campBtn();$('campNote').textContent='';sfx.good();$('codeMsg').textContent=T('Code accepted. The camp mini game is open.','C\u00F3digo aceptado. El minijuego del campamento est\u00E1 abierto.');}
  else if(v==='skipper'){V.skip=!V.skip;saveSet();sfx.good();if(V.skip&&story)stLock(false);$('codeMsg').textContent=V.skip?T('Skip is on. In the stories, you can tap Next right away.','Saltar est\u00E1 activado. En las historias puedes tocar Siguiente enseguida.'):T('Skip is off. Next unlocks after each line is read again.','Saltar est\u00E1 desactivado. Siguiente se desbloquea otra vez despu\u00E9s de leer cada l\u00EDnea.');}
  else{sfx.bad();$('codeMsg').textContent=T('That code did not work.','Ese c\u00F3digo no funcion\u00F3.');}};
+$('btnFit').onclick=function(){sfx.click();FIT.mode=FIT.mode==='auto'?'on':(FIT.mode==='on'?'off':'auto');saveSet();fitApply();fitUI();};
+$('btnTsDn').onclick=function(){sfx.click();FIT.ts=Math.max(70,FIT.ts-10);saveSet();fitApply();fitUI();};
+$('btnTsUp').onclick=function(){sfx.click();FIT.ts=Math.min(130,FIT.ts+10);saveSet();fitApply();fitUI();};
+window.addEventListener('resize',fitSoon,false);window.addEventListener('orientationchange',fitSoon,false);if(window.visualViewport)window.visualViewport.addEventListener('resize',fitSoon,false);
 $('btnSetDone').onclick=function(){sfx.click();hush();$('setCard').style.display='none';};
 $('btnVoiceReset').onclick=function(){if(ES()){VSET_ES.frost=VDEF_ES.frost;VSET_ES.sam=VDEF_ES.sam;VSET_ES.rosa=VDEF_ES.rosa;}else{VSET.frost=VDEF.frost;VSET.sam=VDEF.sam;VSET.rosa=VDEF.rosa;}saveSet();buildVoiceRows();sfx.click();};
 if(window.speechSynthesis&&'onvoiceschanged' in speechSynthesis){speechSynthesis.onvoiceschanged=function(){if($('setCard').style.display==='block')buildVoiceRows();};}
@@ -3680,6 +3712,7 @@ var LTX=[
  ['plNote1','Arrastra la estrella. Se mueve a la ciudad m\u00E1s cercana. Toca un mes en el climograma para ver detalles.'],
  ['plNote2','Climogramas: l\u00EDnea roja = temperatura promedio, banda sombreada = de la m\u00EDnima promedio a la m\u00E1xima promedio, barras azules = precipitaci\u00F3n. Los grupos clim\u00E1ticos usan las reglas de K\u00F6ppen de los libros aplicadas a los datos de cada ciudad.'],
  ['spNote','Datos: temperaturas globales de tierra y oc\u00E9ano de NASA GISTEMP v4, cada mes desde 1880. La NASA compara con 1951-1980; aqu\u00ED cada valor se ajust\u00F3 para comparar con el promedio de 1880-1900 (m\u00E1s o menos preindustrial).'],
+ ['setFitH','Ajuste de pantalla Android: \u00FAsalo si el juego se ve con zoom o el texto se ve demasiado grande en un tel\u00E9fono Android.'],
  ['hpSound','El sonido est\u00E1 apagado. Toca para activarlo.'],['hpGo','\u00A1Empezar la historia!'],['hpBack','Volver a los cap\u00EDtulos']];
 var LTX_EN={},LPH=[['inFirst','Nombre'],['inLast','Apellido'],['inCode','Escribe el c\u00F3digo']];
 function langBtns(){var es=LANG==='es';$('lgEn').className='chip'+(es?'':' sel');$('lgEs').className='chip'+(es?' sel':'');$('sgEn').className='chip'+(es?'':' sel');$('sgEs').className='chip'+(es?' sel':'');}
@@ -3691,7 +3724,7 @@ function applyLang(){var es=LANG==='es',i,e,k;
    swaps to the other language's copy (the copies have the same steps). Answers already saved stay as written. */
 function setLang(l){l=(l==='es')?'es':'en';sfx.click();if(LANG===l){langBtns();return;}LANG=l;saveSet();hush();
  if(cur==='scrCamp'||(CURCH&&!ESDONE[CURCH]&&cur!=='scrMenu'&&cur!=='scrReport'&&cur!=='scrSign'&&cur!=='scrIceLab'))ENONLY=(LANG==='es');
- applyLang();if($('setCard').style.display==='block'){$('btnSound').textContent=sndTx();buildVoiceRows();$('codeMsg').textContent='';}
+ applyLang();if($('setCard').style.display==='block'){$('btnSound').textContent=sndTx();fitUI();buildVoiceRows();$('codeMsg').textContent='';}
  if(cur==='scrMenu')openMenu();else if(cur==='scrReport')openReport(-1);else if(cur==='scrIceLab')labRender();
  else if(cur==='scrStory'&&story&&story.ch1){story.steps=T(CH1_STEPS,CH1_STEPS_ES);story.last=T('Start drilling','Empezar a perforar');renderStep();}
  else if(cur==='scrDrill'){setDrillUI();if($('coreCard').style.display==='block')showCoreCard();}
@@ -3703,7 +3736,7 @@ function setLang(l){l=(l==='es')?'es':'en';sfx.click();if(LANG===l){langBtns();r
 $('lgEn').onclick=function(){setLang('en');};$('lgEs').onclick=function(){setLang('es');};
 $('sgEn').onclick=function(){setLang('en');};$('sgEs').onclick=function(){setLang('es');};
 
-load();loadSet();applyLang();
+load();loadSet();fitApply();applyLang();
 if(S.name&&S.period){openMenu();}else{openSign();}
 })();
 </script>
