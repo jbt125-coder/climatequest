@@ -677,8 +677,8 @@ function vList(){return ES()?VSUG_ES:VSUG;}
 function vSet(){return ES()?VSET_ES:VSET;}
 function vDisp(n){return n==='Monica'?'M\u00F3nica':n;}
 function vOk(n,L){L=L||VSUG;for(var i=0;i<L.length;i++){if(L[i][0]===n)return true;}return false;}
-function loadSet(){try{var r=localStorage.getItem(SKEY);if(r){var o=JSON.parse(r),k;if(o&&o.voice){for(k in VSET){if(vOk(o.voice[k]))VSET[k]=o.voice[k];}}if(o&&o.voiceEs){for(k in VSET_ES){if(vOk(o.voiceEs[k],VSUG_ES))VSET_ES[k]=o.voiceEs[k];}}if(o&&o.sound===false)V.on=false;if(o&&o.lang==='es')LANG='es';}}catch(e){}}
-function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify({voice:VSET,voiceEs:VSET_ES,sound:V.on,lang:LANG}));}catch(e){}}
+function loadSet(){try{var r=localStorage.getItem(SKEY);if(r){var o=JSON.parse(r),k;if(o&&o.voice){for(k in VSET){if(vOk(o.voice[k]))VSET[k]=o.voice[k];}}if(o&&o.voiceEs){for(k in VSET_ES){if(vOk(o.voiceEs[k],VSUG_ES))VSET_ES[k]=o.voiceEs[k];}}if(o&&o.sound===false)V.on=false;if(o&&o.lang==='es')LANG='es';if(o&&o.skip)V.skip=true;}}catch(e){}}
+function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify({voice:VSET,voiceEs:VSET_ES,sound:V.on,lang:LANG,skip:!!V.skip}));}catch(e){}}
 function fold(s){s=String(s||'');try{if(s.normalize)s=s.normalize('NFD');}catch(e){}return s.replace(/[\u0300-\u036f]/g,'');}
 function langVoices(pre){if(!window.speechSynthesis)return [];var vs=speechSynthesis.getVoices()||[],out=[];for(var i=0;i<vs.length;i++){if(String(vs[i].lang).toLowerCase().indexOf(pre)===0)out.push(vs[i]);}return out;}
 function enVoices(){return langVoices('en');}
@@ -874,7 +874,8 @@ var story=null,sIdx=0;
    makes sure Next always unlocks even if the device never reports that speech ended. */
 var stTimers=[];
 function stClear(){for(var i=0;i<stTimers.length;i++)clearTimeout(stTimers[i]);stTimers=[];}
-function stLock(on){var b=$('btnNext');b.disabled=on;b.className=on?'big wait':'big';$('nextNote').textContent=on?(V.on?T('Listen to the whole line to unlock Next.','Escucha toda la l\u00EDnea para desbloquear Siguiente.'):T('Read the whole line to unlock Next.','Lee toda la l\u00EDnea para desbloquear Siguiente.')):'';}
+/* V.skip (code 'skipper' in Settings): story Next is never locked, so lines can be skipped before they are read. */
+function stLock(on){if(V.skip)on=false;var b=$('btnNext');b.disabled=on;b.className=on?'big wait':'big';$('nextNote').textContent=on?(V.on?T('Listen to the whole line to unlock Next.','Escucha toda la l\u00EDnea para desbloquear Siguiente.'):T('Read the whole line to unlock Next.','Lee toda la l\u00EDnea para desbloquear Siguiente.')):'';}
 function stUnlock(tok){if(!story||tok!==story.tok)return;if(sIdx>story.max)story.max=sIdx;stLock(false);}
 function startStoryL(en,es,onDone,lastEn,lastEs){startStory(T(en,es),onDone,T(lastEn,lastEs));story.sw=[en,es,lastEn,lastEs];}
 function startStory(steps,onDone,last){stClear();story={steps:steps,done:onDone,last:last,max:-1,tok:0};sIdx=0;show('scrStory');var c=setupCanvas($('storyCv'),400,300,0.42);startLoop(function(dt,t){drawScene(c,story.steps[sIdx].sc,t);});renderStep();}
@@ -1513,11 +1514,11 @@ function labRange(){var v=parseInt($('lbRange').value,10),mk=[280,420,800];for(v
 /* ---- Activity B: Albedo Painter ---- */
 var MAT={snow:{n:'Fresh snow',a:0.85,r:'0.8 to 0.9',col:'#F7FBFF',ne:'Nieve fresca',re:'0.8 a 0.9'},ice:{n:'Sea ice',a:0.6,r:'0.5 to 0.7',col:'#CFE8F5',ne:'Hielo marino',re:'0.5 a 0.7'},desert:{n:'Desert sand',a:0.35,r:'0.3 to 0.4',col:'#E6C88A',ne:'Arena del desierto',re:'0.3 a 0.4'},grass:{n:'Grass',a:0.25,r:'about 0.25',col:'#6DBB4F',ne:'Pasto',re:'unos 0.25'},forest:{n:'Forest',a:0.12,r:'0.1 to 0.15',col:'#2E6B3A',ne:'Bosque',re:'0.1 a 0.15'},ocean:{n:'Open ocean',a:0.06,r:'about 0.06',col:'#1D4E8C',ne:'Oc\u00E9ano abierto',re:'unos 0.06'},city:{n:'City asphalt',a:0.07,r:'0.05 to 0.1',col:'#3C4048',ne:'Asfalto de ciudad',re:'0.05 a 0.1'}};
 var MATK=['snow','ice','desert','grass','forest','ocean','city'];
-var GC=7,GR=6,CS=48,AGX=4,AGY=6;
+var AGC=7,AGR=6,CS=48,AGX=4,AGY=6;
 var AB={c:null,g:[],sel:'snow',ph:[],sp:0,fl:[],temp:0.5,fb:null,down:false,ms:null,shown:'',tk:0};
 function abAlb(){var s=0;for(var i=0;i<AB.g.length;i++)s+=MAT[AB.g[i]].a;return s/AB.g.length;}
 function abCount(k){var n=0;for(var i=0;i<AB.g.length;i++)if(AB.g[i]===k)n++;return n;}
-function abPreset(name){var r,cI,g=[];for(r=0;r<GR;r++){for(cI=0;cI<GC;cI++){var k;
+function abPreset(name){var r,cI,g=[];for(r=0;r<AGR;r++){for(cI=0;cI<AGC;cI++){var k;
  if(name==='arctic'){k=r<4?'ice':'ocean';if(r===0&&cI<2)k='snow';}
  else{k=cI<2?'ocean':(r===0?'snow':(cI<4?(r<3?'forest':'grass'):(cI<6?'desert':(r>3?'city':'grass'))));}
  g.push(k);}}AB.g=g;}
@@ -1529,9 +1530,9 @@ function tile(c,k,x,y,s,t,i){var m=MAT[k],j;c.fillStyle=m.col;c.fillRect(x,y,s,s
  else if(k==='desert'){c.strokeStyle='#C9A562';c.lineWidth=1.3;for(j=0;j<3;j++){c.beginPath();c.moveTo(x+4,y+14+j*13);c.quadraticCurveTo(x+s/2,y+6+j*13,x+s-4,y+14+j*13);c.stroke();}}
  else if(k==='grass'){c.strokeStyle='#4E9A3A';c.lineWidth=1.3;for(j=0;j<6;j++){var gx=x+6+rnd(i*5+j)*(s-12),gy=y+10+rnd(i*5+j+2)*(s-16);c.beginPath();c.moveTo(gx,gy+6);c.lineTo(gx-2,gy);c.moveTo(gx,gy+6);c.lineTo(gx+2,gy);c.stroke();}}
  else if(k==='city'){c.strokeStyle='#E8C547';c.lineWidth=2;c.setLineDash([5,5]);c.beginPath();c.moveTo(x,y+s/2);c.lineTo(x+s,y+s/2);c.stroke();c.setLineDash([]);}}
-function abCell(x,y){var cI=Math.floor((x-AGX)/CS),r=Math.floor((y-AGY)/CS);if(cI<0||cI>=GC||r<0||r>=GR)return -1;return r*GC+cI;}
+function abCell(x,y){var cI=Math.floor((x-AGX)/CS),r=Math.floor((y-AGY)/CS);if(cI<0||cI>=AGC||r<0||r>=AGR)return -1;return r*AGC+cI;}
 function abLoop(dt,t){var i,p,c=AB.c;
- AB.sp-=dt;if(AB.sp<=0){AB.sp=0.06;AB.ph.push({x:AGX+4+Math.random()*(GC*CS-8),y:-6,ty:AGY+6+Math.random()*(GR*CS-12),up:false});}
+ AB.sp-=dt;if(AB.sp<=0){AB.sp=0.06;AB.ph.push({x:AGX+4+Math.random()*(AGC*CS-8),y:-6,ty:AGY+6+Math.random()*(AGR*CS-12),up:false});}
  for(i=0;i<AB.ph.length;i++){p=AB.ph[i];if(!p.up){p.y+=260*dt;if(p.y>=p.ty){var ci=abCell(p.x,p.ty);if(ci>=0&&Math.random()<MAT[AB.g[ci]].a){p.up=true;}else{AB.fl.push({x:p.x,y:p.ty,a:1});AB.ph.splice(i,1);i--;}}}else{p.y-=260*dt;if(p.y<-12){AB.ph.splice(i,1);i--;}}}
  for(i=0;i<AB.fl.length;i++){AB.fl[i].a-=dt*2.5;if(AB.fl[i].a<=0){AB.fl.splice(i,1);i--;}}
  if(AB.fb&&AB.fb.on){AB.fb.tm-=dt;if(AB.fb.tm<=0){var idx=abPickMelt();if(idx<0){AB.fb.on=false;AB.fb.done=true;$('abMsg').style.color='#6FE3A4';$('abMsg').textContent=T('All the sea ice melted! Look how much warmer it got. Tap Check.','\u00A1Todo el hielo marino se derriti\u00F3! Mira cu\u00E1nto se calent\u00F3. Toca Revisar.');}
@@ -1540,13 +1541,13 @@ function abLoop(dt,t){var i,p,c=AB.c;
  drawAB(c,t);
  var al=abAlb(),key=Math.round(al*100)+'|'+abCount('ice')+LANG;if(key!==AB.shown){AB.shown=key;$('abAlb').textContent=al.toFixed(2)+T(' (reflects ',' (refleja ')+Math.round(al*100)+'%)';$('abAbs').textContent=Math.round((1-al)*100)+'%';$('abIce').textContent=abCount('ice');}}
 function drawAB(c,t){var i,p;c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);
- for(i=0;i<AB.g.length;i++){tile(c,AB.g[i],AGX+(i%GC)*CS,AGY+Math.floor(i/GC)*CS,CS,t,i);}
- c.strokeStyle='rgba(14,27,44,0.35)';c.lineWidth=1;for(i=0;i<=GC;i++){c.beginPath();c.moveTo(AGX+i*CS,AGY);c.lineTo(AGX+i*CS,AGY+GR*CS);c.stroke();}for(i=0;i<=GR;i++){c.beginPath();c.moveTo(AGX,AGY+i*CS);c.lineTo(AGX+GC*CS,AGY+i*CS);c.stroke();}
+ for(i=0;i<AB.g.length;i++){tile(c,AB.g[i],AGX+(i%AGC)*CS,AGY+Math.floor(i/AGC)*CS,CS,t,i);}
+ c.strokeStyle='rgba(14,27,44,0.35)';c.lineWidth=1;for(i=0;i<=AGC;i++){c.beginPath();c.moveTo(AGX+i*CS,AGY);c.lineTo(AGX+i*CS,AGY+AGR*CS);c.stroke();}for(i=0;i<=AGR;i++){c.beginPath();c.moveTo(AGX,AGY+i*CS);c.lineTo(AGX+AGC*CS,AGY+i*CS);c.stroke();}
  for(i=0;i<AB.fl.length;i++){c.fillStyle='rgba(255,140,40,'+(0.7*AB.fl[i].a).toFixed(2)+')';circ(c,AB.fl[i].x,AB.fl[i].y,3+5*(1-AB.fl[i].a));}
  for(i=0;i<AB.ph.length;i++){p=AB.ph[i];c.strokeStyle=p.up?'#FFFFFF':'#FFD45A';c.lineWidth=2;c.lineCap='round';c.beginPath();c.moveTo(p.x,p.y+(p.up?9:-9));c.lineTo(p.x,p.y);c.stroke();c.fillStyle=p.up?'#FFFFFF':'#FFF2B0';circ(c,p.x,p.y,2);}
  c.fillStyle='#0A1522';c.fillRect(346,0,54,300);txt(c,T('Temp','Temp.'),373,16,'800 10px '+FONT,'#FFFFFF','center');thermo(c,373,40,180,AB.temp,true);}
-function abPickMelt(){var cand=[],any=[],i;for(i=0;i<AB.g.length;i++){if(AB.g[i]!=='ice')continue;any.push(i);var r=Math.floor(i/GC),cI=i%GC;
- if((r>0&&AB.g[i-GC]==='ocean')||(r<GR-1&&AB.g[i+GC]==='ocean')||(cI>0&&AB.g[i-1]==='ocean')||(cI<GC-1&&AB.g[i+1]==='ocean'))cand.push(i);}
+function abPickMelt(){var cand=[],any=[],i;for(i=0;i<AB.g.length;i++){if(AB.g[i]!=='ice')continue;any.push(i);var r=Math.floor(i/AGC),cI=i%AGC;
+ if((r>0&&AB.g[i-AGC]==='ocean')||(r<AGR-1&&AB.g[i+AGC]==='ocean')||(cI>0&&AB.g[i-1]==='ocean')||(cI<AGC-1&&AB.g[i+1]==='ocean'))cand.push(i);}
  if(!cand.length)cand=any;if(!cand.length)return -1;return cand[Math.floor(Math.random()*cand.length)];}
 function abPaint(e){if(AB.fb&&AB.fb.on)return;var p=lpos($('abCv'),e,400),ci=abCell(p.x,p.y);if(ci>=0&&AB.g[ci]!==AB.sel){AB.g[ci]=AB.sel;tone(500+MAT[AB.sel].a*500,0.04,'triangle',0.05);}}
 function abStart(e){e.preventDefault();ac();AB.down=true;abPaint(e);}
@@ -3548,9 +3549,11 @@ function buildVoiceRows(){var box=$('voiceRows'),es=ES(),vs=es?langVoices('es'):
   line.appendChild(sel);line.appendChild(tb);row.appendChild(line);box.appendChild(row);})(keys[k]);}}
 function openSettings(){sfx.click();$('btnSound').textContent=sndTx();langBtns();buildVoiceRows();$('codeMsg').textContent='';$('inCode').value='';$('setCard').style.display='block';}
 $('btnGear').onclick=openSettings;
-/* teacher code: reopens the camp mini game right away (clears the 10-minute cooldown) */
+/* teacher codes: 'yourdadacademy' reopens the camp mini game right away (clears the 10-minute cooldown);
+   'skipper' turns story skipping on or off (Next works right away, before the line is read) */
 $('btnCode').onclick=function(){var v=String($('inCode').value||'').replace(/\s+/g,'').toLowerCase();$('inCode').value='';
  if(v==='yourdadacademy'){S.campNext=0;save();campBtn();$('campNote').textContent='';sfx.good();$('codeMsg').textContent=T('Code accepted. The camp mini game is open.','C\u00F3digo aceptado. El minijuego del campamento est\u00E1 abierto.');}
+ else if(v==='skipper'){V.skip=!V.skip;saveSet();sfx.good();if(V.skip&&story)stLock(false);$('codeMsg').textContent=V.skip?T('Skip is on. In the stories, you can tap Next right away.','Saltar est\u00E1 activado. En las historias puedes tocar Siguiente enseguida.'):T('Skip is off. Next unlocks after each line is read again.','Saltar est\u00E1 desactivado. Siguiente se desbloquea otra vez despu\u00E9s de leer cada l\u00EDnea.');}
  else{sfx.bad();$('codeMsg').textContent=T('That code did not work.','Ese c\u00F3digo no funcion\u00F3.');}};
 $('btnSetDone').onclick=function(){sfx.click();hush();$('setCard').style.display='none';};
 $('btnVoiceReset').onclick=function(){if(ES()){VSET_ES.frost=VDEF_ES.frost;VSET_ES.sam=VDEF_ES.sam;VSET_ES.rosa=VDEF_ES.rosa;}else{VSET.frost=VDEF.frost;VSET.sam=VDEF.sam;VSET.rosa=VDEF.rosa;}saveSet();buildVoiceRows();sfx.click();};
