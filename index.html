@@ -281,16 +281,16 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
       <p id="misMsg" class="msg"></p>
     </div>
     <div class="cvwrap"><canvas id="orbCv"></canvas></div>
-    <p class="note ctr">Drag Earth around its orbit. Not to scale!</p>
+    <p id="seNote" class="note ctr">Drag Earth around its orbit. Not to scale!</p>
     <div class="row2"><span id="sDate"></span><button id="btnPlay" class="sbtn">Play a year</button></div>
     <div class="cvwrap"><canvas id="sideCv"></canvas></div>
     <div class="stats">
-      <div>Northern Hemisphere: <b id="sNH"></b></div>
-      <div>Southern Hemisphere: <b id="sSH"></b></div>
-      <div>Direct rays hit: <b id="sRays"></b></div>
+      <div><span id="sNHl">Northern Hemisphere:</span> <b id="sNH"></b></div>
+      <div><span id="sSHl">Southern Hemisphere:</span> <b id="sSH"></b></div>
+      <div><span id="sRaysl">Direct rays hit:</span> <b id="sRays"></b></div>
       <div>Orlando, FL: <b id="sOrl"></b></div>
       <div>Brisbane, Australia: <b id="sBri"></b></div>
-      <div>South Pole: <b id="sPole"></b></div>
+      <div><span id="sPolel">South Pole:</span> <b id="sPole"></b></div>
     </div>
     <div class="cvwrap"><canvas id="beamCv"></canvas></div>
   </div>
@@ -303,14 +303,14 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
       <p id="lbMsg" class="msg"></p>
     </div>
     <div class="cvwrap"><canvas id="labCv"></canvas></div>
-    <div class="row2"><span>CO<sub>2</sub> level: <b id="lbCO2">280 ppm</b></span></div>
+    <div class="row2"><span><span id="lbCO2l">CO<sub>2</sub> level:</span> <b id="lbCO2">280 ppm</b></span></div>
     <input id="lbRange" type="range" min="280" max="800" step="1" value="280">
-    <div class="ticks"><span class="l" style="left:0%">280<br>1700s</span><span style="left:26.9%">420<br>today</span><span class="r" style="left:100%">800<br>future</span></div>
+    <div class="ticks"><span class="l" style="left:0%">280<br><span id="lbT1">1700s</span></span><span style="left:26.9%">420<br><span id="lbT2">today</span></span><span class="r" style="left:100%">800<br><span id="lbT3">future</span></span></div>
     <div class="stats">
-      <div>Infrared escaped to space: <b id="lbEsc">0</b></div>
-      <div>Infrared sent back down: <b id="lbDown">0</b> <span id="lbPct"></span></div>
+      <div><span id="lbEscl">Infrared escaped to space:</span> <b id="lbEsc">0</b></div>
+      <div><span id="lbDownl">Infrared sent back down:</span> <b id="lbDown">0</b> <span id="lbPct"></span></div>
     </div>
-    <p class="note">Molecules: CO<sub>2</sub> (black and red), water vapor H<sub>2</sub>O (red and white), N<sub>2</sub> (blue pairs) and O<sub>2</sub> (pink pairs). Infrared passes right through N<sub>2</sub> and O<sub>2</sub>. The thermometer is a simplified model, not a real forecast.</p>
+    <p id="lbNote" class="note">Molecules: CO<sub>2</sub> (black and red), water vapor H<sub>2</sub>O (red and white), N<sub>2</sub> (blue pairs) and O<sub>2</sub> (pink pairs). Infrared passes right through N<sub>2</sub> and O<sub>2</sub>. The thermometer is a simplified model, not a real forecast.</p>
   </div>
 
   <div id="scrAlbedo" class="scr">
@@ -325,11 +325,11 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     <div id="abPal" class="tools"></div>
     <button id="abFill" class="sbtn">Fill the map with this surface</button>
     <div class="stats">
-      <div>Overall albedo: <b id="abAlb"></b></div>
-      <div>Sunlight absorbed: <b id="abAbs"></b></div>
-      <div>Sea ice squares: <b id="abIce"></b></div>
+      <div><span id="abAlbl">Overall albedo:</span> <b id="abAlb"></b></div>
+      <div><span id="abAbsl">Sunlight absorbed:</span> <b id="abAbs"></b></div>
+      <div><span id="abIcel">Sea ice squares:</span> <b id="abIce"></b></div>
     </div>
-    <p class="note">Yellow dots are sunlight coming in. White dots are reflected back to space. Orange flashes are sunlight absorbed. Albedo values are approximate.</p>
+    <p id="abNote" class="note">Yellow dots are sunlight coming in. White dots are reflected back to space. Orange flashes are sunlight absorbed. Albedo values are approximate.</p>
   </div>
 
   <div id="scrOrbit" class="scr">
@@ -594,6 +594,17 @@ var V={on:true};
 var LANG='en',ENONLY=false,CURCH='';
 function ES(){return LANG==='es'&&!ENONLY;}
 function T(a,b){return ES()?b:a;}
+/* Spanish copies of Chapters 2-8 keep the English structure; these helpers copy it and swap only the words.
+   trSteps: story lines. trMis: adds .es {tx,hint,yes} to each mission; mT(x,k) reads the right one.
+   trQuiz: copies a quiz list and swaps q, o, why, label names, and drawing color names. */
+var ESDONE={ch1:true,ch2:true,ch3:true};
+function trSteps(en,es){var o=[],i;for(i=0;i<en.length;i++)o.push({sc:en[i].sc,who:en[i].who,tx:es[i]});return o;}
+function trMis(L,es){for(var i=0;i<L.length;i++)L[i].es={tx:es[i][0],hint:es[i][1],yes:es[i][2]};return L;}
+function mT(x,k){return (ES()&&x.es&&x.es[k]!==undefined)?x.es[k]:x[k];}
+function cpo(a){var n={},k;for(k in a){if(a.hasOwnProperty(k))n[k]=a[k];}return n;}
+function trQuiz(en,es){var o=[],i,j,q,e,n,L;for(i=0;i<en.length;i++){q=en[i];e=es[i];n=cpo(q);n.q=e.q;if(e.o)n.o=e.o;if(e.why)n.why=e.why;
+ if(e.labels){n.labels=[];for(j=0;j<q.labels.length;j++){L=cpo(q.labels[j]);L.s=e.labels[j];n.labels.push(L);}}
+ if(e.cols){n.cols=[];for(j=0;j<q.cols.length;j++)n.cols.push([e.cols[j],q.cols[j][1]]);}o.push(n);}return o;}
 var cur='';
 var DPR=Math.min(window.devicePixelRatio||1,3);
 function $(id){return document.getElementById(id);}
@@ -863,6 +874,7 @@ var stTimers=[];
 function stClear(){for(var i=0;i<stTimers.length;i++)clearTimeout(stTimers[i]);stTimers=[];}
 function stLock(on){var b=$('btnNext');b.disabled=on;b.className=on?'big wait':'big';$('nextNote').textContent=on?(V.on?T('Listen to the whole line to unlock Next.','Escucha toda la l\u00EDnea para desbloquear Siguiente.'):T('Read the whole line to unlock Next.','Lee toda la l\u00EDnea para desbloquear Siguiente.')):'';}
 function stUnlock(tok){if(!story||tok!==story.tok)return;if(sIdx>story.max)story.max=sIdx;stLock(false);}
+function startStoryL(en,es,onDone,lastEn,lastEs){startStory(T(en,es),onDone,T(lastEn,lastEs));story.sw=[en,es,lastEn,lastEs];}
 function startStory(steps,onDone,last){stClear();story={steps:steps,done:onDone,last:last,max:-1,tok:0};sIdx=0;show('scrStory');var c=setupCanvas($('storyCv'),400,300,0.42);startLoop(function(dt,t){drawScene(c,story.steps[sIdx].sc,t);});renderStep();}
 function renderStep(){var st=story.steps[sIdx],w=WHO[st.who];$('spName').textContent=T(w.n,w.es);$('btnPrev').textContent=T('Back','Atr\u00E1s');$('btnReplay').textContent=T('Replay','Repetir');$('spName').style.color=w.col;$('spText').textContent=st.tx;$('stepCount').textContent=(sIdx+1)+' / '+story.steps.length;$('btnPrev').style.visibility=sIdx>0?'visible':'hidden';$('btnNext').textContent=(sIdx===story.steps.length-1)?(story.last||'Start'):T('Next','Siguiente');
  stClear();story.tok++;var tok=story.tok,words=st.tx.split(/\s+/).length,heard=sIdx<=story.max;stLock(!heard);
@@ -1008,7 +1020,8 @@ var CH1_QUIZ_ES=[
 var Q={ch:'',list:[],i:0,items:[]};
 function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined&&text!==null)e.textContent=text;return e;}
 function chTitle(id){for(var i=0;i<CH.length;i++){if(CH[i].id===id)return ES()?CH_ES[i][0]:CH[i].title;}return id;}
-function startQuiz(ch,list){Q.ch=ch;Q.list=list;Q.i=0;Q.items=[];show('scrQuiz');renderQ();}
+function startQuiz(ch,list){Q.ch=ch;Q.list=list;Q.i=0;Q.items=[];Q.sw=null;show('scrQuiz');renderQ();}
+function startQuizL(ch,en,es){startQuiz(ch,T(en,es));Q.sw=[en,es];}
 function renderQ(){var b=$('quizBody');b.innerHTML='';$('scrQuiz').scrollTop=0;var q=Q.list[Q.i];
  b.appendChild(el('div','qhead',T(chTitle(Q.ch)+' quiz: question '+(Q.i+1)+' of '+Q.list.length,'Cuestionario: pregunta '+(Q.i+1)+' de '+Q.list.length)));
  b.appendChild(el('p','qtext',q.q));
@@ -1060,6 +1073,8 @@ function finishQuiz(){var sc=0,tot=0;for(var i=0;i<Q.items.length;i++){var it=Q.
 /* ================= CHAPTER 2: SUNLIGHT AND SEASONS ================= */
 var TILT=23.44,RAD=Math.PI/180,DEG='\u00B0';
 var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var MONTHS_ES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function MON(i){return T(MONTHS[i],MONTHS_ES[i]);}
 var MDAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
 var TH_PERI=13/365.25*2*Math.PI;
 function norm(a){a=a%(2*Math.PI);if(a<0)a+=2*Math.PI;return a;}
@@ -1067,12 +1082,12 @@ function angDiff(a,b){var d=Math.abs(norm(a)-norm(b));return Math.min(d,2*Math.P
 function decl(th){return -TILT*Math.cos(th);}
 function dayOf(th){return (354+norm(th)/(2*Math.PI)*365.25)%365;}
 function thOfDay(d){return norm((d-354)/365.25*2*Math.PI);}
-function dateStr(th){var d=Math.floor(dayOf(th)),m=0;while(m<11&&d>=MDAYS[m]){d-=MDAYS[m];m++;}return MONTHS[m]+' '+(d+1);}
-function seasons(th){var q=Math.floor(norm(th)/(Math.PI/2))%4;return [['Winter','Summer'],['Spring','Fall'],['Summer','Winter'],['Fall','Spring']][q];}
+function dateStr(th){var d=Math.floor(dayOf(th)),m=0;while(m<11&&d>=MDAYS[m]){d-=MDAYS[m];m++;}return T(MONTHS[m]+' '+(d+1),(d+1)+' '+MONTHS_ES[m]);}
+function seasons(th){var q=Math.floor(norm(th)/(Math.PI/2))%4;return T([['Winter','Summer'],['Spring','Fall'],['Summer','Winter'],['Fall','Spring']],[['Invierno','Verano'],['Primavera','Oto\u00F1o'],['Verano','Invierno'],['Oto\u00F1o','Primavera']])[q];}
 function daylight(lat,dl){var x=-Math.tan(lat*RAD)*Math.tan(dl*RAD);if(x>=1)return 0;if(x<=-1)return 24;return 2*Math.acos(x)/RAD/15;}
 function hm(h){var H=Math.floor(h),M=Math.round((h-H)*60);if(M===60){H++;M=0;}return H+' h '+M+' m';}
 function noonH(lat,dl){return 90-Math.abs(lat-dl);}
-function latStr(v){if(Math.abs(v)<0.3)return '0'+DEG+' (the equator)';var s=Math.abs(v).toFixed(1)+DEG+(v>0?' N':' S');if(v>23.2)s+=' (Tropic of Cancer)';if(v<-23.2)s+=' (Tropic of Capricorn)';return s;}
+function latStr(v){if(Math.abs(v)<0.3)return '0'+DEG+T(' (the equator)',' (el ecuador)');var s=Math.abs(v).toFixed(1)+DEG+(v>0?' N':' S');if(v>23.2)s+=T(' (Tropic of Cancer)',' (Tr\u00F3pico de C\u00E1ncer)');if(v<-23.2)s+=T(' (Tropic of Capricorn)',' (Tr\u00F3pico de Capricornio)');return s;}
 
 function space(c,w,h,t){c.fillStyle='#0B1424';c.fillRect(0,0,w,h);for(var i=0;i<60;i++){var a=0.35+0.45*Math.abs(Math.sin(t*0.8+i));c.fillStyle='rgba(255,255,255,'+a.toFixed(2)+')';circ(c,rnd(i+300)*w,rnd(i+600)*h,0.6+rnd(i+900)*0.9);}}
 function sunGlow(c,x,y,r){var g=c.createRadialGradient(x,y,r*0.2,x,y,r*2.2);g.addColorStop(0,'rgba(255,214,90,0.9)');g.addColorStop(0.45,'rgba(255,170,40,0.25)');g.addColorStop(1,'rgba(255,170,40,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,r*2.2,0,6.2832);c.fill();var g2=c.createRadialGradient(x-r*0.3,y-r*0.3,r*0.1,x,y,r);g2.addColorStop(0,'#FFF6C8');g2.addColorStop(1,'#FFB21E');c.fillStyle=g2;circ(c,x,y,r);}
@@ -1092,20 +1107,20 @@ function drawOrbit(c,W,H,th,t,o){
  o=o||{};var cx=W/2,cy=H/2,R=W*0.4,ry=H*0.32,i;
  space(c,W,H,t);
  c.strokeStyle='rgba(191,230,245,0.5)';c.lineWidth=1.2;c.setLineDash([4,5]);CE(c,cx,cy,R,ry);c.stroke();c.setLineDash([]);
- var keys=[[0,'Dec 21',0,28],[Math.PI/2,'Mar 20',0,-12],[Math.PI,'Jun 21',0,-26],[3*Math.PI/2,'Sep 22',0,24]];
+ var keys=T([[0,'Dec 21',0,28],[Math.PI/2,'Mar 20',0,-12],[Math.PI,'Jun 21',0,-26],[3*Math.PI/2,'Sep 22',0,24]],[[0,'21 dic',0,28],[Math.PI/2,'20 mar',0,-12],[Math.PI,'21 jun',0,-26],[3*Math.PI/2,'22 sep',0,24]]);
  for(i=0;i<4;i++){var px=cx+R*Math.cos(keys[i][0]),py=cy-ry*Math.sin(keys[i][0]);c.fillStyle='#BFE6F5';circ(c,px,py,2.5);txt(c,keys[i][1],px+keys[i][2],py+keys[i][3],'700 11px '+FONT,'#BFE6F5','center');}
  if(o.dist){var a1=TH_PERI,a2=TH_PERI+Math.PI;var p1x=cx+R*Math.cos(a1),p1y=cy-ry*Math.sin(a1),p2x=cx+R*Math.cos(a2),p2y=cy-ry*Math.sin(a2);
   c.fillStyle='#FF7A2F';circ(c,p1x,p1y,3.5);circ(c,p2x,p2y,3.5);
-  txt(c,'closest (early Jan)',p1x-6,p1y-12,'700 10px '+FONT,'#FFB27E','right');txt(c,'farthest (early Jul)',p2x+6,p2y+20,'700 10px '+FONT,'#FFB27E');}
+  txt(c,T('closest (early Jan)','m\u00E1s cerca (inicios de ene)'),p1x-6,p1y-12,'700 10px '+FONT,'#FFB27E','right');txt(c,T('farthest (early Jul)','m\u00E1s lejos (inicios de jul)'),p2x+6,p2y+20,'700 10px '+FONT,'#FFB27E');}
  sunGlow(c,cx,cy,R*0.17);
  var ex=cx+R*Math.cos(th),ey=cy-ry*Math.sin(th);
  miniEarth(c,ex,ey,W*0.042,cx,cy);
- if(o.star){var sx=W-58,sy=40,ax=Math.sin(TILT*RAD),ay=-Math.cos(TILT*RAD);c.fillStyle='#FFFFFF';star5(c,sx+ax*16,sy+ay*16,5);c.strokeStyle='rgba(255,255,255,0.7)';c.lineWidth=1.2;c.beginPath();c.moveTo(sx-ax*10,sy-ay*10);c.lineTo(sx+ax*10,sy+ay*10);c.stroke();txt(c,'North Star',sx-16,sy+24,'600 9px '+FONT,'#FFFFFF');}
+ if(o.star){var sx=W-58,sy=40,ax=Math.sin(TILT*RAD),ay=-Math.cos(TILT*RAD);c.fillStyle='#FFFFFF';star5(c,sx+ax*16,sy+ay*16,5);c.strokeStyle='rgba(255,255,255,0.7)';c.lineWidth=1.2;c.beginPath();c.moveTo(sx-ax*10,sy-ay*10);c.lineTo(sx+ax*10,sy+ay*10);c.stroke();txt(c,T('North Star','Estrella Polar'),sx-16,sy+24,'600 9px '+FONT,'#FFFFFF');}
  return {cx:cx,cy:cy,R:R,ry:ry};
 }
 
 /* Side view of Earth at noon with sunlight from the left. dl = latitude of the direct rays */
-var LATS=[[0,'Equator','#FFFFFF',[]],[23.44,'Tropic of Cancer','#FFD45A',[5,4]],[-23.44,'Tropic of Capricorn','#FFD45A',[5,4]],[66.56,'Arctic Circle','#BFE6F5',[3,4]],[-66.56,'Antarctic Circle','#BFE6F5',[3,4]]];
+var LATS=[[0,'Equator','#FFFFFF',[],'Ecuador'],[23.44,'Tropic of Cancer','#FFD45A',[5,4],'Tr\u00F3pico de C\u00E1ncer'],[-23.44,'Tropic of Capricorn','#FFD45A',[5,4],'Tr\u00F3pico de Capricornio'],[66.56,'Arctic Circle','#BFE6F5',[3,4],'C\u00EDrculo Polar \u00C1rtico'],[-66.56,'Antarctic Circle','#BFE6F5',[3,4],'C\u00EDrculo Polar Ant\u00E1rtico']];
 function drawSide(c,cx,cy,R,dl,o){
  o=o||{};var s=Math.sin(dl*RAD),co=Math.cos(dl*RAD),ux=-s,uy=-co,vx=co,vy=-s,i,y,fs=o.fs||9;
  if(o.rays){c.strokeStyle='rgba(255,214,90,0.9)';c.fillStyle='rgba(255,214,90,0.95)';c.lineWidth=2;
@@ -1122,7 +1137,7 @@ function drawSide(c,cx,cy,R,dl,o){
  c.strokeStyle='rgba(255,255,255,0.6)';c.lineWidth=1;c.beginPath();c.arc(cx,cy,R,0,6.2832);c.stroke();
  c.strokeStyle='#FFFFFF';c.lineWidth=2;c.beginPath();c.moveTo(cx-ux*R*1.22,cy-uy*R*1.22);c.lineTo(cx+ux*R*1.22,cy+uy*R*1.22);c.stroke();
  txt(c,'N',cx+ux*R*1.3,cy+uy*R*1.3+(uy<0?0:8),'800 '+(fs+2)+'px '+FONT,'#FFFFFF','center');txt(c,'S',cx-ux*R*1.3,cy-uy*R*1.3+(uy<0?10:0),'800 '+(fs+2)+'px '+FONT,'#FFFFFF','center');
- if(o.labels){for(i=0;i<LATS.length;i++){var sp2=Math.sin(LATS[i][0]*RAD),hl2=R*Math.cos(LATS[i][0]*RAD);txt(c,LATS[i][1],cx+ux*R*sp2+vx*hl2+4,cy+uy*R*sp2+vy*hl2+3,'700 '+fs+'px '+FONT,LATS[i][2]);}}
+ if(o.labels){for(i=0;i<LATS.length;i++){var sp2=Math.sin(LATS[i][0]*RAD),hl2=R*Math.cos(LATS[i][0]*RAD);txt(c,T(LATS[i][1],LATS[i][4]),cx+ux*R*sp2+vx*hl2+4,cy+uy*R*sp2+vy*hl2+3,'700 '+fs+'px '+FONT,LATS[i][2]);}}
  if(o.star){c.fillStyle='#FFD45A';star5(c,cx-R,cy,R*0.08+3);c.strokeStyle='#0B1424';c.lineWidth=1;}
  if(o.cities){var C=[[28.5,'Orlando','#FF7A2F'],[-27.5,'Brisbane','#6FE3A4']];for(i=0;i<2;i++){var a=(C[i][0]-dl)*RAD,px=cx-R*Math.cos(a),py=cy-R*Math.sin(a);c.fillStyle=C[i][2];circ(c,px,py,4.5);c.strokeStyle='#FFFFFF';c.lineWidth=1.5;c.beginPath();c.arc(px,py,4.5,0,6.2832);c.stroke();pill(c,C[i][1],px-9,py+(C[i][0]>0?-6:14),fs+1,C[i][2],'right');}}
 }
@@ -1134,8 +1149,8 @@ function drawBeams(c,hs,names){
   c.fillStyle='rgba(255,214,90,0.5)';c.beginPath();c.moveTo(gx-L/2,gy);c.lineTo(gx+L/2,gy);c.lineTo(gx+L/2-dx*120,gy-dy*120);c.lineTo(gx-L/2-dx*120,gy-dy*120);c.closePath();c.fill();
   c.fillStyle='rgba(255,230,120,'+(0.25+0.75*sn).toFixed(2)+')';c.fillRect(gx-L/2,gy-2,L,6);
   txt(c,names[k],ox+8,15,'800 12px '+FONT,k===0?'#FF9A5C':'#6FE3A4');
-  txt(c,'Noon Sun: '+Math.round(h)+DEG+' high',ox+8,30,'600 10.5px '+FONT,'#DDEFF8');
-  txt(c,'Sunlight strength: '+Math.round(sn*100)+'%',ox+8,116,'700 10.5px '+FONT,'#FFFFFF');
+  txt(c,T('Noon Sun: '+Math.round(h)+DEG+' high','Sol al mediod\u00EDa: '+Math.round(h)+DEG+' de altura'),ox+8,30,'600 10.5px '+FONT,'#DDEFF8');
+  txt(c,T('Sunlight strength: ','Intensidad de la luz: ')+Math.round(sn*100)+'%',ox+8,116,'700 10.5px '+FONT,'#FFFFFF');
   c.restore();}
  c.fillStyle='#27425F';c.fillRect(199,0,2,120);
 }
@@ -1143,14 +1158,14 @@ function drawBeams(c,hs,names){
 /* ---- story scenes ---- */
 function sceneTilt(c,t){space(c,400,300,t);var cx=200,cy=168,R=88;
  c.strokeStyle='rgba(191,230,245,0.5)';c.setLineDash([4,5]);c.lineWidth=1;c.beginPath();c.moveTo(20,cy);c.lineTo(380,cy);c.moveTo(cx,cy-R*1.45);c.lineTo(cx,cy+R*1.3);c.stroke();c.setLineDash([]);
- txt(c,'orbit plane',372,cy-6,'600 10px '+FONT,'#BFE6F5','right');
+ txt(c,T('orbit plane','plano de la \u00F3rbita'),372,cy-6,'600 10px '+FONT,'#BFE6F5','right');
  drawSide(c,cx,cy,R,TILT,{night:false});
  var ax=Math.sin(TILT*RAD),ay=-Math.cos(TILT*RAD);
  c.strokeStyle='#FFD45A';c.lineWidth=2;c.beginPath();c.arc(cx,cy,R*1.12,-Math.PI/2-TILT*RAD,-Math.PI/2);c.stroke();
  pill(c,'23.4'+DEG,cx+12,cy-R*1.18,13,'#FFD45A','left');
  c.fillStyle='#FFFFFF';star5(c,cx-ax*R*1.62,cy+ay*R*1.62,6);
- pill(c,'North Star',cx-ax*R*1.62-10,cy+ay*R*1.62+4,10,'#FFFFFF','right');
- txt(c,'The axis always points toward the North Star',200,292,'700 12px '+FONT,'#BFE6F5','center');}
+ pill(c,T('North Star','Estrella Polar'),cx-ax*R*1.62-10,cy+ay*R*1.62+4,10,'#FFFFFF','right');
+ txt(c,T('The axis always points toward the North Star','El eje siempre apunta hacia la Estrella Polar'),200,292,'700 12px '+FONT,'#BFE6F5','center');}
 function flashlight(c,x,y,ang){c.save();c.translate(x,y);c.rotate(ang);c.fillStyle='#3E4A5A';rr(c,-9,-46,18,40,5);c.fill();c.fillStyle='#FF7A2F';rr(c,-13,-8,26,12,4);c.fill();c.fillStyle='#FFF2B0';c.fillRect(-11,3,22,3);c.restore();}
 function sceneBeam(c,t){c.fillStyle='#16283E';c.fillRect(0,0,400,300);c.fillStyle='#22384F';c.fillRect(0,214,400,86);
  c.strokeStyle='rgba(191,230,245,0.25)';c.lineWidth=1;for(var x=0;x<=400;x+=20){c.beginPath();c.moveTo(x,214);c.lineTo(x,300);c.stroke();}for(var y=214;y<=300;y+=14){c.beginPath();c.moveTo(0,y);c.lineTo(400,y);c.stroke();}
@@ -1161,27 +1176,27 @@ function sceneBeam(c,t){c.fillStyle='#16283E';c.fillRect(0,0,400,300);c.fillStyl
  c.fillStyle='rgba(255,230,120,'+(0.22*p).toFixed(2)+')';c.beginPath();c.moveTo(214,82);c.lineTo(228,70);c.lineTo(370,232);c.lineTo(250,232);c.closePath();c.fill();
  c.fillStyle='rgba(255,236,140,'+(0.4*p).toFixed(2)+')';CE(c,310,232,60,9);c.fill();
  flashlight(c,220,76,-0.72);
- txt(c,'Direct',100,26,'800 14px '+FONT,'#FFD45A','center');txt(c,'Slanted',300,26,'800 14px '+FONT,'#FFD45A','center');
- txt(c,'small, bright spot',100,264,'700 12px '+FONT,'#FFFFFF','center');txt(c,'= more heating',100,281,'600 11px '+FONT,'#BFE6F5','center');
- txt(c,'same light, spread out',310,264,'700 12px '+FONT,'#FFFFFF','center');txt(c,'= less heating',310,281,'600 11px '+FONT,'#BFE6F5','center');}
+ txt(c,T('Direct','Directa'),100,26,'800 14px '+FONT,'#FFD45A','center');txt(c,T('Slanted','Inclinada'),300,26,'800 14px '+FONT,'#FFD45A','center');
+ txt(c,T('small, bright spot','mancha peque\u00F1a y brillante'),100,264,'700 '+T('12','10.5')+'px '+FONT,'#FFFFFF','center');txt(c,T('= more heating','= calienta m\u00E1s'),100,281,'600 11px '+FONT,'#BFE6F5','center');
+ txt(c,T('same light, spread out','la misma luz, m\u00E1s extendida'),310,264,'700 '+T('12','10.5')+'px '+FONT,'#FFFFFF','center');txt(c,T('= less heating','= calienta menos'),310,281,'600 11px '+FONT,'#BFE6F5','center');}
 function sceneSolstice(c,t){space(c,400,300,t);sunGlow(c,-30,150,46);drawSide(c,216,152,96,TILT,{rays:true,rayX:22,labels:true,star:true});
- txt(c,'June solstice (about June 21)',10,20,'800 13px '+FONT,'#FFFFFF');pill(c,'Most direct rays',112,140,10,'#FFD45A','right');}
+ txt(c,T('June solstice (about June 21)','Solsticio de junio (alrededor del 21 de junio)'),10,20,'800 13px '+FONT,'#FFFFFF');pill(c,T('Most direct rays','Rayos m\u00E1s directos'),112,140,10,'#FFD45A','right');}
 function sceneEquinox(c,t){space(c,400,300,t);sunGlow(c,-30,150,46);drawSide(c,216,152,96,0,{rays:true,rayX:22,labels:true,star:true});
- txt(c,'Equinox (about Mar 20 and Sep 22)',10,20,'800 13px '+FONT,'#FFFFFF');pill(c,'Direct rays on the equator',112,140,10,'#FFD45A','right');}
+ txt(c,T('Equinox (about Mar 20 and Sep 22)','Equinoccio (alrededor del 20 de marzo y del 22 de sep)'),10,20,'800 '+T('13','12')+'px '+FONT,'#FFFFFF');pill(c,T('Direct rays on the equator','Rayos directos en el ecuador'),112,140,10,'#FFD45A','right');}
 function sceneHemis(c,t){space(c,400,300,t);
  drawSide(c,108,150,64,TILT,{rays:true,rayX:8,star:true});drawSide(c,300,150,64,-TILT,{rays:true,rayX:205,star:true});
  c.fillStyle='#27425F';c.fillRect(199,30,2,240);
- txt(c,'June',108,30,'800 15px '+FONT,'#FFFFFF','center');txt(c,'December',300,30,'800 15px '+FONT,'#FFFFFF','center');
- txt(c,'North: summer',108,252,'700 11.5px '+FONT,'#FF9A5C','center');txt(c,'South: winter',108,268,'700 11.5px '+FONT,'#8FC9E3','center');
- txt(c,'North: winter',300,252,'700 11.5px '+FONT,'#8FC9E3','center');txt(c,'South: summer',300,268,'700 11.5px '+FONT,'#FF9A5C','center');}
+ txt(c,T('June','Junio'),108,30,'800 15px '+FONT,'#FFFFFF','center');txt(c,T('December','Diciembre'),300,30,'800 15px '+FONT,'#FFFFFF','center');
+ txt(c,T('North: summer','Norte: verano'),108,252,'700 11.5px '+FONT,'#FF9A5C','center');txt(c,T('South: winter','Sur: invierno'),108,268,'700 11.5px '+FONT,'#8FC9E3','center');
+ txt(c,T('North: winter','Norte: invierno'),300,252,'700 11.5px '+FONT,'#8FC9E3','center');txt(c,T('South: summer','Sur: verano'),300,268,'700 11.5px '+FONT,'#FF9A5C','center');}
 function sceneScale(c,t){space(c,400,300,t);sunGlow(c,-170,150,260);
  var ex=292,ey=160;c.fillStyle='#5FA8E8';circ(c,ex,ey,2.4);c.strokeStyle='#FFFFFF';c.lineWidth=1;c.beginPath();c.arc(ex,ey,7,0,6.2832);c.stroke();
- pill(c,'Earth (tiny!)',ex+12,ey+4,11,'#5FA8E8','left');pill(c,'The Sun',112,60,13,'#FFD45A','left');
- txt(c,'Sizes to scale: the Sun is about',250,226,'700 12px '+FONT,'#FFFFFF','center');txt(c,'109 times wider than Earth.',250,242,'700 12px '+FONT,'#FFFFFF','center');
- txt(c,'Distance NOT to scale: the real Earth would be',250,266,'600 11px '+FONT,'#BFE6F5','center');txt(c,'about 108 Sun-widths away, far off this screen!',250,281,'600 11px '+FONT,'#BFE6F5','center');}
+ pill(c,T('Earth (tiny!)','La Tierra (\u00A1diminuta!)'),ex+12,ey+4,11,'#5FA8E8','left');pill(c,T('The Sun','El Sol'),112,60,13,'#FFD45A','left');
+ txt(c,T('Sizes to scale: the Sun is about','Tama\u00F1os a escala: el Sol es unas'),250,226,'700 12px '+FONT,'#FFFFFF','center');txt(c,T('109 times wider than Earth.','109 veces m\u00E1s ancho que la Tierra.'),250,242,'700 12px '+FONT,'#FFFFFF','center');
+ txt(c,T('Distance NOT to scale: the real Earth would be','Distancia NO a escala: la Tierra real estar\u00EDa'),250,266,'600 11px '+FONT,'#BFE6F5','center');txt(c,T('about 108 Sun-widths away, far off this screen!','a unos 108 anchos del Sol, \u00A1muy fuera de la pantalla!'),250,281,'600 11px '+FONT,'#BFE6F5','center');}
 function drawScene2(c,name,t){
  if(name==='orbit')drawOrbit(c,400,300,norm(t*0.55),t,{star:true});
- else if(name==='distance'){drawOrbit(c,400,300,norm(t*0.55),t,{dist:true});txt(c,'Closest: about 147 million km',8,16,'700 10.5px '+FONT,'#FFFFFF');txt(c,'Farthest: about 152 million km',8,30,'700 10.5px '+FONT,'#FFFFFF');txt(c,'Only about 3% different!',392,16,'700 10.5px '+FONT,'#FFD45A','right');}
+ else if(name==='distance'){drawOrbit(c,400,300,norm(t*0.55),t,{dist:true});txt(c,T('Closest: about 147 million km','M\u00E1s cerca: unos 147 millones de km'),8,16,'700 10.5px '+FONT,'#FFFFFF');txt(c,T('Farthest: about 152 million km','M\u00E1s lejos: unos 152 millones de km'),8,30,'700 10.5px '+FONT,'#FFFFFF');txt(c,T('Only about 3% different!','\u00A1Solo un 3% de diferencia!'),392,16,'700 10.5px '+FONT,'#FFD45A','right');}
  else if(name==='tilt')sceneTilt(c,t);else if(name==='beam')sceneBeam(c,t);else if(name==='solstice')sceneSolstice(c,t);
  else if(name==='equinox')sceneEquinox(c,t);else if(name==='hemis')sceneHemis(c,t);else if(name==='scale')sceneScale(c,t);
  else drawScene3(c,name,t);}
@@ -1200,6 +1215,20 @@ var CH2_STEPS=[
  {sc:'orbit',who:'frost',tx:"Now it's your turn. Drag Earth around its orbit, watch how the sunlight changes, and complete five missions."}
 ];
 
+var CH2_STEPS_ES=trSteps(CH2_STEPS,[
+ "\u00A1Buen trabajo con esos n\u00FAcleos de hielo! Para entender el clima de la Tierra, empezamos con el Sol. La Tierra da una vuelta alrededor del Sol cada a\u00F1o, y ese viaje nos da las estaciones.",
+ "Entonces, \u00BFes verano cuando la Tierra se acerca m\u00E1s al Sol?",
+ "\u00A1Mucha gente piensa eso, pero no! La \u00F3rbita de la Tierra es casi un c\u00EDrculo perfecto. De hecho, estamos m\u00E1s cerca del Sol a principios de enero, durante el invierno en Florida, y m\u00E1s lejos a principios de julio.",
+ "La verdadera raz\u00F3n es la inclinaci\u00F3n. El eje de la Tierra est\u00E1 inclinado unos 23.4 grados. Mientras la Tierra gira alrededor del Sol, el eje sigue apuntando en la misma direcci\u00F3n en el espacio, hacia la Estrella Polar.",
+ "La inclinaci\u00F3n cambia qu\u00E9 tan directa es la luz solar. La luz directa llega al suelo de frente y concentra su energ\u00EDa en un \u00E1rea peque\u00F1a. La luz inclinada reparte la misma energ\u00EDa en un \u00E1rea m\u00E1s grande, as\u00ED que calienta menos el suelo.",
+ "\u00A1Como una linterna! Si la apuntas directo hacia abajo, hace una mancha peque\u00F1a y brillante. Si la inclinas, hace un \u00F3valo m\u00E1s grande y m\u00E1s tenue.",
+ "Exacto. En junio, el hemisferio norte se inclina hacia el Sol. Los rayos m\u00E1s directos caen en el Tr\u00F3pico de C\u00E1ncer, a 23.4 grados al norte. Los d\u00EDas son largos y la luz es directa, as\u00ED que es verano en el norte.",
+ "Al mismo tiempo, el hemisferio sur se inclina hacia el otro lado, as\u00ED que all\u00E1 es invierno. \u00A1Aqu\u00ED en la Ant\u00E1rtida, el Sol no sale durante meses! En diciembre todo se invierte: verano en el sur e invierno en el norte.",
+ "En marzo y septiembre, ning\u00FAn hemisferio se inclina hacia el Sol. Los rayos directos caen en el ecuador, y el d\u00EDa y la noche duran unas 12 horas cada uno en casi todas partes. Esos son los equinoccios.",
+ "Una advertencia sobre nuestro modelo: no est\u00E1 a escala. El Sol real es unas 109 veces m\u00E1s ancho que la Tierra y est\u00E1 a unos 150 millones de kil\u00F3metros. \u00A1Si dibuj\u00E1ramos la distancia a escala, la Tierra quedar\u00EDa muy fuera de la pantalla!",
+ "Ahora te toca a ti. Arrastra la Tierra alrededor de su \u00F3rbita, observa c\u00F3mo cambia la luz solar y completa cinco misiones."
+]);
+
 /* ---- orbit activity ---- */
 var MIS=[
  {tx:'Move Earth to the June solstice, the longest day of the year in the Northern Hemisphere.',hint:'Watch "Direct rays hit." You want them as far north as they go: the Tropic of Cancer.',ok:function(th,dl){return dl>22.5;},yes:'Yes! The North Pole tilts toward the Sun. The direct rays hit the Tropic of Cancer, and Orlando gets almost 14 hours of daylight.'},
@@ -1208,32 +1237,42 @@ var MIS=[
  {tx:'Earth is CLOSEST to the Sun in early January. Move Earth there. Then look at the season in Orlando.',hint:'Find the orange dot labeled "closest (early Jan)" on the orbit and drag Earth onto it.',ok:function(th,dl){return angDiff(th,TH_PERI)<0.17;},yes:'It is winter in Orlando, even though Earth is closest to the Sun! Distance barely matters. Tilt is what causes the seasons.'},
  {tx:'Move Earth to when Antarctica is in its long, dark winter and the South Pole gets no sunlight at all.',hint:'The South Pole is dark when the Southern Hemisphere tilts AWAY from the Sun.',ok:function(th,dl){return dl>15;},yes:'That\'s around June! The South Pole tilts away from the Sun, so the Sun stays below the horizon for months.'}
 ];
+trMis(MIS,[
+ ['Mueve la Tierra al solsticio de junio, el d\u00EDa m\u00E1s largo del a\u00F1o en el hemisferio norte.','Mira "Los rayos directos caen en". Quieres que lleguen lo m\u00E1s al norte posible: el Tr\u00F3pico de C\u00E1ncer.','\u00A1S\u00ED! El Polo Norte se inclina hacia el Sol. Los rayos directos caen en el Tr\u00F3pico de C\u00E1ncer, y Orlando tiene casi 14 horas de luz.'],
+ ['Mueve la Tierra al punto m\u00E1s alto del verano en el hemisferio sur, cuando Brisbane, Australia, tiene su d\u00EDa m\u00E1s largo.','Ahora quieres que los rayos directos lleguen lo m\u00E1s al SUR posible: el Tr\u00F3pico de Capricornio.','\u00A1Correcto! En diciembre, el hemisferio sur se inclina hacia el Sol. Brisbane tiene verano mientras Florida tiene invierno.'],
+ ['Encuentra un equinoccio, cuando los rayos directos del Sol caen en el ecuador.','Busca "Los rayos directos caen en: 0 grados (el ecuador)". Hay dos equinoccios, as\u00ED que cualquiera de los dos sirve.','\u00A1Equinoccio! Ning\u00FAn hemisferio se inclina hacia el Sol, as\u00ED que el d\u00EDa y la noche duran unas 12 horas cada uno en Orlando y en Brisbane.'],
+ ['La Tierra est\u00E1 M\u00C1S CERCA del Sol a principios de enero. Mueve la Tierra ah\u00ED. Luego mira la estaci\u00F3n en Orlando.','Busca el punto anaranjado que dice "m\u00E1s cerca (inicios de ene)" en la \u00F3rbita y arrastra la Tierra hasta \u00E9l.','\u00A1En Orlando es invierno, aunque la Tierra est\u00E1 m\u00E1s cerca del Sol! La distancia casi no importa. La inclinaci\u00F3n es lo que causa las estaciones.'],
+ ['Mueve la Tierra al momento en que la Ant\u00E1rtida est\u00E1 en su largo y oscuro invierno y el Polo Sur no recibe nada de luz solar.','El Polo Sur est\u00E1 oscuro cuando el hemisferio sur se inclina en direcci\u00F3n CONTRARIA al Sol.','\u00A1Eso es alrededor de junio! El Polo Sur se inclina en direcci\u00F3n contraria al Sol, as\u00ED que el Sol se queda bajo el horizonte durante meses.']
+]);
 var SE={th:0,play:false,mi:0,drag:false,wait:false,done:false,cO:null,cS:null,cB:null,last:''};
 function lpos(cv,e,lw){var r=cv.getBoundingClientRect();var p=(e.touches&&e.touches.length)?e.touches[0]:((e.changedTouches&&e.changedTouches.length)?e.changedTouches[0]:e);return {x:(p.clientX-r.left)*lw/r.width,y:(p.clientY-r.top)*lw/r.width};}
 function startSeasons(){show('scrSeason');SE.mi=0;SE.play=false;SE.wait=false;SE.done=false;SE.th=thOfDay(105);SE.last='';
  SE.cO=setupCanvas($('orbCv'),400,300,0.36);SE.cS=setupCanvas($('sideCv'),400,260,0.32);SE.cB=setupCanvas($('beamCv'),400,120,0.2);
- $('btnPlay').textContent='Play a year';renderMission();startLoop(seasonLoop);say(MIS[0].tx,1.05);}
+ $('btnPlay').textContent=T('Play a year','Ver un a\u00F1o');renderMission();startLoop(seasonLoop);say(mT(MIS[0],'tx'),1.05);}
 function seasonLoop(dt,t){if(SE.play){SE.th=norm(SE.th+dt*2*Math.PI/14);}
  var dl=decl(SE.th);drawOrbit(SE.cO,400,300,SE.th,t,{dist:true,star:true});
- var c=SE.cS;space(c,400,260,t);drawSide(c,214,134,92,dl,{rays:true,rayX:10,labels:true,star:true,cities:true});txt(c,'Side view at noon',8,16,'800 11px '+FONT,'#FFFFFF');txt(c,'Sunlight',10,250,'700 10px '+FONT,'#FFD45A');
+ var c=SE.cS;space(c,400,260,t);drawSide(c,214,134,92,dl,{rays:true,rayX:10,labels:true,star:true,cities:true});txt(c,T('Side view at noon','Vista lateral al mediod\u00EDa'),8,16,'800 11px '+FONT,'#FFFFFF');txt(c,T('Sunlight','Luz solar'),10,250,'700 10px '+FONT,'#FFD45A');
  drawBeams(SE.cB,[noonH(28.5,dl),noonH(-27.5,dl)],['Orlando, FL (28.5'+DEG+'N)','Brisbane (27.5'+DEG+'S)']);
- var se=seasons(SE.th),key=dateStr(SE.th)+'|'+dl.toFixed(1);
- if(key!==SE.last){SE.last=key;$('sDate').textContent='Date: about '+dateStr(SE.th);$('sNH').textContent=se[0];$('sSH').textContent=se[1];$('sRays').textContent=latStr(dl);
-  $('sOrl').textContent=hm(daylight(28.5,dl))+' of daylight';$('sBri').textContent=hm(daylight(-27.5,dl))+' of daylight';$('sPole').textContent=dl>0.3?'Dark all day':(dl<-0.3?'Sun up all day':'Sun on the horizon');}}
-function renderMission(){var m=MIS[SE.mi];$('misHead').textContent='Mission '+(SE.mi+1)+' of '+MIS.length;$('misText').textContent=m.tx;$('misMsg').textContent='';$('btnCheck').textContent='Check';SE.wait=false;}
+ var se=seasons(SE.th),key=dateStr(SE.th)+'|'+dl.toFixed(1)+LANG;
+ if(key!==SE.last){SE.last=key;$('sDate').textContent=T('Date: about ','Fecha: alrededor del ')+dateStr(SE.th);$('sNH').textContent=se[0];$('sSH').textContent=se[1];$('sRays').textContent=latStr(dl);
+  $('sOrl').textContent=hm(daylight(28.5,dl))+T(' of daylight',' de luz');$('sBri').textContent=hm(daylight(-27.5,dl))+T(' of daylight',' de luz');$('sPole').textContent=dl>0.3?T('Dark all day','Oscuro todo el d\u00EDa'):(dl<-0.3?T('Sun up all day','Sol todo el d\u00EDa'):T('Sun on the horizon','Sol en el horizonte'));}}
+function renderMission(){SE.wait=false;seHead();$('misMsg').textContent='';}
+function seHead(){var m=MIS[SE.mi];$('misHead').textContent=SE.done?T('All missions complete!','\u00A1Completaste todas las misiones!'):T('Mission '+(SE.mi+1)+' of '+MIS.length,'Misi\u00F3n '+(SE.mi+1)+' de '+MIS.length);$('misText').textContent=mT(m,'tx');
+ $('btnCheck').textContent=SE.done?T('Take the quiz','Hacer el cuestionario'):(SE.wait?T('Next mission','Siguiente misi\u00F3n'):T('Check','Revisar'));$('btnHint').textContent=T('Hint','Pista');$('btnPlay').textContent=SE.play?T('Pause','Pausa'):T('Play a year','Ver un a\u00F1o');}
+LREF.scrSeason=function(){seHead();SE.last='';};
 function orbDrag(e){if(!SE.drag)return;e.preventDefault();var p=lpos($('orbCv'),e,400);SE.th=norm(Math.atan2(-(p.y-150)/96,(p.x-200)/160));}
-function orbStart(e){e.preventDefault();ac();SE.drag=true;SE.play=false;$('btnPlay').textContent='Play a year';orbDrag(e);}
+function orbStart(e){e.preventDefault();ac();SE.drag=true;SE.play=false;$('btnPlay').textContent=T('Play a year','Ver un a\u00F1o');orbDrag(e);}
 function orbEnd(){SE.drag=false;}
 function seasonCheck(){
- if(SE.done){sfx.click();startQuiz('ch2',CH2_QUIZ);return;}
- if(SE.wait){sfx.click();SE.mi++;renderMission();say(MIS[SE.mi].tx,1.05);return;}
- var m=MIS[SE.mi];if(m.ok(SE.th,decl(SE.th))){sfx.good();SE.play=false;$('btnPlay').textContent='Play a year';$('misMsg').style.color='#6FE3A4';$('misMsg').textContent=m.yes;say(m.yes,1.05);
-  if(SE.mi>=MIS.length-1){SE.done=true;$('misHead').textContent='All missions complete!';$('btnCheck').textContent='Take the quiz';}else{SE.wait=true;$('btnCheck').textContent='Next mission';}}
- else{sfx.bad();$('misMsg').style.color='#FFD2B8';$('misMsg').textContent='Not yet. '+m.hint;}}
+ if(SE.done){sfx.click();startQuizL('ch2',CH2_QUIZ,CH2_QUIZ_ES);return;}
+ if(SE.wait){sfx.click();SE.mi++;renderMission();say(mT(MIS[SE.mi],'tx'),1.05);return;}
+ var m=MIS[SE.mi];if(m.ok(SE.th,decl(SE.th))){sfx.good();SE.play=false;$('misMsg').style.color='#6FE3A4';$('misMsg').textContent=mT(m,'yes');say(mT(m,'yes'),1.05);
+  if(SE.mi>=MIS.length-1){SE.done=true;}else{SE.wait=true;}seHead();}
+ else{sfx.bad();$('misMsg').style.color='#FFD2B8';$('misMsg').textContent=T('Not yet. ','Todav\u00EDa no. ')+mT(m,'hint');}}
 
 /* ---- quiz backgrounds ---- */
 function bgSideJune(c){space(c,600,620,1);sunGlow(c,-60,330,80);drawSide(c,340,330,180,TILT,{rays:true,rayX:40});}
-function bgSideDec(c){space(c,600,600,1);sunGlow(c,-60,300,80);txt(c,'Sun',20,30,'800 20px '+FONT,'#FFD45A');txt(c,'December',580,34,'800 22px '+FONT,'#FFFFFF','right');drawSide(c,285,310,160,-TILT,{labels:true,fs:15});}
+function bgSideDec(c){space(c,600,600,1);sunGlow(c,-60,300,80);txt(c,T('Sun','Sol'),20,30,'800 20px '+FONT,'#FFD45A');txt(c,T('December','Diciembre'),580,34,'800 22px '+FONT,'#FFFFFF','right');drawSide(c,285,310,160,-TILT,{labels:true,fs:15});}
 
 var CH2_QUIZ=[
  {t:'mc',q:'What is the main cause of Earth\'s seasons?',o:['Earth\'s distance from the Sun changes','The tilt of Earth\'s axis','The Sun gets hotter in summer','The Moon blocks sunlight in winter'],a:1,why:'Earth\'s 23.4 degree tilt changes how directly sunlight hits each hemisphere and how long the days are.'},
@@ -1246,6 +1285,18 @@ var CH2_QUIZ=[
  {t:'draw',q:'This is Earth in DECEMBER. Draw the Sun\'s rays reaching Earth. Then draw a star where the sunlight hits most directly.',bg:'sideDec',cols:[['Yellow','#FFD45A'],['White','#FFFFFF'],['Red','#FF5A4A']]},
  {t:'text',q:'Earth is farther from the Sun in July than in January. Explain why Florida is still warmer in July.'}
 ];
+
+var CH2_QUIZ_ES=trQuiz(CH2_QUIZ,[
+ {q:'\u00BFCu\u00E1l es la causa principal de las estaciones de la Tierra?',o:['Cambia la distancia entre la Tierra y el Sol','La inclinaci\u00F3n del eje de la Tierra','El Sol se calienta m\u00E1s en verano','La Luna tapa la luz solar en invierno'],why:'La inclinaci\u00F3n de 23.4 grados de la Tierra cambia qu\u00E9 tan directa llega la luz solar a cada hemisferio y cu\u00E1nto duran los d\u00EDas.'},
+ {q:'\u00BFCu\u00E1ndo est\u00E1 la Tierra m\u00E1s cerca del Sol?',o:['A principios de enero','A principios de abril','A principios de julio','A principios de octubre'],why:'La Tierra est\u00E1 m\u00E1s cerca a principios de enero, que es invierno en el hemisferio norte. Eso demuestra que la distancia no causa las estaciones.'},
+ {q:'\u00BFPor qu\u00E9 la luz solar directa calienta el suelo m\u00E1s que la luz inclinada?',o:['La luz directa es de otro color','La luz directa concentra su energ\u00EDa en un \u00E1rea m\u00E1s peque\u00F1a','La luz inclinada viaja m\u00E1s r\u00E1pido','La luz directa viene de un Sol m\u00E1s cercano'],why:'La luz directa concentra la misma energ\u00EDa en un \u00E1rea m\u00E1s peque\u00F1a. La luz inclinada la reparte, como el haz de una linterna inclinada.'},
+ {q:'En junio, \u00BFcu\u00E1l afirmaci\u00F3n es verdadera?',o:['Verano en el hemisferio norte, invierno en el hemisferio sur','Los dos hemisferios tienen verano','Invierno en el hemisferio norte, verano en el hemisferio sur','Los dos hemisferios tienen invierno'],why:'En junio, el hemisferio norte se inclina hacia el Sol y el hemisferio sur hacia el lado contrario, as\u00ED que sus estaciones son opuestas.'},
+ {q:'En un equinoccio, \u00BFd\u00F3nde caen los rayos m\u00E1s directos del Sol?',o:['En el Tr\u00F3pico de C\u00E1ncer','En el ecuador','En el Tr\u00F3pico de Capricornio','En el Polo Norte'],why:'En los equinoccios, ning\u00FAn hemisferio se inclina hacia el Sol, as\u00ED que los rayos directos caen en el ecuador.'},
+ {q:'Nuestro modelo de la \u00F3rbita NO est\u00E1 dibujado a escala. \u00BFCu\u00E1l afirmaci\u00F3n es verdadera?',o:['El Sol es unas 109 veces m\u00E1s ancho que la Tierra','El Sol y la Tierra son del mismo tama\u00F1o','La Tierra es m\u00E1s grande que el Sol','El Sol est\u00E1 a solo 150 km'],why:'El Sol es unas 109 veces m\u00E1s ancho que la Tierra y est\u00E1 a unos 150 millones de km. Un modelo a escala no cabr\u00EDa en una pantalla.'},
+ {q:'Esta es la Tierra en junio. Toca una etiqueta y luego toca donde va.',labels:['Polo Norte','Ecuador','Luz solar m\u00E1s directa','Lado de noche']},
+ {q:'Esta es la Tierra en DICIEMBRE. Dibuja los rayos del Sol llegando a la Tierra. Luego dibuja una estrella donde la luz solar llega de forma m\u00E1s directa.',cols:['Amarillo','Blanco','Rojo']},
+ {q:'La Tierra est\u00E1 m\u00E1s lejos del Sol en julio que en enero. Explica por qu\u00E9 Florida es m\u00E1s c\u00E1lida en julio de todos modos.'}
+]);
 
 /* ================= CHAPTER 3: EARTH'S ENERGY BALANCE ================= */
 function arw(c,x1,y1,x2,y2,col,lw,hd){var a=Math.atan2(y2-y1,x2-x1);lw=lw||3;hd=hd||lw*3.2;c.strokeStyle=col;c.fillStyle=col;c.lineWidth=lw;c.lineCap='round';c.beginPath();c.moveTo(x1,y1);c.lineTo(x2-Math.cos(a)*hd*0.7,y2-Math.sin(a)*hd*0.7);c.stroke();
@@ -1273,20 +1324,20 @@ function ebg(c,t,ice){space(c,400,300,t);
  c.strokeStyle='rgba(255,255,255,0.35)';c.lineWidth=1.2;for(var k=0;k<5;k++){var wx=160+((k*23+t*8)%95);c.beginPath();c.arc(wx,256+k*8,5,3.6,5.8);c.stroke();}
  c.fillStyle='#2A6B38';for(k=0;k<6;k++){circ(c,14+k*22,250+(k%2)*6,7);}
  if(ice){c.fillStyle='#F4FBFF';c.fillRect(290,240,110,60);c.strokeStyle='#BFE6F5';c.lineWidth=1;c.beginPath();c.moveTo(300,262);c.lineTo(330,270);c.lineTo(360,258);c.moveTo(320,285);c.lineTo(350,292);c.stroke();}
- txt(c,'Space',394,16,'700 10px '+FONT,'#BFE6F5','right');}
+ txt(c,T('Space','Espacio'),394,16,'700 10px '+FONT,'#BFE6F5','right');}
 function sceneSunIn(c,t){ebg(c,t,false);sunGlow(c,30,22,16);
  for(var k=0;k<5;k++){var x1=70+k*60,x2=x1+26;arw(c,x1,30,x2,232,'rgba(255,214,90,0.85)',3);var f=(t*0.6+k*0.23)%1;c.fillStyle='#FFF6C8';circ(c,x1+(x2-x1)*f,30+202*f,3.5);}
- pill(c,'Sunlight: shortwave radiation',200,74,12,'#FFD45A','center');pill(c,'much of it visible light',200,94,11,'#FFFFFF','center');
- txt(c,'Land and ocean soak it up',200,288,'800 12px '+FONT,'#FFFFFF','center');}
+ pill(c,T('Sunlight: shortwave radiation','Luz solar: radiaci\u00F3n de onda corta'),200,74,12,'#FFD45A','center');pill(c,T('much of it visible light','gran parte es luz visible'),200,94,11,'#FFFFFF','center');
+ txt(c,T('Land and ocean soak it up','La tierra y el oc\u00E9ano la absorben'),200,288,'800 12px '+FONT,'#FFFFFF','center');}
 function sceneReflect(c,t){ebg(c,t,true);sunGlow(c,30,22,16);cloud(c,110,110,1.1);
  arw(c,60,34,104,104,'#FFD45A',3);arw(c,104,104,150,36,'#FFF2B0',3);
  arw(c,250,30,330,234,'#FFD45A',3);arw(c,330,234,388,52,'#FFF2B0',3);
  arw(c,180,30,205,234,'#FFD45A',3);var p=0.5+0.5*Math.sin(t*4);c.fillStyle='rgba(255,140,40,'+(0.35+0.4*p).toFixed(2)+')';circ(c,205,244,9);
- pill(c,'About 30% reflected back to space',200,160,12,'#FFF2B0','center');pill(c,'Earth\'s average albedo: about 0.3',200,184,11,'#FFFFFF','center');
+ pill(c,T('About 30% reflected back to space','Cerca del 30% se refleja al espacio'),200,160,12,'#FFF2B0','center');pill(c,T('Earth\'s average albedo: about 0.3','Albedo promedio de la Tierra: unos 0.3'),200,184,11,'#FFFFFF','center');
  txt(c,'cloud',110,140,'700 10px '+FONT,'#123A55','center');txt(c,'ice',345,276,'800 11px '+FONT,'#2C4A63','center');txt(c,'absorbed',205,288,'800 11px '+FONT,'#FFFFFF','center');}
 function sceneInfra(c,t){ebg(c,t,false);var p=0.5+0.5*Math.sin(t*3);c.fillStyle='rgba(255,120,40,'+(0.12+0.12*p).toFixed(2)+')';c.fillRect(0,236,400,64);
  for(var k=0;k<5;k++){var x=40+k*80,f=(t*0.5+k*0.3)%1;wavyArw(c,x,232-f*40,x+(k%2?10:-10),120-f*40,'rgba(255,90,74,'+(1-f*0.6).toFixed(2)+')',2.5,t*6,4);}
- pill(c,'Infrared (longwave) heat',200,60,12,'#FF8A80','center');pill(c,'invisible to our eyes',200,80,11,'#FFFFFF','center');
+ pill(c,T('Infrared (longwave) heat','Calor infrarrojo (onda larga)'),200,60,12,'#FF8A80','center');pill(c,T('invisible to our eyes','invisible para nuestros ojos'),200,80,11,'#FFFFFF','center');
  person(c,120,292,0.62,'#FF7A2F',{goggles:true,skin:'#C68A5E'},t);person(c,300,292,0.62,'#F2C230',{skin:'#F2C9A5',wave:true},t);}
 var GHM=[['co2',70,120],['h2o',150,170],['ch4',255,115],['co2',330,160],['n2',110,80],['o2',300,75],['n2',210,190],['o2',40,190],['h2o',370,110]];
 function sceneGases(c,t){ebg(c,t,false);sunGlow(c,30,22,16);var i;
@@ -1297,53 +1348,53 @@ function sceneGases(c,t){ebg(c,t,false);sunGlow(c,30,22,16);var i;
  else{var g=Math.max(0,1-(ph-1)*0.8);c.fillStyle='rgba(255,90,74,'+(0.5*g).toFixed(2)+')';circ(c,cx,cy,18);
   if(ph>1.3){var d=(ph-1.3)*45,an=[-2.4,-0.4,1.2,2.2];for(i=0;i<4;i++){var ex=cx+Math.cos(an[i])*(14+d),ey=cy+Math.sin(an[i])*(14+d);wavyArw(c,cx+Math.cos(an[i])*14,cy+Math.sin(an[i])*14,ex,ey,'#FF5A4A',2.2,t*6,3);}}}
  molS(c,'co2',cx,cy,0,1.5);
- txt(c,'Absorbs infrared, then re-emits it in all directions',200,286,'800 11.5px '+FONT,'#FFFFFF','center');
- pill(c,'Greenhouse gases: CO\u2082, H\u2082O, CH\u2084, N\u2082O',62,20,10,'#FF9A5C','left');pill(c,'N\u2082 and O\u2082: not greenhouse gases',62,38,10,'#8FC9E3','left');}
-function sceneNoGH(c,t){space(c,400,300,t);txt(c,'Earth\'s average surface temperature',200,26,'800 14px '+FONT,'#FFFFFF','center');
+ txt(c,T('Absorbs infrared, then re-emits it in all directions','Absorbe el infrarrojo y lo vuelve a emitir en todas direcciones'),200,286,'800 '+T('11.5','10.5')+'px '+FONT,'#FFFFFF','center');
+ pill(c,T('Greenhouse gases: CO\u2082, H\u2082O, CH\u2084, N\u2082O','Gases de efecto invernadero: CO\u2082, H\u2082O, CH\u2084, N\u2082O'),62,20,10,'#FF9A5C','left');pill(c,T('N\u2082 and O\u2082: not greenhouse gases','N\u2082 y O\u2082: no son gases de efecto invernadero'),62,38,10,'#8FC9E3','left');}
+function sceneNoGH(c,t){space(c,400,300,t);txt(c,T('Earth\'s average surface temperature','Temperatura promedio de la superficie'),200,26,'800 14px '+FONT,'#FFFFFF','center');
  var x=105,y=140,R=62;c.save();c.beginPath();c.arc(x,y,R,0,6.2832);c.clip();c.fillStyle='#CFE8F5';c.fillRect(x-R,y-R,2*R,2*R);c.fillStyle='#F7FBFF';CE(c,x-15,y-10,40,30);c.fill();CE(c,x+25,y+28,30,22);c.fill();c.restore();
  x=295;c.save();c.beginPath();c.arc(x,y,R,0,6.2832);c.clip();c.fillStyle='#2F7FD1';c.fillRect(x-R,y-R,2*R,2*R);c.fillStyle='#46A35A';CE(c,x-18,y-8,24,18);c.fill();CE(c,x+22,y+20,18,24);c.fill();c.fillStyle='#F7FBFF';c.fillRect(x-R,y-R,2*R,12);c.fillRect(x-R,y+R-10,2*R,10);c.restore();
  c.strokeStyle='rgba(255,90,74,0.6)';c.lineWidth=4;c.beginPath();c.arc(x,y,R+6,0,6.2832);c.stroke();
- txt(c,'No greenhouse effect',105,226,'800 12.5px '+FONT,'#8FC9E3','center');txt(c,'about -18'+DEG+'C (0'+DEG+'F)',105,248,'800 15px '+FONT,'#FFFFFF','center');
- txt(c,'With greenhouse effect',295,226,'800 12.5px '+FONT,'#FF9A5C','center');txt(c,'about 15'+DEG+'C (59'+DEG+'F)',295,248,'800 15px '+FONT,'#FFFFFF','center');
- txt(c,'The natural greenhouse effect keeps Earth livable',200,284,'700 11px '+FONT,'#BFE6F5','center');}
+ txt(c,T('No greenhouse effect','Sin efecto invernadero'),105,226,'800 12.5px '+FONT,'#8FC9E3','center');txt(c,T('about ','unos ')+'-18'+DEG+'C (0'+DEG+'F)',105,248,'800 15px '+FONT,'#FFFFFF','center');
+ txt(c,T('With greenhouse effect','Con efecto invernadero'),295,226,'800 12.5px '+FONT,'#FF9A5C','center');txt(c,T('about ','unos ')+'15'+DEG+'C (59'+DEG+'F)',295,248,'800 15px '+FONT,'#FFFFFF','center');
+ txt(c,T('The natural greenhouse effect keeps Earth livable','El efecto invernadero natural mantiene la Tierra habitable'),200,284,'700 11px '+FONT,'#BFE6F5','center');}
 function sceneCO2(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);var X0=56,X1=380,i;function Y(p){return 250-p/450*200;}
- txt(c,'Carbon dioxide in the air (ppm)',200,24,'800 13px '+FONT,'#FFFFFF','center');
+ txt(c,T('Carbon dioxide in the air (ppm)','Di\u00F3xido de carbono en el aire (ppm)'),200,24,'800 13px '+FONT,'#FFFFFF','center');
  c.strokeStyle='#27425F';c.lineWidth=1;for(i=0;i<=4;i++){var yy=Y(i*100);c.beginPath();c.moveTo(X0,yy);c.lineTo(X1,yy);c.stroke();txt(c,String(i*100),X0-6,yy+4,'600 10px '+FONT,'#9FC3D8','right');}
  c.fillStyle='rgba(191,230,245,0.35)';c.fillRect(X0+8,Y(300),210,Y(180)-Y(300));c.strokeStyle='#BFE6F5';c.lineWidth=2;c.strokeRect(X0+8,Y(300),210,Y(180)-Y(300));
- txt(c,'Ice cores: 800,000 years',X0+113,Y(240)-4,'800 11px '+FONT,'#FFFFFF','center');txt(c,'about 180 to 300 ppm',X0+113,Y(240)+11,'700 10.5px '+FONT,'#BFE6F5','center');
+ txt(c,T('Ice cores: 800,000 years','N\u00FAcleos de hielo: 800,000 a\u00F1os'),X0+113,Y(240)-4,'800 11px '+FONT,'#FFFFFF','center');txt(c,T('about 180 to 300 ppm','entre unas 180 y 300 ppm'),X0+113,Y(240)+11,'700 10.5px '+FONT,'#BFE6F5','center');
  var gr=Math.min(1,(t%9)/1.2),top=Y(0)-(Y(0)-Y(422))*gr;c.fillStyle='#FF7A2F';rr(c,300,top,56,Y(0)-top,5);c.fill();
  c.strokeStyle='#FFD2B8';c.lineWidth=1.5;c.setLineDash([4,4]);c.beginPath();c.moveTo(X0+8,Y(300));c.lineTo(X1,Y(300));c.stroke();c.setLineDash([]);
- txt(c,'Today',328,268,'800 12px '+FONT,'#FFFFFF','center');if(gr>=1)pill(c,'over 420',328,Y(422)-8,11,'#FFB27E','center');
- txt(c,'Ice cores',X0+113,268,'800 12px '+FONT,'#FFFFFF','center');}
+ txt(c,T('Today','Hoy'),328,268,'800 12px '+FONT,'#FFFFFF','center');if(gr>=1)pill(c,T('over 420','m\u00E1s de 420'),328,Y(422)-8,11,'#FFB27E','center');
+ txt(c,T('Ice cores','N\u00FAcleos de hielo'),X0+113,268,'800 12px '+FONT,'#FFFFFF','center');}
 function sceneShirts(c,t){sky(c,400,300,'#6FB6E8','#DDF0FA');sunGlow(c,200,30,20);c.fillStyle='#8FC77A';c.fillRect(0,250,400,50);
  c.strokeStyle='#6B5440';c.lineWidth=3;c.beginPath();c.moveTo(40,250);c.lineTo(40,100);c.moveTo(360,250);c.lineTo(360,100);c.stroke();c.lineWidth=1.5;c.beginPath();c.moveTo(40,104);c.quadraticCurveTo(200,124,360,104);c.stroke();
  tshirt(c,120,112,'#FFFFFF','#B5C6D3');tshirt(c,280,112,'#22262E','#000000');
  arw(c,180,48,132,140,'#FFB21E',3);arw(c,132,140,70,62,'#FFD45A',3);
  arw(c,220,48,268,140,'#FFB21E',3);
  for(var k=0;k<3;k++){var f=(t*0.6+k/3)%1;wavyArw(c,262+k*14,196-f*30,262+k*14,176-f*30,'rgba(255,90,40,'+(1-f).toFixed(2)+')',2,t*6,2.5);}
- pill(c,'reflects most light',120,224,11,'#FFFFFF','center');pill(c,'absorbs most light',280,224,11,'#FF9A5C','center');
- txt(c,'stays cooler',120,276,'800 13px '+FONT,'#123A55','center');txt(c,'gets hot!',280,276,'800 13px '+FONT,'#B3261E','center');}
-var ALB=[['Fresh snow',0.8,0.9,'#F7FBFF'],['Sea ice',0.5,0.7,'#CFE8F5'],['Desert sand',0.3,0.4,'#E6C88A'],['Grass',0.25,0.25,'#6DBB4F'],['Forest',0.1,0.15,'#2E6B3A'],['Asphalt',0.05,0.1,'#3C4048'],['Open ocean',0.06,0.06,'#1D4E8C']];
+ pill(c,T('reflects most light','refleja casi toda la luz'),120,224,T(11,10),'#FFFFFF','center');pill(c,T('absorbs most light','absorbe casi toda la luz'),280,224,T(11,10),'#FF9A5C','center');
+ txt(c,T('stays cooler','se mantiene fresca'),120,276,'800 13px '+FONT,'#123A55','center');txt(c,T('gets hot!','\u00A1se calienta!'),280,276,'800 13px '+FONT,'#B3261E','center');}
+var ALB=[['Fresh snow',0.8,0.9,'#F7FBFF','Nieve fresca'],['Sea ice',0.5,0.7,'#CFE8F5','Hielo marino'],['Desert sand',0.3,0.4,'#E6C88A','Arena del desierto'],['Grass',0.25,0.25,'#6DBB4F','Pasto'],['Forest',0.1,0.15,'#2E6B3A','Bosque'],['Asphalt',0.05,0.1,'#3C4048','Asfalto'],['Open ocean',0.06,0.06,'#1D4E8C','Oc\u00E9ano abierto']];
 function sceneAlbedo(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);var X0=150,W=200,i;
- txt(c,'Albedo: the fraction of sunlight reflected',200,22,'800 13px '+FONT,'#FFFFFF','center');
+ txt(c,T('Albedo: the fraction of sunlight reflected','Albedo: la fracci\u00F3n de luz solar reflejada'),200,22,'800 13px '+FONT,'#FFFFFF','center');
  c.strokeStyle='#27425F';c.lineWidth=1;for(i=0;i<=4;i++){var gx=X0+W*i/4;c.beginPath();c.moveTo(gx,36);c.lineTo(gx,268);c.stroke();txt(c,(i/4).toFixed(2).replace(/0$/,''),gx,284,'600 10px '+FONT,'#9FC3D8','center');}
  for(i=0;i<ALB.length;i++){var y=40+i*32,a=ALB[i];c.fillStyle=a[3];rr(c,8,y+4,20,20,4);c.fill();c.strokeStyle='#5E7F9A';c.lineWidth=1;rr(c,8,y+4,20,20,4);c.stroke();
-  txt(c,a[0],34,y+19,'700 11.5px '+FONT,'#FFFFFF');var x1=X0+W*a[1],x2=X0+W*a[2];c.fillStyle='#FFD45A';if(x2-x1<4){circ(c,x1,y+14,5);}else{rr(c,x1,y+9,x2-x1,10,5);c.fill();}
-  var lb=a[1]===a[2]?'about '+a[1]:a[1]+' to '+a[2];txt(c,lb,Math.min(x2+8,394),y+18,'600 10px '+FONT,'#BFE6F5',x2+8+50>394?'right':'left');}
- txt(c,'0 = absorbs all       1 = reflects all',X0+W/2,298,'600 9.5px '+FONT,'#8FC9E3','center');}
+  txt(c,T(a[0],a[4]),34,y+19,'700 '+T('11.5','10.5')+'px '+FONT,'#FFFFFF');var x1=X0+W*a[1],x2=X0+W*a[2];c.fillStyle='#FFD45A';if(x2-x1<4){circ(c,x1,y+14,5);}else{rr(c,x1,y+9,x2-x1,10,5);c.fill();}
+  var lb=a[1]===a[2]?T('about ','unos ')+a[1]:a[1]+T(' to ',' a ')+a[2];txt(c,lb,Math.min(x2+8,394),y+18,'600 10px '+FONT,'#BFE6F5',x2+8+50>394?'right':'left');}
+ txt(c,T('0 = absorbs all       1 = reflects all','0 = absorbe todo       1 = refleja todo'),X0+W/2,298,'600 9.5px '+FONT,'#8FC9E3','center');}
 function sceneFeedback(c,t){c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);var cx=200,cy=158,R=92,i;
- var N=[['Warmer','temperatures','#FF7A2F'],['Ice','melts','#BFE6F5'],['Dark ocean','is exposed','#4FA3E0'],['More sunlight','absorbed','#FFD45A']];
+ var N=T([['Warmer','temperatures','#FF7A2F'],['Ice','melts','#BFE6F5'],['Dark ocean','is exposed','#4FA3E0'],['More sunlight','absorbed','#FFD45A']],[['Temperaturas','m\u00E1s c\u00E1lidas','#FF7A2F'],['El hielo','se derrite','#BFE6F5'],['Oc\u00E9ano oscuro','queda expuesto','#4FA3E0'],['M\u00E1s luz solar','absorbida','#FFD45A']]);
  var P=[[cx,cy-R],[cx+R+30,cy],[cx,cy+R],[cx-R-30,cy]];
  c.strokeStyle='rgba(191,230,245,0.5)';c.lineWidth=3;c.beginPath();c.arc(cx,cy,R,0,6.2832);c.stroke();
  var a=t*0.9;for(i=0;i<4;i++){var aa=-Math.PI/2+i*Math.PI/2+Math.PI/4;arw(c,cx+Math.cos(aa-0.2)*R,cy+Math.sin(aa-0.2)*R,cx+Math.cos(aa+0.2)*R,cy+Math.sin(aa+0.2)*R,'#BFE6F5',3,12);}
  c.fillStyle='#FFFFFF';circ(c,cx+Math.cos(a-Math.PI/2)*R,cy+Math.sin(a-Math.PI/2)*R,5);
  for(i=0;i<4;i++){var w=104,h=40;c.fillStyle='#16283E';rr(c,P[i][0]-w/2,P[i][1]-h/2,w,h,10);c.fill();c.strokeStyle=N[i][2];c.lineWidth=2.5;rr(c,P[i][0]-w/2,P[i][1]-h/2,w,h,10);c.stroke();
   txt(c,N[i][0],P[i][0],P[i][1]-2,'800 12px '+FONT,N[i][2],'center');txt(c,N[i][1],P[i][0],P[i][1]+13,'700 10.5px '+FONT,'#FFFFFF','center');}
- txt(c,'Ice-albedo',cx,cy-4,'800 13px '+FONT,'#FFFFFF','center');txt(c,'feedback',cx,cy+13,'800 13px '+FONT,'#FFFFFF','center');}
+ txt(c,T('Ice-albedo','Retroalimentaci\u00F3n'),cx,cy-4,'800 '+T('13','12')+'px '+FONT,'#FFFFFF','center');txt(c,T('feedback','hielo-albedo'),cx,cy+13,'800 '+T('13','12')+'px '+FONT,'#FFFFFF','center');}
 function sceneTeam(c,t){ebg(c,t,true);sunGlow(c,30,22,16);cloud(c,300,90,1);
  for(var k=0;k<3;k++){var f=(t*0.5+k*0.33)%1;wavyArw(c,120+k*80,236-f*60,120+k*80,206-f*60,'rgba(255,90,74,'+(1-f).toFixed(2)+')',2.2,t*6,3);}
  person(c,90,292,0.66,'#2A9DB5',{glasses:true,clip:true,skin:'#E8B48F',wave:true},t);person(c,210,292,0.6,'#FF7A2F',{goggles:true,skin:'#C68A5E'},t);person(c,330,292,0.6,'#F2C230',{skin:'#F2C9A5'},t);
- pill(c,'Next: the Photon Lab',200,60,13,'#FFD45A','center');}
+ pill(c,T('Next: the Photon Lab','Sigue: el Laboratorio de Fotones'),200,60,13,'#FFD45A','center');}
 function drawScene3(c,name,t){
  if(name==='sunIn')sceneSunIn(c,t);else if(name==='reflect')sceneReflect(c,t);else if(name==='infra')sceneInfra(c,t);else if(name==='gases')sceneGases(c,t);
  else if(name==='noGH')sceneNoGH(c,t);else if(name==='co2')sceneCO2(c,t);else if(name==='shirts')sceneShirts(c,t);else if(name==='albedo')sceneAlbedo(c,t);
@@ -1367,13 +1418,35 @@ var CH3_STEPS=[
 ];
 
 /* ---- mission runner (same Check / Next mission flow as Chapter 2) ---- */
-function misRun(pre,list,lastLbl,onDone){var m={pre:pre,list:list,i:0,wait:false,done:false,lastLbl:lastLbl,onDone:onDone};misRender(m);return m;}
-function misRender(m){var x=m.list[m.i];$(m.pre+'Head').textContent='Mission '+(m.i+1)+' of '+m.list.length;$(m.pre+'Text').textContent=x.tx;$(m.pre+'Msg').textContent='';$(m.pre+'Check').textContent='Check';m.wait=false;if(x.start)x.start();say(x.tx,1.05);}
+/* lastLbl may be [English, Spanish]. CURMIS is the running mission set, so a language switch can relabel it. */
+var CURMIS=null;
+function misLbl(m){var l=m.lastLbl;return (l&&typeof l==='object')?T(l[0],l[1]):l;}
+function misRun(pre,list,lastLbl,onDone){var m={pre:pre,list:list,i:0,wait:false,done:false,lastLbl:lastLbl,onDone:onDone};CURMIS=m;misRender(m);return m;}
+function misHead(m){$(m.pre+'Head').textContent=m.done?T('All missions complete!','\u00A1Completaste todas las misiones!'):T('Mission '+(m.i+1)+' of '+m.list.length,'Misi\u00F3n '+(m.i+1)+' de '+m.list.length);$(m.pre+'Text').textContent=mT(m.list[m.i],'tx');
+ $(m.pre+'Check').textContent=m.done?misLbl(m):(m.wait?T('Next mission','Siguiente misi\u00F3n'):T('Check','Revisar'));var h=$(m.pre+'Hint');if(h)h.textContent=T('Hint','Pista');}
+function misRender(m){var x=m.list[m.i];m.wait=false;misHead(m);$(m.pre+'Msg').textContent='';if(x.start)x.start();say(mT(x,'tx'),1.05);}
 function misCheck(m){if(!m)return;if(m.done){sfx.click();m.onDone();return;}if(m.wait){sfx.click();m.i++;misRender(m);return;}
- var x=m.list[m.i],g=$(m.pre+'Msg');if(x.ok()){sfx.good();g.style.color='#6FE3A4';g.textContent=x.yes;say(x.yes,1.05);
-  if(m.i>=m.list.length-1){m.done=true;$(m.pre+'Head').textContent='All missions complete!';$(m.pre+'Check').textContent=m.lastLbl;}else{m.wait=true;$(m.pre+'Check').textContent='Next mission';}}
- else{sfx.bad();g.style.color='#FFD2B8';g.textContent='Not yet. '+x.hint;}}
-function misHint(m){if(!m)return;sfx.click();if(m.done||m.wait)return;var g=$(m.pre+'Msg');g.style.color='#FFD2B8';g.textContent='Hint: '+m.list[m.i].hint;}
+ var x=m.list[m.i],g=$(m.pre+'Msg');if(x.ok()){sfx.good();g.style.color='#6FE3A4';g.textContent=mT(x,'yes');say(mT(x,'yes'),1.05);
+  if(m.i>=m.list.length-1){m.done=true;}else{m.wait=true;}misHead(m);}
+ else{sfx.bad();g.style.color='#FFD2B8';g.textContent=T('Not yet. ','Todav\u00EDa no. ')+mT(x,'hint');}}
+function misHint(m){if(!m)return;sfx.click();if(m.done||m.wait)return;var g=$(m.pre+'Msg');g.style.color='#FFD2B8';g.textContent=T('Hint: ','Pista: ')+mT(m.list[m.i],'hint');}
+
+var CH3_STEPS_ES=trSteps(CH3_STEPS,[
+ "\u00A1Bienvenidos de nuevo, equipo! En el Cap\u00EDtulo 2 seguimos la luz solar hasta la Tierra. Hoy seguimos esa energ\u00EDa despu\u00E9s de que llega. La luz solar llega como radiaci\u00F3n de onda corta, y gran parte de ella es luz visible.",
+ "Cerca del 30 por ciento de la luz solar que llega se refleja directo al espacio por las nubes, el hielo y otras superficies brillantes. Por eso el albedo promedio de la Tierra es de unos 0.3. Casi todo lo dem\u00E1s se absorbe y calienta la tierra y el oc\u00E9ano.",
+ "Si el suelo sigue absorbiendo luz solar, \u00BFpor qu\u00E9 no se calienta m\u00E1s y m\u00E1s para siempre?",
+ "\u00A1Excelente pregunta! La superficie caliente tambi\u00E9n emite energ\u00EDa, como radiaci\u00F3n infrarroja invisible. Eso es calor, tambi\u00E9n llamado radiaci\u00F3n de onda larga. Una acera que sigue caliente despu\u00E9s de que se pone el Sol est\u00E1 emitiendo infrarrojo.",
+ "Algunos gases del aire son gases de efecto invernadero. Los principales son el vapor de agua, el di\u00F3xido de carbono, el metano y el \u00F3xido nitroso. Dejan pasar la luz solar, pero absorben el infrarrojo.",
+ "Entonces, \u00BFlos gases de efecto invernadero rebotan el calor hacia abajo, como un espejo?",
+ "\u00A1No exactamente! Un espejo refleja. Una mol\u00E9cula de gas de efecto invernadero absorbe el infrarrojo y luego lo vuelve a emitir en una direcci\u00F3n al azar: hacia arriba, hacia un lado o hacia abajo. Una parte regresa hacia la superficie. El nitr\u00F3geno y el ox\u00EDgeno forman cerca del 99 por ciento del aire, y no son gases de efecto invernadero.",
+ "Este efecto invernadero natural es algo bueno. Sin \u00E9l, la temperatura promedio de la Tierra ser\u00EDa de unos 18 grados Celsius bajo cero, o 0 grados Fahrenheit. Con \u00E9l, el promedio es de unos 15 grados Celsius, o 59 grados Fahrenheit.",
+ "Pero si agregamos m\u00E1s gases de efecto invernadero, se atrapa m\u00E1s infrarrojo, y eso causa calentamiento. \u00BFRecuerdan los n\u00FAcleos de hielo? Durante 800,000 a\u00F1os, el CO\u2082 se mantuvo entre unas 180 y 300 partes por mill\u00F3n. Hoy supera las 420.",
+ "Ahora, el albedo. El albedo es la fracci\u00F3n de luz solar que refleja una superficie, de 0 a 1. Imagina una camiseta blanca y una camiseta negra en un d\u00EDa soleado. La camiseta blanca refleja casi toda la luz. La camiseta negra la absorbe y se calienta.",
+ "La nieve fresca refleja entre el 80 y el 90 por ciento de la luz solar. El hielo marino refleja entre el 50 y el 70 por ciento. El oc\u00E9ano abierto refleja solo cerca del 6 por ciento, as\u00ED que absorbe casi toda la luz.",
+ "Un momento. Si el hielo marino se derrite, el oc\u00E9ano oscuro de abajo absorbe m\u00E1s luz solar. \u00BFEntonces se calienta todav\u00EDa m\u00E1s?",
+ "\u00A1S\u00ED! Esa es la retroalimentaci\u00F3n hielo-albedo. El calentamiento derrite el hielo, el oc\u00E9ano m\u00E1s oscuro absorbe m\u00E1s luz solar, y eso causa m\u00E1s calentamiento. Tambi\u00E9n funciona al rev\u00E9s. Durante las glaciaciones, el hielo que crec\u00EDa reflejaba m\u00E1s luz solar y enfriaba todav\u00EDa m\u00E1s la Tierra.",
+ "Entonces, \u00BFqu\u00E9 inici\u00F3 esas glaciaciones? Eso es el Cap\u00EDtulo 4. Primero, hagamos el Laboratorio de Fotones y luego pintemos un planeta con el Pintor de Albedo."
+]);
 
 /* ---- Activity A: Greenhouse Photon Lab ---- */
 var LB_W=352,LB_GY=290,LB_TOP=34;
@@ -1384,7 +1457,7 @@ function labMols(){var M=[],i,n=Math.round(LAB.C/40);
  for(i=0;i<n;i++)M.push({k:'co2',x:22+rnd(i+500)*306,y:66+rnd(i+520)*186,gh:true,g:0});
  for(i=0;i<M.length;i++){if(LAB.mols[i]&&LAB.mols[i].k===M[i].k)M[i].g=LAB.mols[i].g;}LAB.mols=M;}
 function setCO2(v){if(v!==LAB.C){LAB.esc=0;LAB.down=0;}LAB.C=v;
- $('lbCO2').textContent=v+' ppm'+(v===280?' (pre-industrial)':(v===420?' (about today)':(v===800?' (possible future)':'')));labMols();}
+ $('lbCO2').textContent=v+' ppm'+(v===280?T(' (pre-industrial)',' (preindustrial)'):(v===420?T(' (about today)',' (m\u00E1s o menos hoy)'):(v===800?T(' (possible future)',' (futuro posible)'):'')));labMols();}
 function labFate(x){if(x>=60&&x<=150&&Math.random()<0.5)return 'cloud';if(x>=280)return Math.random()<0.75?'refl':'abs';if(x>=180)return Math.random()<0.06?'refl':'abs';return Math.random()<0.15?'refl':'abs';}
 function irEmit(x,y,up,src){var a,v=95,vx,vy;if(up){a=-Math.PI/2+(Math.random()-0.5)*1.2;vx=Math.cos(a);vy=Math.sin(a);}else{a=Math.random()*6.2832;vx=Math.cos(a);vy=Math.sin(a);if(Math.abs(vy)<0.25){vy=vy<0?-0.25:0.25;vx=(vx<0?-1:1)*0.968;}}
  LAB.ph.push({k:'ir',x:x,y:y,vx:vx*v,vy:vy*v,back:!up,skip:src||null,st:0});}
@@ -1405,11 +1478,11 @@ function labLoop(dt,t){var i,j,p,m,c=LAB.c;
   for(j=0;j<LAB.mols.length;j++){m=LAB.mols[j];if(!m.gh||m===p.skip)continue;var dx=p.x-m.cx,dy=p.y-m.cy;if(dx*dx+dy*dy<169){p.held=m;p.w=0.25;p.x=m.cx;p.y=m.cy;m.g=1;break;}}}
  var tt=0.25+0.6*Math.log(LAB.C/280)/Math.log(800/280);LAB.temp+=(tt-LAB.temp)*Math.min(1,dt*1.5);
  drawLab(c,t);
- var tot=LAB.esc+LAB.down,key=LAB.esc+'|'+LAB.down;if(key!==LAB.shown){LAB.shown=key;$('lbEsc').textContent=LAB.esc;$('lbDown').textContent=LAB.down;$('lbPct').textContent=tot>=10?'('+Math.round(LAB.down/tot*100)+'% of the infrared counted)':'';}}
+ var tot=LAB.esc+LAB.down,key=LAB.esc+'|'+LAB.down+LANG;if(key!==LAB.shown){LAB.shown=key;$('lbEsc').textContent=LAB.esc;$('lbDown').textContent=LAB.down;$('lbPct').textContent=tot>=10?'('+Math.round(LAB.down/tot*100)+T('% of the infrared counted)','% del infrarrojo contado)'):'';}}
 function drawLab(c,t){var i,p,m;space(c,400,340,t);
  var g=c.createLinearGradient(0,LB_TOP,0,LB_GY);g.addColorStop(0,'rgba(70,130,200,0.15)');g.addColorStop(1,'rgba(110,180,235,0.7)');c.fillStyle=g;c.fillRect(0,LB_TOP,LB_W,LB_GY-LB_TOP);
  c.strokeStyle='rgba(191,230,245,0.5)';c.setLineDash([4,4]);c.lineWidth=1;c.beginPath();c.moveTo(0,LB_TOP);c.lineTo(LB_W,LB_TOP);c.stroke();c.setLineDash([]);
- txt(c,'SPACE',8,22,'800 11px '+FONT,'#BFE6F5');txt(c,'Sunlight in',LB_W-6,22,'700 10px '+FONT,'#FFD45A','right');
+ txt(c,T('SPACE','ESPACIO'),8,22,'800 11px '+FONT,'#BFE6F5');txt(c,T('Sunlight in','Luz solar que entra'),LB_W-6,22,'700 10px '+FONT,'#FFD45A','right');
  c.fillStyle='#3E8E4E';c.fillRect(0,LB_GY,180,50);c.fillStyle='#1F5FA8';c.fillRect(180,LB_GY,100,50);c.fillStyle='#F4FBFF';c.fillRect(280,LB_GY,LB_W-280,50);
  c.fillStyle='#2A6B38';for(i=0;i<8;i++){circ(c,12+i*22,LB_GY+8+(i%2)*6,7);}
  txt(c,'land',90,332,'700 10px '+FONT,'#FFFFFF','center');txt(c,'ocean',230,332,'700 10px '+FONT,'#FFFFFF','center');txt(c,'ice',316,332,'800 10px '+FONT,'#2C4A63','center');
@@ -1420,18 +1493,23 @@ function drawLab(c,t){var i,p,m;space(c,400,340,t);
   if(p.k==='sun'){var dir=p.vy>0?-1:1;c.strokeStyle=p.vy>0?'#FFD45A':'#FFF2B0';c.lineWidth=2.5;c.lineCap='round';c.beginPath();c.moveTo(p.x,p.y+dir*12);c.lineTo(p.x,p.y);c.stroke();c.fillStyle='#FFF6C8';circ(c,p.x,p.y,2.4);}
   else if(!p.held){var sp=Math.sqrt(p.vx*p.vx+p.vy*p.vy),ux=p.vx/sp,uy=p.vy/sp;c.strokeStyle='#FF5A4A';c.lineWidth=2.2;c.beginPath();for(var k=0;k<=10;k++){var s=-18+k*1.8,w=Math.sin(k*1.4+t*14)*2.8;var X=p.x+ux*s-uy*w,Y=p.y+uy*s+ux*w;if(k===0)c.moveTo(X,Y);else c.lineTo(X,Y);}c.stroke();c.fillStyle='#FF8A80';circ(c,p.x,p.y,2.2);}}
  c.fillStyle='#0A1522';c.fillRect(LB_W,0,400-LB_W,340);c.fillStyle='#27425F';c.fillRect(LB_W,0,1,340);
- txt(c,'Temp',376,22,'800 10px '+FONT,'#FFFFFF','center');thermo(c,376,52,190,LAB.temp,true);}
+ txt(c,T('Temp','Temp.'),376,22,'800 10px '+FONT,'#FFFFFF','center');thermo(c,376,52,190,LAB.temp,true);}
 var LAB_MIS=[
  {tx:'Yellow dots are sunlight. Red wavy lines are infrared from the warm ground. Keep CO\u2082 at 280 ppm, the level before factories, and wait until 10 infrared photons are sent back down.',hint:'Watch a red photon hit a molecule. The molecule absorbs it, glows, then sends it off in a random direction. Some go down. Just wait and watch the counter.',ok:function(){return LAB.C<=290&&LAB.down>=10;},yes:'Even before factories, greenhouse gases sent some heat back down. That natural greenhouse effect keeps Earth at about 15 degrees Celsius instead of about minus 18.'},
  {tx:'Slide CO\u2082 up to today\'s level, about 420 ppm. Watch the number of molecules and the thermometer.',hint:'Drag the slider to the middle mark labeled 420.',ok:function(){return Math.abs(LAB.C-420)<=10;},yes:'More CO\u2082 molecules means more infrared gets absorbed and sent back down, so the thermometer climbs.'},
  {tx:'Slide CO\u2082 to 800 ppm, a possible future level. Wait until 30 infrared photons have escaped or been sent back down. Compare the percent sent back down with before.',hint:'Drag the slider all the way to the right, then wait for the two counters to add up to 30.',ok:function(){return LAB.C>=790&&LAB.esc+LAB.down>=30;},yes:'At 800 ppm, a bigger share of the infrared is sent back down before it can escape. More heat stays near the surface, so the planet warms.'}
 ];
+trMis(LAB_MIS,[
+ ['Los puntos amarillos son luz solar. Las l\u00EDneas rojas onduladas son infrarrojo que sale del suelo caliente. Deja el CO\u2082 en 280 ppm, el nivel de antes de las f\u00E1bricas, y espera hasta que 10 fotones infrarrojos sean enviados de regreso hacia abajo.','Observa c\u00F3mo un fot\u00F3n rojo choca con una mol\u00E9cula. La mol\u00E9cula lo absorbe, brilla y luego lo env\u00EDa en una direcci\u00F3n al azar. Algunos van hacia abajo. Solo espera y mira el contador.','Incluso antes de las f\u00E1bricas, los gases de efecto invernadero enviaban algo de calor de regreso hacia abajo. Ese efecto invernadero natural mantiene la Tierra a unos 15 grados Celsius en vez de unos 18 grados bajo cero.'],
+ ['Sube el CO\u2082 hasta el nivel de hoy, unas 420 ppm. Observa el n\u00FAmero de mol\u00E9culas y el term\u00F3metro.','Arrastra el control deslizante hasta la marca del medio que dice 420.','M\u00E1s mol\u00E9culas de CO\u2082 significan que se absorbe m\u00E1s infrarrojo y se env\u00EDa m\u00E1s hacia abajo, as\u00ED que el term\u00F3metro sube.'],
+ ['Sube el CO\u2082 a 800 ppm, un posible nivel futuro. Espera hasta que 30 fotones infrarrojos hayan escapado o hayan sido enviados hacia abajo. Compara el porcentaje enviado hacia abajo con el de antes.','Arrastra el control deslizante hasta la derecha y espera a que los dos contadores sumen 30.','Con 800 ppm, una parte m\u00E1s grande del infrarrojo se env\u00EDa hacia abajo antes de que pueda escapar. M\u00E1s calor se queda cerca de la superficie, as\u00ED que el planeta se calienta.']
+]);
 function startLab(){show('scrLab');LAB.ph=[];LAB.q=[];LAB.mols=[];LAB.sp=0;LAB.temp=0.25;LAB.shown='';LAB.C=-1;$('lbRange').value=280;setCO2(280);
- LAB.c=setupCanvas($('labCv'),400,340,0.42);LAB.ms=misRun('lb',LAB_MIS,'Next: Albedo Painter',startAlbedo);startLoop(labLoop);}
+ LAB.c=setupCanvas($('labCv'),400,340,0.42);LAB.ms=misRun('lb',LAB_MIS,['Next: Albedo Painter','Sigue: Pintor de Albedo'],startAlbedo);startLoop(labLoop);}
 function labRange(){var v=parseInt($('lbRange').value,10),mk=[280,420,800];for(var i=0;i<3;i++){if(Math.abs(v-mk[i])<=12){v=mk[i];$('lbRange').value=v;}}setCO2(v);}
 
 /* ---- Activity B: Albedo Painter ---- */
-var MAT={snow:{n:'Fresh snow',a:0.85,r:'0.8 to 0.9',col:'#F7FBFF'},ice:{n:'Sea ice',a:0.6,r:'0.5 to 0.7',col:'#CFE8F5'},desert:{n:'Desert sand',a:0.35,r:'0.3 to 0.4',col:'#E6C88A'},grass:{n:'Grass',a:0.25,r:'about 0.25',col:'#6DBB4F'},forest:{n:'Forest',a:0.12,r:'0.1 to 0.15',col:'#2E6B3A'},ocean:{n:'Open ocean',a:0.06,r:'about 0.06',col:'#1D4E8C'},city:{n:'City asphalt',a:0.07,r:'0.05 to 0.1',col:'#3C4048'}};
+var MAT={snow:{n:'Fresh snow',a:0.85,r:'0.8 to 0.9',col:'#F7FBFF',ne:'Nieve fresca',re:'0.8 a 0.9'},ice:{n:'Sea ice',a:0.6,r:'0.5 to 0.7',col:'#CFE8F5',ne:'Hielo marino',re:'0.5 a 0.7'},desert:{n:'Desert sand',a:0.35,r:'0.3 to 0.4',col:'#E6C88A',ne:'Arena del desierto',re:'0.3 a 0.4'},grass:{n:'Grass',a:0.25,r:'about 0.25',col:'#6DBB4F',ne:'Pasto',re:'unos 0.25'},forest:{n:'Forest',a:0.12,r:'0.1 to 0.15',col:'#2E6B3A',ne:'Bosque',re:'0.1 a 0.15'},ocean:{n:'Open ocean',a:0.06,r:'about 0.06',col:'#1D4E8C',ne:'Oc\u00E9ano abierto',re:'unos 0.06'},city:{n:'City asphalt',a:0.07,r:'0.05 to 0.1',col:'#3C4048',ne:'Asfalto de ciudad',re:'0.05 a 0.1'}};
 var MATK=['snow','ice','desert','grass','forest','ocean','city'];
 var GC=7,GR=6,CS=48,AGX=4,AGY=6;
 var AB={c:null,g:[],sel:'snow',ph:[],sp:0,fl:[],temp:0.5,fb:null,down:false,ms:null,shown:'',tk:0};
@@ -1454,17 +1532,17 @@ function abLoop(dt,t){var i,p,c=AB.c;
  AB.sp-=dt;if(AB.sp<=0){AB.sp=0.06;AB.ph.push({x:AGX+4+Math.random()*(GC*CS-8),y:-6,ty:AGY+6+Math.random()*(GR*CS-12),up:false});}
  for(i=0;i<AB.ph.length;i++){p=AB.ph[i];if(!p.up){p.y+=260*dt;if(p.y>=p.ty){var ci=abCell(p.x,p.ty);if(ci>=0&&Math.random()<MAT[AB.g[ci]].a){p.up=true;}else{AB.fl.push({x:p.x,y:p.ty,a:1});AB.ph.splice(i,1);i--;}}}else{p.y-=260*dt;if(p.y<-12){AB.ph.splice(i,1);i--;}}}
  for(i=0;i<AB.fl.length;i++){AB.fl[i].a-=dt*2.5;if(AB.fl[i].a<=0){AB.fl.splice(i,1);i--;}}
- if(AB.fb&&AB.fb.on){AB.fb.tm-=dt;if(AB.fb.tm<=0){var idx=abPickMelt();if(idx<0){AB.fb.on=false;AB.fb.done=true;$('abMsg').style.color='#6FE3A4';$('abMsg').textContent='All the sea ice melted! Look how much warmer it got. Tap Check.';}
+ if(AB.fb&&AB.fb.on){AB.fb.tm-=dt;if(AB.fb.tm<=0){var idx=abPickMelt();if(idx<0){AB.fb.on=false;AB.fb.done=true;$('abMsg').style.color='#6FE3A4';$('abMsg').textContent=T('All the sea ice melted! Look how much warmer it got. Tap Check.','\u00A1Todo el hielo marino se derriti\u00F3! Mira cu\u00E1nto se calent\u00F3. Toca Revisar.');}
   else{AB.g[idx]='ocean';tone(380+AB.fb.n*14,0.12,'triangle',0.06);AB.fb.n++;var w=(1-abAlb())-AB.fb.a0+0.03;AB.fb.tm=Math.max(0.12,Math.min(1.6,0.05/w));}}}
  var tt=0.08+0.84*Math.min(1,Math.max(0,((1-abAlb())-0.1)/0.84));AB.temp+=(tt-AB.temp)*Math.min(1,dt*2);
  drawAB(c,t);
- var al=abAlb(),key=Math.round(al*100)+'|'+abCount('ice');if(key!==AB.shown){AB.shown=key;$('abAlb').textContent=al.toFixed(2)+' (reflects '+Math.round(al*100)+'%)';$('abAbs').textContent=Math.round((1-al)*100)+'%';$('abIce').textContent=abCount('ice');}}
+ var al=abAlb(),key=Math.round(al*100)+'|'+abCount('ice')+LANG;if(key!==AB.shown){AB.shown=key;$('abAlb').textContent=al.toFixed(2)+T(' (reflects ',' (refleja ')+Math.round(al*100)+'%)';$('abAbs').textContent=Math.round((1-al)*100)+'%';$('abIce').textContent=abCount('ice');}}
 function drawAB(c,t){var i,p;c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);
  for(i=0;i<AB.g.length;i++){tile(c,AB.g[i],AGX+(i%GC)*CS,AGY+Math.floor(i/GC)*CS,CS,t,i);}
  c.strokeStyle='rgba(14,27,44,0.35)';c.lineWidth=1;for(i=0;i<=GC;i++){c.beginPath();c.moveTo(AGX+i*CS,AGY);c.lineTo(AGX+i*CS,AGY+GR*CS);c.stroke();}for(i=0;i<=GR;i++){c.beginPath();c.moveTo(AGX,AGY+i*CS);c.lineTo(AGX+GC*CS,AGY+i*CS);c.stroke();}
  for(i=0;i<AB.fl.length;i++){c.fillStyle='rgba(255,140,40,'+(0.7*AB.fl[i].a).toFixed(2)+')';circ(c,AB.fl[i].x,AB.fl[i].y,3+5*(1-AB.fl[i].a));}
  for(i=0;i<AB.ph.length;i++){p=AB.ph[i];c.strokeStyle=p.up?'#FFFFFF':'#FFD45A';c.lineWidth=2;c.lineCap='round';c.beginPath();c.moveTo(p.x,p.y+(p.up?9:-9));c.lineTo(p.x,p.y);c.stroke();c.fillStyle=p.up?'#FFFFFF':'#FFF2B0';circ(c,p.x,p.y,2);}
- c.fillStyle='#0A1522';c.fillRect(346,0,54,300);txt(c,'Temp',373,16,'800 10px '+FONT,'#FFFFFF','center');thermo(c,373,40,180,AB.temp,true);}
+ c.fillStyle='#0A1522';c.fillRect(346,0,54,300);txt(c,T('Temp','Temp.'),373,16,'800 10px '+FONT,'#FFFFFF','center');thermo(c,373,40,180,AB.temp,true);}
 function abPickMelt(){var cand=[],any=[],i;for(i=0;i<AB.g.length;i++){if(AB.g[i]!=='ice')continue;any.push(i);var r=Math.floor(i/GC),cI=i%GC;
  if((r>0&&AB.g[i-GC]==='ocean')||(r<GR-1&&AB.g[i+GC]==='ocean')||(cI>0&&AB.g[i-1]==='ocean')||(cI<GC-1&&AB.g[i+1]==='ocean'))cand.push(i);}
  if(!cand.length)cand=any;if(!cand.length)return -1;return cand[Math.floor(Math.random()*cand.length)];}
@@ -1472,17 +1550,22 @@ function abPaint(e){if(AB.fb&&AB.fb.on)return;var p=lpos($('abCv'),e,400),ci=abC
 function abStart(e){e.preventDefault();ac();AB.down=true;abPaint(e);}
 function abMove(e){if(!AB.down)return;e.preventDefault();abPaint(e);}
 function abEnd(){AB.down=false;}
-function abPalette(){var P=$('abPal'),i;P.innerHTML='';for(i=0;i<MATK.length;i++){(function(k){var b=el('button','chip'+(AB.sel===k?' sel':''));var sw=el('span','sw');sw.style.background=MAT[k].col;b.appendChild(sw);b.appendChild(document.createTextNode(MAT[k].n+' ('+MAT[k].r+')'));
+function abPalette(){var P=$('abPal'),i;P.innerHTML='';for(i=0;i<MATK.length;i++){(function(k){var b=el('button','chip'+(AB.sel===k?' sel':''));var sw=el('span','sw');sw.style.background=MAT[k].col;b.appendChild(sw);b.appendChild(document.createTextNode(T(MAT[k].n,MAT[k].ne)+' ('+T(MAT[k].r,MAT[k].re)+')'));
  b.onclick=function(){sfx.click();AB.sel=k;abPalette();};P.appendChild(b);})(MATK[i]);}}
 var AB_MIS=[
  {tx:'Pick a surface below, then tap or drag on the map to paint it. Make your planet reflect at least 50% of the sunlight (overall albedo 0.50 or more).',hint:'Bright surfaces reflect the most. Try fresh snow and sea ice.',start:function(){$('abHeat').style.display='none';AB.fb=null;},ok:function(){return abAlb()>=0.5;},yes:'Nice! A bright, icy planet reflects most of its sunlight, so it stays cool. During ice ages, huge ice sheets did the same thing.'},
  {tx:'Now make your planet absorb as MUCH sunlight as you can. Get the overall albedo down to 0.08 or less.',hint:'Dark surfaces absorb the most. Open ocean has the lowest albedo, about 0.06. Use "Fill the map" to paint everything at once.',start:function(){$('abHeat').style.display='none';AB.fb=null;},ok:function(){return abAlb()<=0.08;},yes:'Your planet now absorbs over 90% of the sunlight that hits it. Dark ocean is one of the best sunlight absorbers on Earth.'},
  {tx:'This is a polar ocean covered with sea ice. Tap "Turn up the heat" to add a little warming. Then watch what happens to the ice.',hint:'Tap the "Turn up the heat" button, then wait until all the sea ice has melted.',start:function(){abPreset('arctic');AB.fb=null;$('abHeat').style.display='block';},ok:function(){return AB.fb&&AB.fb.done&&abCount('ice')===0;},yes:'That is the ice-albedo feedback! Each bit of melting exposed dark ocean, which absorbed more sunlight and sped up the melting. In the real Arctic this takes many years, but the same feedback is at work.'}
 ];
-function abHeat(){sfx.click();ac();if(AB.fb&&AB.fb.on)return;if(abCount('ice')===0){$('abMsg').style.color='#FFD2B8';$('abMsg').textContent='There is no sea ice left to melt. Paint some sea ice first.';return;}
- AB.fb={on:true,done:false,tm:0.4,n:0,a0:1-abAlb()};$('abMsg').style.color='#BFE6F5';$('abMsg').textContent='Warmer, so ice melts. Dark ocean absorbs more sunlight, so it gets even warmer, so more ice melts...';}
+trMis(AB_MIS,[
+ ['Elige una superficie abajo y luego toca o arrastra sobre el mapa para pintarla. Haz que tu planeta refleje al menos el 50% de la luz solar (albedo total de 0.50 o m\u00E1s).','Las superficies brillantes son las que m\u00E1s reflejan. Prueba con nieve fresca y hielo marino.','\u00A1Muy bien! Un planeta brillante y helado refleja casi toda su luz solar, as\u00ED que se mantiene fr\u00EDo. Durante las glaciaciones, los enormes mantos de hielo hac\u00EDan lo mismo.'],
+ ['Ahora haz que tu planeta absorba TODA la luz solar que puedas. Baja el albedo total a 0.08 o menos.','Las superficies oscuras son las que m\u00E1s absorben. El oc\u00E9ano abierto tiene el albedo m\u00E1s bajo, unos 0.06. Usa "Llenar el mapa" para pintar todo de una vez.','Tu planeta ahora absorbe m\u00E1s del 90% de la luz solar que le llega. El oc\u00E9ano oscuro es uno de los mejores absorbentes de luz solar de la Tierra.'],
+ ['Este es un oc\u00E9ano polar cubierto de hielo marino. Toca "Subir el calor" para agregar un poco de calentamiento. Luego observa qu\u00E9 le pasa al hielo.','Toca el bot\u00F3n "Subir el calor" y espera hasta que todo el hielo marino se haya derretido.','\u00A1Esa es la retroalimentaci\u00F3n hielo-albedo! Cada parte que se derret\u00EDa dejaba expuesto oc\u00E9ano oscuro, que absorb\u00EDa m\u00E1s luz solar y aceleraba el derretimiento. En el \u00C1rtico real esto toma muchos a\u00F1os, pero la misma retroalimentaci\u00F3n est\u00E1 en marcha.']
+]);
+function abHeat(){sfx.click();ac();if(AB.fb&&AB.fb.on)return;if(abCount('ice')===0){$('abMsg').style.color='#FFD2B8';$('abMsg').textContent=T('There is no sea ice left to melt. Paint some sea ice first.','Ya no queda hielo marino para derretir. Primero pinta un poco de hielo marino.');return;}
+ AB.fb={on:true,done:false,tm:0.4,n:0,a0:1-abAlb()};$('abMsg').style.color='#BFE6F5';$('abMsg').textContent=T('Warmer, so ice melts. Dark ocean absorbs more sunlight, so it gets even warmer, so more ice melts...','M\u00E1s calor, as\u00ED que el hielo se derrite. El oc\u00E9ano oscuro absorbe m\u00E1s luz solar, as\u00ED que se calienta a\u00FAn m\u00E1s, y se derrite m\u00E1s hielo...');}
 function startAlbedo(){show('scrAlbedo');AB.ph=[];AB.fl=[];AB.fb=null;AB.sel='snow';AB.shown='';abPreset('earth');AB.temp=0.5;abPalette();
- AB.c=setupCanvas($('abCv'),400,300,0.38);AB.ms=misRun('ab',AB_MIS,'Take the quiz',function(){startQuiz('ch3',CH3_QUIZ);});startLoop(abLoop);}
+ AB.c=setupCanvas($('abCv'),400,300,0.38);AB.ms=misRun('ab',AB_MIS,['Take the quiz','Hacer el cuestionario'],function(){startQuizL('ch3',CH3_QUIZ,CH3_QUIZ_ES);});startLoop(abLoop);}
 
 /* ---- quiz backgrounds ---- */
 function bgEnergy(c){space(c,600,620,1);var g=c.createLinearGradient(0,150,0,520);g.addColorStop(0,'rgba(70,130,200,0.15)');g.addColorStop(1,'rgba(120,190,240,0.8)');c.fillStyle=g;c.fillRect(0,150,600,370);
@@ -1496,14 +1579,14 @@ function bgEnergy(c){space(c,600,620,1);var g=c.createLinearGradient(0,150,0,520
  wavyArw(c,505,512,505,404,'#FF5A4A',6,0,7);
  molS(c,'co2',510,372,0,2.2);
  wavyArw(c,524,356,566,300,'#FF5A4A',4,0,4);wavyArw(c,494,388,460,440,'#FF5A4A',4,0,4);
- txt(c,'Space',588,34,'800 22px '+FONT,'#BFE6F5','right');txt(c,'Ground',14,608,'800 20px '+FONT,'#FFFFFF');}
+ txt(c,T('Space','Espacio'),588,34,'800 22px '+FONT,'#BFE6F5','right');txt(c,T('Ground','Suelo'),14,608,'800 20px '+FONT,'#FFFFFF');}
 function bgGH(c){space(c,600,600,1);var g=c.createLinearGradient(0,130,0,470);g.addColorStop(0,'rgba(70,130,200,0.15)');g.addColorStop(1,'rgba(120,190,240,0.8)');c.fillStyle=g;c.fillRect(0,130,600,340);
- c.fillStyle='#3E8E4E';c.fillRect(0,470,600,130);sunGlow(c,70,64,32);txt(c,'Sun',122,40,'800 22px '+FONT,'#FFD45A');
+ c.fillStyle='#3E8E4E';c.fillRect(0,470,600,130);sunGlow(c,70,64,32);txt(c,T('Sun','Sol'),122,40,'800 22px '+FONT,'#FFD45A');
  var M=[['co2',80,270],['h2o',190,320],['co2',300,250],['ch4',410,310],['co2',520,260],['h2o',560,340]],i;for(i=0;i<M.length;i++){molS(c,M[i][0],M[i][1],M[i][2],i,2);}
- pill(c,'Greenhouse gases',300,212,18,'#FF9A5C','center');
+ pill(c,T('Greenhouse gases','Gases de efecto invernadero'),300,212,T(18,16),'#FF9A5C','center');
  c.fillStyle='#E9DCC4';c.fillRect(400,500,80,56);c.fillStyle='#B3261E';c.beginPath();c.moveTo(390,502);c.lineTo(440,466);c.lineTo(490,502);c.closePath();c.fill();c.fillStyle='#5A3B22';c.fillRect(432,526,16,30);
  for(i=0;i<4;i++){c.fillStyle='#5A3B22';c.fillRect(60+i*60,520,6,26);c.fillStyle='#2A6B38';circ(c,63+i*60,512,18);}
- txt(c,'Space',588,34,'800 22px '+FONT,'#BFE6F5','right');txt(c,'Ground',14,590,'800 20px '+FONT,'#FFFFFF');}
+ txt(c,T('Space','Espacio'),588,34,'800 22px '+FONT,'#BFE6F5','right');txt(c,T('Ground','Suelo'),14,590,'800 20px '+FONT,'#FFFFFF');}
 
 var CH3_QUIZ=[
  {t:'mc',q:'What do greenhouse gases do with infrared radiation from Earth\'s surface?',o:['Reflect it back down like a mirror','Absorb it, then re-emit it in all directions','Turn it into visible light','Destroy it so it disappears'],a:1,why:'Greenhouse gas molecules absorb infrared and then re-emit it in random directions. Some of it goes back down toward the surface. They do not reflect it like a mirror.'},
@@ -1516,6 +1599,17 @@ var CH3_QUIZ=[
  {t:'draw',q:'Draw arrows showing sunlight coming in from the Sun to the ground. Then draw infrared leaving the ground, getting absorbed by the greenhouse gases, and being re-emitted in different directions, including back down.',bg:'gh',cols:[['Yellow (sunlight)','#FFD45A'],['Red (infrared)','#FF5A4A'],['White','#FFFFFF']]},
  {t:'text',q:'Explain why melting sea ice can cause even more warming.'}
 ];
+var CH3_QUIZ_ES=trQuiz(CH3_QUIZ,[
+ {q:'\u00BFQu\u00E9 hacen los gases de efecto invernadero con la radiaci\u00F3n infrarroja que sale de la superficie de la Tierra?',o:['La reflejan hacia abajo como un espejo','La absorben y luego la vuelven a emitir en todas direcciones','La convierten en luz visible','La destruyen para que desaparezca'],why:'Las mol\u00E9culas de gases de efecto invernadero absorben el infrarrojo y luego lo vuelven a emitir en direcciones al azar. Una parte regresa hacia la superficie. No lo reflejan como un espejo.'},
+ {q:'\u00BFQu\u00E9 superficie tiene el albedo m\u00E1s alto?',o:['Oc\u00E9ano abierto','Bosque','Nieve fresca','Asfalto'],why:'La nieve fresca refleja entre el 80 y el 90 por ciento de la luz solar (albedo de unos 0.8 a 0.9). El oc\u00E9ano abierto refleja solo cerca del 6 por ciento.'},
+ {q:'En un d\u00EDa soleado, \u00BFpor qu\u00E9 una camiseta negra se calienta m\u00E1s que una blanca?',o:['La negra absorbe m\u00E1s luz solar, mientras que la blanca refleja m\u00E1s','La tela negra siempre es m\u00E1s gruesa','Las camisetas blancas emiten m\u00E1s gases de efecto invernadero','Las camisetas negras bloquean el viento'],why:'El negro tiene un albedo bajo, as\u00ED que absorbe casi toda la luz solar. El blanco tiene un albedo alto, as\u00ED que refleja casi toda.'},
+ {q:'Sin el efecto invernadero natural, la temperatura promedio de la Tierra ser\u00EDa de unos:',o:['15'+DEG+'C (59'+DEG+'F)','-18'+DEG+'C (0'+DEG+'F)','100'+DEG+'C (212'+DEG+'F)','30'+DEG+'C (86'+DEG+'F)'],why:'Sin el efecto invernadero natural, la Tierra tendr\u00EDa un promedio de unos -18'+DEG+'C (0'+DEG+'F). Con \u00E9l, el promedio es de unos 15'+DEG+'C (59'+DEG+'F).'},
+ {q:'\u00BFQu\u00E9 gas NO es un gas de efecto invernadero?',o:['Di\u00F3xido de carbono','Metano','Nitr\u00F3geno','Vapor de agua'],why:'El nitr\u00F3geno y el ox\u00EDgeno forman cerca del 99 por ciento del aire, pero no son gases de efecto invernadero. El di\u00F3xido de carbono, el metano, el vapor de agua y el \u00F3xido nitroso s\u00ED lo son.'},
+ {q:'\u00BFQu\u00E9 afirmaci\u00F3n describe la retroalimentaci\u00F3n hielo-albedo?',o:['El calentamiento derrite el hielo, el oc\u00E9ano m\u00E1s oscuro absorbe m\u00E1s luz solar, y eso causa m\u00E1s calentamiento','El hielo refleja el calor infrarrojo hacia el suelo','El hielo que se derrite agrega gases de efecto invernadero que enfr\u00EDan el planeta','M\u00E1s hielo hace que el oc\u00E9ano absorba m\u00E1s luz solar'],why:'El hielo refleja mucha luz solar. Cuando se derrite, el oc\u00E9ano oscuro de abajo absorbe m\u00E1s, lo que causa m\u00E1s calentamiento y m\u00E1s derretimiento.'},
+ {q:'Etiqueta el flujo de energ\u00EDa. Toca una etiqueta y luego toca donde va en la imagen.',labels:['Luz solar que llega','Luz solar reflejada','Infrarrojo del suelo','Gases de efecto invernadero']},
+ {q:'Dibuja flechas que muestren la luz solar que viene del Sol hasta el suelo. Luego dibuja el infrarrojo que sale del suelo, es absorbido por los gases de efecto invernadero y se vuelve a emitir en distintas direcciones, incluso hacia abajo.',cols:['Amarillo (luz solar)','Rojo (infrarrojo)','Blanco']},
+ {q:'Explica por qu\u00E9 el derretimiento del hielo marino puede causar todav\u00EDa m\u00E1s calentamiento.'}
+]);
 
 /* ================= CHAPTER 4: ORBIT CYCLES AND ICE AGES ================= */
 /* Real ice core data as 1,000-year averages. Index i = i to i+1 thousand years ago (0 = most recent).
@@ -1685,7 +1779,7 @@ function drawObWob(c,t){space(c,400,300,t);var cx=205,cy=150,a=118,ev=0.32,sy=0.
  function rAt(th){return a*(1-ev*ev)/(1+ev*Math.cos(th-thp));}
  function P(th,extra){var r=rAt(th)+(extra||0);return [cx+r*Math.cos(th),cy-r*Math.sin(th)*sy];}
  c.strokeStyle='rgba(191,230,245,0.55)';c.lineWidth=1.5;c.setLineDash([5,5]);c.beginPath();for(i=0;i<=72;i++){var q=P(i/72*6.2832);if(i===0)c.moveTo(q[0],q[1]);else c.lineTo(q[0],q[1]);}c.stroke();c.setLineDash([]);
- for(i=0;i<12;i++){var th=((i*30.44+15)-355)/365.25*2*Math.PI,q2=P(th,20);txt(c,MONTHS[i],q2[0],q2[1]+4,'700 10px '+FONT,i===ORB.pm?'#FFB27E':'#BFE6F5','center');}
+ for(i=0;i<12;i++){var th=((i*30.44+15)-355)/365.25*2*Math.PI,q2=P(th,20);txt(c,MON(i),q2[0],q2[1]+4,'700 10px '+FONT,i===ORB.pm?'#FFB27E':'#BFE6F5','center');}
  sunGlow(c,cx,cy,14);var pc=P(thp),pf=P(thp+Math.PI);c.fillStyle='#FF7A2F';circ(c,pc[0],pc[1],4.5);circ(c,pf[0],pf[1],3);
  var te=t*0.9,qe=P(te);var gg=c.createRadialGradient(qe[0]-3,qe[1]-3,1,qe[0],qe[1],8);gg.addColorStop(0,'#7FC0F0');gg.addColorStop(1,'#1F5FA8');c.fillStyle=gg;circ(c,qe[0],qe[1],7);
  wobTop(c,40,62,t,0.9);txt(c,'wobble',40,110,'700 9.5px '+FONT,'#BFE6F5','center');
@@ -2383,7 +2477,7 @@ function spPt(i,cx,cy,k,r0){var g=GT[i],th=-Math.PI/2+g.m*Math.PI/6,r=spR(g.a,k,
 function spRings(c,cx,cy,k,r0,lbl,fs){var R=[[0,'0'+DEG+'C (1880-1900)','#FFFFFF'],[1,'+1.0'+DEG+'C','#FFB27E'],[1.5,'+1.5'+DEG+'C','#FF5A4A']];
  for(var i=0;i<3;i++){var r=spR(R[i][0],k,r0);c.strokeStyle=R[i][2];c.globalAlpha=0.75;c.lineWidth=1.4;c.setLineDash([5,4]);c.beginPath();c.arc(cx,cy,r,0,6.2832);c.stroke();c.setLineDash([]);c.globalAlpha=1;
   if(lbl)pill(c,R[i][1],cx+r*0.71+2,cy-r*0.71,fs||9,R[i][2],'left');}}
-function spMonths(c,cx,cy,r,fs){for(var m=0;m<12;m++){var th=-Math.PI/2+m*Math.PI/6;txt(c,MONTHS[m],cx+r*Math.cos(th),cy+r*Math.sin(th)+fs*0.35,'700 '+fs+'px '+FONT,'#9FC3D8','center');}}
+function spMonths(c,cx,cy,r,fs){for(var m=0;m<12;m++){var th=-Math.PI/2+m*Math.PI/6;txt(c,MON(m),cx+r*Math.cos(th),cy+r*Math.sin(th)+fs*0.35,'700 '+fs+'px '+FONT,'#9FC3D8','center');}}
 function spFlat(c,cx,cy,k,r0,pEnd,lw){var i,p0=spPt(0,cx,cy,k,r0);c.lineWidth=lw||1.6;c.lineCap='round';for(i=1;i<=pEnd&&i<GT_N;i++){var p1=spPt(i,cx,cy,k,r0);c.strokeStyle=gtCol(GT[i].a);c.globalAlpha=0.35+0.65*Math.min(1,(i+400-pEnd)/400);c.beginPath();c.moveTo(p0[0],p0[1]);c.lineTo(p1[0],p1[1]);c.stroke();p0=p1;}c.globalAlpha=1;}
 
 /* ---- story scenes ---- */
@@ -3103,18 +3197,18 @@ $('labNext').onclick=function(){labGo(LB.step+1);};
 
 /* ---------- menu ---------- */
 function openMenu(){show('scrMenu');campBtn();$('campNote').textContent='';$('hello').textContent=T('Hi, '+S.name+' (Period '+S.period+'). Pick a chapter. Aim for 70% or higher on each quiz.','Hola, '+S.name+' (Periodo '+S.period+'). Elige un cap\u00EDtulo. Trata de sacar 70% o m\u00E1s en cada cuestionario.');var L=$('chList');L.innerHTML='';
- for(var i=0;i<CH.length;i++){(function(i){var ch=CH[i];var r=S.res[ch.id];var bt=el('button','ch'+(ch.ready?'':' off'));bt.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,T(ch.title,CH_ES[i][0])));tx.appendChild(el('small',null,T(ch.desc,CH_ES[i][1])));if(ES()&&ch.id!=='ch1')tx.appendChild(el('small','enOnly','Solo en ingl\u00E9s por ahora'));bt.appendChild(tx);
+ for(var i=0;i<CH.length;i++){(function(i){var ch=CH[i];var r=S.res[ch.id];var bt=el('button','ch'+(ch.ready?'':' off'));bt.appendChild(el('span','num',String(i+1)));var tx=el('span','tx');tx.appendChild(el('b',null,T(ch.title,CH_ES[i][0])));tx.appendChild(el('small',null,T(ch.desc,CH_ES[i][1])));if(ES()&&!ESDONE[ch.id])tx.appendChild(el('small','enOnly','Solo en ingl\u00E9s por ahora'));bt.appendChild(tx);
   bt.appendChild(el('span','pill'+(r?' done':''),r?(T('Score ','Puntos ')+r.score+'/'+r.total):(ch.ready?T('Start','Empezar'):T('Soon','Pronto'))));
   bt.onclick=function(){sfx.click();ac();startChapter(i);};L.appendChild(bt);if(i===0)L.appendChild(labMenuBtn());})(i);}}
 /* Every chapter start (menu or "Try again") goes through the headphones reminder card. */
 var hpNext=null;
 function startChapter(i){var ch=CH[i];ac();if(!ch.ready){show('scrSoon');$('soonTitle').textContent=T(ch.title,CH_ES[i][0]);return;}
  openMenu();hpNext=function(){launchChapter(i);};$('hpTitle').textContent=T('Chapter '+(i+1)+': '+ch.title,'Cap\u00EDtulo '+(i+1)+': '+CH_ES[i][0]);hpSoundBtn();
- var he=$('hpEn');if(LANG==='es'&&ch.id!=='ch1'){he.textContent='Este cap\u00EDtulo est\u00E1 solo en ingl\u00E9s por ahora. La historia, las voces y el cuestionario van a estar en ingl\u00E9s. (This chapter is in English for now.)';he.style.display='block';}else he.style.display='none';
+ var he=$('hpEn');if(LANG==='es'&&!ESDONE[ch.id]){he.textContent='Este cap\u00EDtulo est\u00E1 solo en ingl\u00E9s por ahora. La historia, las voces y el cuestionario van a estar en ingl\u00E9s. (This chapter is in English for now.)';he.style.display='block';}else he.style.display='none';
  $('hpCard').style.display='block';$('hpCard').scrollTop=0;
  say(T('Put on your headphones and turn up the volume so you can hear the story.','Ponte los aud\u00EDfonos y sube el volumen para que puedas escuchar la historia.'),1.05);}
 function hpSoundBtn(){$('hpSound').style.display=V.on?'none':'block';}
-function launchChapter(i){var ch=CH[i];CURCH=ch.id;ENONLY=(LANG==='es'&&ch.id!=='ch1');if(ch.id==='ch1'){startStory(T(CH1_STEPS,CH1_STEPS_ES),startDrillGame,T('Start drilling','Empezar a perforar'));story.ch1=true;}else if(ch.id==='ch2')startStory(CH2_STEPS,startSeasons,'Start the missions');else if(ch.id==='ch3')startStory(CH3_STEPS,startLab,'Start the Photon Lab');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');}
+function launchChapter(i){var ch=CH[i];CURCH=ch.id;ENONLY=(LANG==='es'&&!ESDONE[ch.id]);if(ch.id==='ch1'){startStory(T(CH1_STEPS,CH1_STEPS_ES),startDrillGame,T('Start drilling','Empezar a perforar'));story.ch1=true;}else if(ch.id==='ch2')startStoryL(CH2_STEPS,CH2_STEPS_ES,startSeasons,'Start the missions','Empezar las misiones');else if(ch.id==='ch3')startStoryL(CH3_STEPS,CH3_STEPS_ES,startLab,'Start the Photon Lab','Empezar el Laboratorio de Fotones');else if(ch.id==='ch4')startStory(CH4_STEPS,startOrbit,'Start the Orbit Lab');else if(ch.id==='ch5')startStory(CH5_STEPS,startConv,'Start the Convection Tank');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');}
 
 /* ---------- report + PDF ---------- */
 var pdfBlob=null,pdfName='';
@@ -3252,8 +3346,8 @@ hb.addEventListener('contextmenu',function(e){e.preventDefault();},false);
 $('btnPull').onclick=function(){if(D.phase!=='reached')return;D.phase='pull';D.pull=0;sfx.winch();$('btnPull').style.display='none';$('dMsg').textContent=T('Pulling up the core...','Sacando el n\u00FAcleo...');};
 $('ccNext').onclick=nextCore;
 $('btnCheck').onclick=seasonCheck;
-$('btnHint').onclick=function(){sfx.click();if(SE.done||SE.wait)return;$('misMsg').style.color='#FFD2B8';$('misMsg').textContent='Hint: '+MIS[SE.mi].hint;};
-$('btnPlay').onclick=function(){sfx.click();ac();SE.play=!SE.play;this.textContent=SE.play?'Pause':'Play a year';};
+$('btnHint').onclick=function(){sfx.click();if(SE.done||SE.wait)return;$('misMsg').style.color='#FFD2B8';$('misMsg').textContent=T('Hint: ','Pista: ')+mT(MIS[SE.mi],'hint');};
+$('btnPlay').onclick=function(){sfx.click();ac();SE.play=!SE.play;this.textContent=SE.play?T('Pause','Pausa'):T('Play a year','Ver un a\u00F1o');};
 var oc=$('orbCv');oc.addEventListener('touchstart',orbStart,false);oc.addEventListener('touchmove',orbDrag,false);oc.addEventListener('touchend',orbEnd,false);oc.addEventListener('mousedown',orbStart,false);oc.addEventListener('mousemove',orbDrag,false);window.addEventListener('mouseup',orbEnd,false);
 $('lbCheck').onclick=function(){misCheck(LAB.ms);};
 $('lbHint').onclick=function(){misHint(LAB.ms);};
@@ -3339,6 +3433,11 @@ var LTX=[
  ['nmH','\u00BFEst\u00E1 correcto?'],['nmWarn','Este es el nombre que ver\u00E1 tu docente. Revisa c\u00F3mo escribiste tu nombre y tu apellido. Cuando toques S\u00ED, tu nombre quedar\u00E1 fijo.'],['nmYes','S\u00ED, soy yo'],['nmNo','Regresar y corregirlo'],
  ['hpP1','<b>Ponte tus aud\u00EDfonos o auriculares y sube el volumen.</b> El Dr. Frost, Sam y Rosa leen la historia en voz alta, as\u00ED que vas a querer escucharla.',1],
  ['hpP2','\u00BFNo hay sonido? Aseg\u00FArate de que tu iPhone no est\u00E9 en silencio, sube el volumen y revisa que el sonido est\u00E9 activado en Configuraci\u00F3n (el engranaje de arriba).'],
+ ['seNote','Arrastra la Tierra alrededor de su \u00F3rbita. \u00A1No est\u00E1 a escala!'],['sNHl','Hemisferio norte:'],['sSHl','Hemisferio sur:'],['sRaysl','Los rayos directos caen en:'],['sPolel','Polo Sur:'],
+ ['lbCO2l','Nivel de CO<sub>2</sub>:',1],['lbT1','1700s'],['lbT2','hoy'],['lbT3','futuro'],['lbEscl','Infrarrojo que escap\u00F3 al espacio:'],['lbDownl','Infrarrojo enviado hacia abajo:'],
+ ['lbNote','Mol\u00E9culas: CO<sub>2</sub> (negro y rojo), vapor de agua H<sub>2</sub>O (rojo y blanco), N<sub>2</sub> (pares azules) y O<sub>2</sub> (pares rosados). El infrarrojo pasa directo a trav\u00E9s del N<sub>2</sub> y el O<sub>2</sub>. El term\u00F3metro es un modelo simplificado, no un pron\u00F3stico real.',1],
+ ['abHeat','Subir el calor'],['abFill','Llenar el mapa con esta superficie'],['abAlbl','Albedo total:'],['abAbsl','Luz solar absorbida:'],['abIcel','Cuadros de hielo marino:'],
+ ['abNote','Los puntos amarillos son luz solar que llega. Los puntos blancos se reflejan de regreso al espacio. Los destellos anaranjados son luz solar absorbida. Los valores de albedo son aproximados.'],
  ['hpSound','El sonido est\u00E1 apagado. Toca para activarlo.'],['hpGo','\u00A1Empezar la historia!'],['hpBack','Volver a los cap\u00EDtulos']];
 var LTX_EN={},LPH=[['inFirst','Nombre'],['inLast','Apellido'],['inCode','Escribe el c\u00F3digo']];
 function langBtns(){var es=LANG==='es';$('lgEn').className='chip'+(es?'':' sel');$('lgEs').className='chip'+(es?' sel':'');$('sgEn').className='chip'+(es?'':' sel');$('sgEs').className='chip'+(es?' sel':'');}
@@ -3349,12 +3448,18 @@ function applyLang(){var es=LANG==='es',i,e,k;
 /* Switching language keeps the student's place: menus and the lab redraw, and a Chapter 1 story, drill, or quiz
    swaps to the other language's copy (the copies have the same steps). Answers already saved stay as written. */
 function setLang(l){l=(l==='es')?'es':'en';sfx.click();if(LANG===l){langBtns();return;}LANG=l;saveSet();hush();
- if(cur==='scrCamp'||(CURCH&&CURCH!=='ch1'&&cur!=='scrMenu'&&cur!=='scrReport'&&cur!=='scrSign'&&cur!=='scrIceLab'))ENONLY=(LANG==='es');
+ if(cur==='scrCamp'||(CURCH&&!ESDONE[CURCH]&&cur!=='scrMenu'&&cur!=='scrReport'&&cur!=='scrSign'&&cur!=='scrIceLab'))ENONLY=(LANG==='es');
  applyLang();if($('setCard').style.display==='block'){$('btnSound').textContent=sndTx();buildVoiceRows();$('codeMsg').textContent='';}
  if(cur==='scrMenu')openMenu();else if(cur==='scrReport')openReport(-1);else if(cur==='scrIceLab')labRender();
  else if(cur==='scrStory'&&story&&story.ch1){story.steps=T(CH1_STEPS,CH1_STEPS_ES);story.last=T('Start drilling','Empezar a perforar');renderStep();}
  else if(cur==='scrDrill'){setDrillUI();if($('coreCard').style.display==='block')showCoreCard();}
- else if(cur==='scrQuiz'&&Q.ch==='ch1'&&Q.i<Q.list.length){Q.list=T(CH1_QUIZ,CH1_QUIZ_ES);renderQ();}}
+ else if(cur==='scrStory'&&story&&story.sw){story.steps=T(story.sw[0],story.sw[1]);story.last=T(story.sw[2],story.sw[3]);renderStep();}
+ else if(cur==='scrQuiz'&&Q.ch==='ch1'&&Q.i<Q.list.length){Q.list=T(CH1_QUIZ,CH1_QUIZ_ES);renderQ();}
+ else if(cur==='scrQuiz'&&Q.sw&&Q.i<Q.list.length){Q.list=T(Q.sw[0],Q.sw[1]);renderQ();}
+ else if(CURMIS&&$(CURMIS.pre+'Head')&&$(cur).contains($(CURMIS.pre+'Head')))misHead(CURMIS);
+ if(LREF[cur])LREF[cur]();}
+/* Per-screen refresh after a language switch (dynamic text that is not redrawn every frame). */
+var LREF={};
 $('lgEn').onclick=function(){setLang('en');};$('lgEs').onclick=function(){setLang('es');};
 $('sgEn').onclick=function(){setLang('en');};$('sgEs').onclick=function(){setLang('es');};
 
