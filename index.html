@@ -431,15 +431,15 @@ input[type=range]{padding:0;border:0;background:none;height:34px;margin:4px 0 0 
     <div id="dcChips" class="tools"></div>
     <button id="dcFlip" class="sbtn">Flip the wind</button>
     <div class="stats">
-      <div>Altitude: <b id="dcZ"></b></div>
-      <div>Air temperature: <b id="dcT"></b></div>
-      <div>Humidity: <b id="dcRH"></b></div>
-      <div>Water vapor: <b id="dcW"></b></div>
-      <div>Raining: <b id="dcR"></b></div>
+      <div><span id="dcZl">Altitude:</span> <b id="dcZ"></b></div>
+      <div><span id="dcTl">Air temperature:</span> <b id="dcT"></b></div>
+      <div><span id="dcRHl">Humidity:</span> <b id="dcRH"></b></div>
+      <div><span id="dcWl">Water vapor:</span> <b id="dcW"></b></div>
+      <div><span id="dcRl">Raining:</span> <b id="dcR"></b></div>
       <div><b id="dcCmp"></b></div>
     </div>
     <div id="dcCards"></div>
-    <p class="note">Example air parcel: 25&deg;C at sea level with a dew point of 17&deg;C, and a mountain about 3 km high. The cooling and warming rates are real: about 10&deg;C per km for dry air and about 5 to 6&deg;C per km inside clouds.</p>
+    <p id="dcNote" class="note">Example air parcel: 25&deg;C at sea level with a dew point of 17&deg;C, and a mountain about 3 km high. The cooling and warming rates are real: about 10&deg;C per km for dry air and about 5 to 6&deg;C per km inside clouds.</p>
   </div>
 
   <div id="scrPlan" class="scr">
@@ -597,7 +597,7 @@ function T(a,b){return ES()?b:a;}
 /* Spanish copies of Chapters 2-8 keep the English structure; these helpers copy it and swap only the words.
    trSteps: story lines. trMis: adds .es {tx,hint,yes} to each mission; mT(x,k) reads the right one.
    trQuiz: copies a quiz list and swaps q, o, why, label names, and drawing color names. */
-var ESDONE={ch1:true,ch2:true,ch3:true,ch4:true,ch5:true};
+var ESDONE={ch1:true,ch2:true,ch3:true,ch4:true,ch5:true,ch6:true};
 function trSteps(en,es){var o=[],i;for(i=0;i<en.length;i++)o.push({sc:en[i].sc,who:en[i].who,tx:es[i]});return o;}
 function trMis(L,es){for(var i=0;i<L.length;i++)L[i].es={tx:es[i][0],hint:es[i][1],yes:es[i][2]};return L;}
 function mT(x,k){return (ES()&&x.es&&x.es[k]!==undefined)?x.es[k]:x[k];}
@@ -2205,30 +2205,34 @@ function rainCloud(c,x,y,s,dark,rain,t){var col=mix('#FFFFFF','#7A8794',dark);c.
 var SL_ORDER=['sl_intro','sl_oro','sl_cool','sl_dew','sl_lee','sl_shadow','sl_sierra','sl_casc','sl_hawaii','sl_himal','sl_andes','sl_end'];
 function slideFrame(c,t,name,title,ord){ord=ord||SL_ORDER;c.fillStyle='#0E1B2C';c.fillRect(0,0,400,300);c.fillStyle='#F4FAFD';rr(c,6,6,388,272,10);c.fill();
  c.fillStyle='#16283E';rr(c,6,6,388,30,10);c.fill();c.fillRect(6,26,388,10);txt(c,title,16,27,'800 14px '+FONT,'#FFFFFF');
- var n=ord.indexOf(name)+1;txt(c,'Slide '+n+' of '+ord.length,388,27,'700 10px '+FONT,'#BFE6F5','right');
+ var n=ord.indexOf(name)+1;txt(c,T('Slide ','Diapositiva ')+n+T(' of ',' de ')+ord.length,388,27,'700 10px '+FONT,'#BFE6F5','right');
  person(c,368,298,0.42,'#2A9DB5',{glasses:true,clip:true,skin:'#E8B48F',wave:true},t);}
 function slideLabel(c,s,x,y,col,al){c.font='800 11px '+FONT;var w=mtext(c,s)+10,x0=al==='left'?x-5:(al==='right'?x-w+5:x-w/2);c.fillStyle='rgba(244,250,253,0.88)';rr(c,x0,y-12,w,16,5);c.fill();txt(c,s,x,y,'800 11px '+FONT,col||'#0E1B2C',al||'center');}
 function sceneSlide(c,name,t){var r,i;
- if(name==='sl_intro'){slideFrame(c,t,name,'Mountains and Rain Shadows');r=crossSec(c,14,40,372,190,t,{});rainCloud(c,r.pk-80,r.gy(r.pk-80)-40,1,0.6,1,t);arw(c,24,180,90,180,'#FFFFFF',3,10);
-  slideLabel(c,'Rainforest',r.pk-95,252,'#1F5A2E');slideLabel(c,'Desert',r.pk+95,252,'#8A5A1E');slideLabel(c,'Why so different?',200,270,'#0E1B2C');}
- else if(name==='sl_oro'){slideFrame(c,t,name,'Orographic lifting');r=crossSec(c,14,40,372,200,t,{wet:0.5,dry:0.5});
+ if(name==='sl_intro'){slideFrame(c,t,name,T('Mountains and Rain Shadows','Monta\u00F1as y sombras de lluvia'));r=crossSec(c,14,40,372,190,t,{});rainCloud(c,r.pk-80,r.gy(r.pk-80)-40,1,0.6,1,t);arw(c,24,180,90,180,'#FFFFFF',3,10);
+  slideLabel(c,T('Rainforest','Selva lluviosa'),r.pk-95,252,'#1F5A2E');slideLabel(c,T('Desert','Desierto'),r.pk+95,252,'#8A5A1E');slideLabel(c,T('Why so different?','\u00BFPor qu\u00E9 son tan distintos?'),200,270,'#0E1B2C');}
+ else if(name==='sl_oro'){slideFrame(c,t,name,T('Orographic lifting','Ascenso orogr\u00E1fico'));r=crossSec(c,14,40,372,200,t,{wet:0.5,dry:0.5});
   var f=(t*0.35)%1;for(i=0;i<3;i++){var ff=(f+i/3)%1,px=40+ff*(r.pk-40-10),py=r.gy(px)-14-i*14;c.fillStyle='rgba(255,255,255,0.9)';circ(c,px,py,6);}
-  arw(c,40,215,r.pk-90,r.gy(r.pk-90)-14,'#FF7A2F',4,12);slideLabel(c,'Moist air is pushed UP',110,72,'#0E1B2C','left');slideLabel(c,'the WINDWARD side',110,88,'#FF7A2F','left');slideLabel(c,'Wind',40,200,'#0E1B2C');}
- else if(name==='sl_cool'){slideFrame(c,t,name,'Rising air expands and cools');c.strokeStyle='#4A6B85';c.lineWidth=2;c.beginPath();c.moveTo(60,250);c.lineTo(60,50);c.stroke();
+  arw(c,40,215,r.pk-90,r.gy(r.pk-90)-14,'#FF7A2F',4,12);slideLabel(c,T('Moist air is pushed UP','El aire h\u00FAmedo es empujado HACIA ARRIBA'),110,72,'#0E1B2C','left');slideLabel(c,T('the WINDWARD side','por el lado de BARLOVENTO'),110,88,'#FF7A2F','left');slideLabel(c,T('Wind','Viento'),40,200,'#0E1B2C');}
+ else if(name==='sl_cool'){slideFrame(c,t,name,T('Rising air expands and cools','El aire que sube se expande y se enfr\u00EDa'));c.strokeStyle='#4A6B85';c.lineWidth=2;c.beginPath();c.moveTo(60,250);c.lineTo(60,50);c.stroke();
   for(i=0;i<=3;i++){var yk=250-i*62;c.beginPath();c.moveTo(55,yk);c.lineTo(65,yk);c.stroke();slideLabel(c,i+' km',50,yk+4,'#4A6B85','right');}
-  for(i=0;i<4;i++){var by=250-i*62-10,br=10+i*4;c.fillStyle=mix('#FF9A5C','#4FA3E0',i/3);circ(c,120,by,br);slideLabel(c,(i===0?'25':(i===1?'15':(i===2?'about 10':'about 4')))+DEG+'C',150,by+4,'#0E1B2C','left');}
-  c.strokeStyle='#9FB8CC';c.setLineDash([4,4]);c.beginPath();c.moveTo(70,188);c.lineTo(380,188);c.stroke();c.setLineDash([]);slideLabel(c,'cloud base (example)',380,182,'#4A6B85','right');
-  slideLabel(c,'Dry air:',300,214,'#B3261E');slideLabel(c,'about 10'+DEG+'C cooler per km',300,230,'#B3261E');slideLabel(c,'In clouds:',300,128,'#1F5FA8');slideLabel(c,'about 5 to 6'+DEG+'C per km',300,144,'#1F5FA8');slideLabel(c,'Example air parcel',255,262,'#4A6B85');}
- else if(name==='sl_dew'){slideFrame(c,t,name,'Clouds form at the dew point');r=crossSec(c,14,40,372,200,t,{wet:1,dry:0.3});
-  c.strokeStyle='#4A6B85';c.setLineDash([5,4]);c.lineWidth=1.5;c.beginPath();c.moveTo(20,170);c.lineTo(r.pk,170);c.stroke();c.setLineDash([]);slideLabel(c,'dew point reached',24,188,'#4A6B85','left');
-  rainCloud(c,r.pk-70,r.gy(r.pk-70)-36,1.1,0.7,1,t);rainCloud(c,r.pk-130,150,0.8,0.4,0.6,t);slideLabel(c,'Rain and snow on the windward side',200,262,'#1F5A2E');}
- else if(name==='sl_lee'){slideFrame(c,t,name,'The leeward side: warm and dry');r=crossSec(c,14,40,372,200,t,{wet:1,dry:1});
+  for(i=0;i<4;i++){var by=250-i*62-10,br=10+i*4;c.fillStyle=mix('#FF9A5C','#4FA3E0',i/3);circ(c,120,by,br);slideLabel(c,(i===0?'25':(i===1?'15':(i===2?T('about 10','unos 10'):T('about 4','unos 4'))))+DEG+'C',150,by+4,'#0E1B2C','left');}
+  c.strokeStyle='#9FB8CC';c.setLineDash([4,4]);c.beginPath();c.moveTo(70,188);c.lineTo(380,188);c.stroke();c.setLineDash([]);slideLabel(c,T('cloud base (example)','base de la nube (ejemplo)'),380,182,'#4A6B85','right');
+  slideLabel(c,T('Dry air:','Aire seco:'),300,214,'#B3261E');slideLabel(c,T('about 10'+DEG+'C cooler per km','unos 10'+DEG+'C m\u00E1s fr\u00EDo por km'),300,230,'#B3261E');slideLabel(c,T('In clouds:','En las nubes:'),300,128,'#1F5FA8');slideLabel(c,T('about 5 to 6'+DEG+'C per km','unos 5 a 6'+DEG+'C por km'),300,144,'#1F5FA8');slideLabel(c,T('Example air parcel','Porci\u00F3n de aire de ejemplo'),255,262,'#4A6B85');}
+ else if(name==='sl_dew'){slideFrame(c,t,name,T('Clouds form at the dew point','Las nubes se forman en el punto de roc\u00EDo'));r=crossSec(c,14,40,372,200,t,{wet:1,dry:0.3});
+  c.strokeStyle='#4A6B85';c.setLineDash([5,4]);c.lineWidth=1.5;c.beginPath();c.moveTo(20,170);c.lineTo(r.pk,170);c.stroke();c.setLineDash([]);slideLabel(c,T('dew point reached','se alcanza el punto de roc\u00EDo'),24,188,'#4A6B85','left');
+  rainCloud(c,r.pk-70,r.gy(r.pk-70)-36,1.1,0.7,1,t);rainCloud(c,r.pk-130,150,0.8,0.4,0.6,t);slideLabel(c,T('Rain and snow on the windward side','Lluvia y nieve en el lado de barlovento'),200,262,'#1F5A2E');}
+ else if(name==='sl_lee'){slideFrame(c,t,name,T('The leeward side: warm and dry','El lado de sotavento: c\u00E1lido y seco'));r=crossSec(c,14,40,372,200,t,{wet:1,dry:1});
   rainCloud(c,r.pk-60,r.gy(r.pk-60)-36,0.9,0.6,0.8,t);arw(c,r.pk+20,r.top-10,r.pk+120,r.gy(r.pk+120)-12,'#FF7A2F',4,12);
-  slideLabel(c,'Sinking air is squeezed',290,74,'#0E1B2C');slideLabel(c,'and warms about 10'+DEG+'C per km',290,90,'#B3261E');slideLabel(c,'Warm, dry wind',r.pk+120,262,'#8A5A1E');}
- else if(name==='sl_shadow'){slideFrame(c,t,name,'The rain shadow');r=crossSec(c,14,40,372,200,t,{wet:1,dry:1});rainCloud(c,r.pk-70,r.gy(r.pk-70)-36,1,0.6,1,t);
-  c.fillStyle='rgba(120,90,40,0.18)';c.fillRect(r.pk+10,46,372-(r.pk-14)-10,200);slideLabel(c,'RAIN SHADOW',r.pk+95,70,'#8A5A1E');
-  slideLabel(c,'WINDWARD: wet',r.pk-100,262,'#1F5A2E');slideLabel(c,'LEEWARD: dry',r.pk+100,262,'#8A5A1E');arw(c,24,190,80,190,'#FFFFFF',3,10);}
- else{var ex={sl_sierra:['Sierra Nevada, California','Pacific Ocean','Wet western slopes','Great Basin and','Death Valley: dry',false],
+  slideLabel(c,T('Sinking air is squeezed','El aire que baja se comprime'),290,74,'#0E1B2C');slideLabel(c,T('and warms about 10'+DEG+'C per km','y se calienta unos 10'+DEG+'C por km'),290,90,'#B3261E');slideLabel(c,T('Warm, dry wind','Viento c\u00E1lido y seco'),r.pk+120,262,'#8A5A1E');}
+ else if(name==='sl_shadow'){slideFrame(c,t,name,T('The rain shadow','La sombra de lluvia'));r=crossSec(c,14,40,372,200,t,{wet:1,dry:1});rainCloud(c,r.pk-70,r.gy(r.pk-70)-36,1,0.6,1,t);
+  c.fillStyle='rgba(120,90,40,0.18)';c.fillRect(r.pk+10,46,372-(r.pk-14)-10,200);slideLabel(c,T('RAIN SHADOW','SOMBRA DE LLUVIA'),r.pk+95,70,'#8A5A1E');
+  slideLabel(c,T('WINDWARD: wet','BARLOVENTO: h\u00FAmedo'),r.pk-100,262,'#1F5A2E');slideLabel(c,T('LEEWARD: dry','SOTAVENTO: seco'),r.pk+100,262,'#8A5A1E');arw(c,24,190,80,190,'#FFFFFF',3,10);}
+ else{var ex=ES()?{sl_sierra:['Sierra Nevada, California','Oc\u00E9ano Pac\u00EDfico','Laderas oeste h\u00FAmedas','Gran Cuenca y','Valle de la Muerte: secos',false],
+  sl_casc:['Cascadas, Washington','Seattle, pen\u00EDnsula Ol\u00EDmpica','Lado oeste h\u00FAmedo','Este de Washington','mucho m\u00E1s seco',false],
+  sl_hawaii:['Haw\u00E1i (Kauai)','Alisios del noreste','Laderas de barlovento lluviosas','Lado de sotavento','seco',false],
+  sl_himal:['Himalaya','Monz\u00F3n de verano desde el sur','Lluvias enormes en el lado sur','Meseta del T\u00EDbet','seca',false],
+  sl_andes:['Los Andes y Atacama','Humedad desde el lado amaz\u00F3nico','Laderas este h\u00FAmedas','Desierto de Atacama:','de los lugares m\u00E1s secos',true]}[name]:{sl_sierra:['Sierra Nevada, California','Pacific Ocean','Wet western slopes','Great Basin and','Death Valley: dry',false],
   sl_casc:['Cascades, Washington','Seattle, Olympic Peninsula','Wet west side','Eastern Washington','much drier',false],
   sl_hawaii:['Hawaii (Kauai)','Trade winds from the northeast','Rainy windward slopes','Leeward side','dry',false],
   sl_himal:['Himalayas','Summer monsoon from the south','Huge rains on the south side','Tibetan Plateau','dry',false],
@@ -2236,9 +2240,9 @@ function sceneSlide(c,name,t){var r,i;
   if(ex){slideFrame(c,t,name,ex[0]);r=crossSec(c,14,40,372,190,t,{flip:ex[5],seaL:name!=='sl_himal',seaR:name==='sl_hawaii'});var wx=ex[5]?r.pk+80:r.pk-80;rainCloud(c,wx,r.gy(wx)-36,0.95,0.6,1,t);
    if(ex[5])arw(c,376,180,316,180,'#FFFFFF',3,10);else arw(c,24,180,84,180,'#FFFFFF',3,10);
    var wetX=ex[5]?300:100,dryX=ex[5]?100:300;slideLabel(c,ex[1],ex[5]?300:110,56+8,'#0E1B2C');slideLabel(c,ex[2],wetX,248,'#1F5A2E');slideLabel(c,ex[3],dryX,248,'#8A5A1E');slideLabel(c,ex[4],dryX,263,'#8A5A1E');
-   if(name==='sl_hawaii')slideLabel(c,'Mount Waialeale: one of the wettest spots on Earth',200,226,'#1F5FA8');
-   if(name==='sl_andes')slideLabel(c,'A cold ocean current also helps keep it dry',200,226,'#1F5FA8');}
-  else{slideFrame(c,t,'sl_end','Your turn!');r=crossSec(c,14,40,372,200,t,{wet:0.5,dry:0.5,seaR:true});rainCloud(c,60+((t*30)%120),110,1,0.2,0,t);slideLabel(c,'Drag the cloud over the mountain',200,262,'#0E1B2C');}}}
+   if(name==='sl_hawaii')slideLabel(c,T('Mount Waialeale: one of the wettest spots on Earth','Monte Waialeale: de los lugares m\u00E1s lluviosos del mundo'),200,226,'#1F5FA8');
+   if(name==='sl_andes')slideLabel(c,T('A cold ocean current also helps keep it dry','Una corriente oce\u00E1nica fr\u00EDa tambi\u00E9n ayuda a que sea seco'),200,226,'#1F5FA8');}
+  else{slideFrame(c,t,'sl_end',T('Your turn!','\u00A1Te toca!'));r=crossSec(c,14,40,372,200,t,{wet:0.5,dry:0.5,seaR:true});rainCloud(c,60+((t*30)%120),110,1,0.2,0,t);slideLabel(c,T('Drag the cloud over the mountain','Arrastra la nube sobre la monta\u00F1a'),200,262,'#0E1B2C');}}}
 function drawScene6(c,name,t){if(name.indexOf('sl_')===0)sceneSlide(c,name,t);else drawScene7(c,name,t);}
 
 var CH6_STEPS=[
@@ -2284,31 +2288,37 @@ function dcLoop(dt,t){var c=DC.c,s,i;DC.x+=(DC.tx-DC.x)*Math.min(1,dt*8);s=dcSta
   for(i=0;i<5;i++){var px=side===0?190-i*28:210+i*28,py=dcY(dcH(px));if(wv>0.15+i*0.15){c.fillStyle='#1F5A2E';circ(c,px,py-6,6);c.fillStyle='#5A3B22';c.fillRect(px-1.5,py-2,3,5);}if(dv>0.15+i*0.15){c.fillStyle='#4F8A3C';c.fillRect(px-2,py-11,4,11);c.fillRect(px-6,py-8,3,5);}}}
  c.fillStyle='#F4FBFF';c.beginPath();c.moveTo(180,dcY(dcH(180)));for(var xs=180;xs<=220;xs+=2)c.lineTo(xs,dcY(dcH(xs)));c.closePath();c.fill();
  c.strokeStyle='rgba(74,107,133,0.7)';c.lineWidth=1;c.font='600 9px '+FONT;for(i=0;i<=3;i++){var yk=dcY(i);c.beginPath();c.moveTo(0,yk);c.lineTo(8,yk);c.stroke();txt(c,i+' km',11,yk+3,'700 9px '+FONT,'#2C4A63');}
- c.setLineDash([4,4]);c.beginPath();c.moveTo(40,dcY(DC_ZB));c.lineTo(360,dcY(DC_ZB));c.stroke();c.setLineDash([]);txt(c,'cloud base (example)',356,dcY(DC_ZB)-4,'600 9px '+FONT,'#4A6B85','right');
- var ax=DC.d>0?60:340;arw(c,ax-DC.d*30,40,ax+DC.d*30,40,'#FFFFFF',4,13);txt(c,'wind',ax,28,'800 11px '+FONT,'#0E1B2C','center');
- for(i=0;i<DC.tags.length;i++){var tg=DC.tags[i];pill(c,tg.k,tg.x,dcY(dcH(tg.x))+(tg.k==='Desert here'?30:-8),11,tg.k==='Windward'?'#6FE3A4':(tg.k==='Leeward'?'#FFB27E':'#FFD45A'),'center');c.fillStyle='#FF7A2F';circ(c,tg.x,dcY(dcH(tg.x)),4);}
+ c.setLineDash([4,4]);c.beginPath();c.moveTo(40,dcY(DC_ZB));c.lineTo(360,dcY(DC_ZB));c.stroke();c.setLineDash([]);txt(c,T('cloud base (example)','base de la nube (ejemplo)'),356,dcY(DC_ZB)-4,'600 9px '+FONT,'#4A6B85','right');
+ var ax=DC.d>0?60:340;arw(c,ax-DC.d*30,40,ax+DC.d*30,40,'#FFFFFF',4,13);txt(c,T('wind','viento'),ax,28,'800 11px '+FONT,'#0E1B2C','center');
+ for(i=0;i<DC.tags.length;i++){var tg=DC.tags[i];pill(c,T(tg.k,DC_KES[tg.k]),tg.x,dcY(dcH(tg.x))+(tg.k==='Desert here'?30:-8),11,tg.k==='Windward'?'#6FE3A4':(tg.k==='Leeward'?'#FFB27E':'#FFD45A'),'center');c.fillStyle='#FF7A2F';circ(c,tg.x,dcY(dcH(tg.x)),4);}
  var cy=dcY(s.z)-26,sz=s.lee?Math.max(0.35,s.rh/100):(s.z>DC_ZB?1+0.25*(s.z-DC_ZB):0.75),dark=s.lee?0:(s.z>DC_ZB?Math.min(0.8,0.3+0.25*(s.z-DC_ZB)):0.05);
  c.globalAlpha=s.lee?Math.max(0.25,s.rh/100):1;rainCloud(c,DC.x,cy,sz,dark,s.rain?1:0,t);c.globalAlpha=1;
- if(!s.lee&&s.z<=DC_ZB){txt(c,'moist air',DC.x,cy+30,'700 9px '+FONT,'#2C4A63','center');}
- var key=Math.round(s.z*10)+'|'+Math.round(s.T)+'|'+Math.round(s.rh)+'|'+s.lee;if(key!==DC.last){DC.last=key;$('dcZ').textContent=s.z.toFixed(1)+' km';$('dcT').textContent=Math.round(s.T)+DEG+'C';$('dcRH').textContent=Math.round(s.rh)+'%';$('dcW').textContent=s.w.toFixed(1)+' g of water per kg of air';
-  $('dcR').textContent=s.rain?'Yes, on the windward slope':(s.lee?'No (the air is sinking and drying out)':'Not yet');
-  $('dcCmp').textContent=s.lee&&s.z<2.9?('At '+s.z.toFixed(1)+' km on the windward side it was about '+Math.round(dcWind(s.z))+DEG+'C. Now it is about '+Math.round(s.T)+DEG+'C.'):'';}}
+ if(!s.lee&&s.z<=DC_ZB){txt(c,T('moist air','aire h\u00FAmedo'),DC.x,cy+30,'700 9px '+FONT,'#2C4A63','center');}
+ var key=Math.round(s.z*10)+'|'+Math.round(s.T)+'|'+Math.round(s.rh)+'|'+s.lee+LANG;if(key!==DC.last){DC.last=key;$('dcZ').textContent=s.z.toFixed(1)+' km';$('dcT').textContent=Math.round(s.T)+DEG+'C';$('dcRH').textContent=Math.round(s.rh)+'%';$('dcW').textContent=s.w.toFixed(1)+T(' g of water per kg of air',' g de agua por kg de aire');
+  $('dcR').textContent=s.rain?T('Yes, on the windward slope','S\u00ED, en la ladera de barlovento'):(s.lee?T('No (the air is sinking and drying out)','No (el aire est\u00E1 bajando y sec\u00E1ndose)'):T('Not yet','Todav\u00EDa no'));
+  $('dcCmp').textContent=s.lee&&s.z<2.9?(ES()?('A '+s.z.toFixed(1)+' km en el lado de barlovento estaba a unos '+Math.round(dcWind(s.z))+DEG+'C. Ahora est\u00E1 a unos '+Math.round(s.T)+DEG+'C.'):('At '+s.z.toFixed(1)+' km on the windward side it was about '+Math.round(dcWind(s.z))+DEG+'C. Now it is about '+Math.round(s.T)+DEG+'C.')):'';}}
 function dcTouch(e){e.preventDefault();ac();var p=lpos($('dcCv'),e,400);if(DC.sel){var tg=DC.sel;var keep=[];for(var i=0;i<DC.tags.length;i++){if(DC.tags[i].k!==tg)keep.push(DC.tags[i]);}keep.push({k:tg,x:Math.max(45,Math.min(355,p.x))});DC.tags=keep;DC.sel='';dcChips();sfx.click();return;}
  DC.drag=true;DC.tx=Math.max(20,Math.min(380,p.x));}
 function dcMove(e){if(!DC.drag)return;e.preventDefault();var p=lpos($('dcCv'),e,400);DC.tx=Math.max(20,Math.min(380,p.x));}
 function dcEnd(){DC.drag=false;}
-function dcChips(){var B=$('dcChips'),i,list=DC.chipList||[];B.innerHTML='';for(i=0;i<list.length;i++){(function(k){var b=el('button','chip'+(DC.sel===k?' sel':''),k);b.onclick=function(){sfx.click();DC.sel=k;dcChips();$('dcMsg').style.color='#FFD2B8';$('dcMsg').textContent='Now tap the picture where "'+k+'" goes.';};B.appendChild(b);})(list[i]);}B.style.display=list.length?'flex':'none';}
+function dcChips(){var B=$('dcChips'),i,list=DC.chipList||[];B.innerHTML='';for(i=0;i<list.length;i++){(function(k){var b=el('button','chip'+(DC.sel===k?' sel':''),T(k,DC_KES[k]));b.onclick=function(){sfx.click();DC.sel=k;dcChips();$('dcMsg').style.color='#FFD2B8';$('dcMsg').textContent=T('Now tap the picture where "'+k+'" goes.','Ahora toca la imagen donde va "'+DC_KES[k]+'".');};B.appendChild(b);})(list[i]);}B.style.display=list.length?'flex':'none';}
 function dcFlip(){sfx.click();DC.d=-DC.d;DC.wet=[0,0];DC.dry=[0,0];DC.x=DC.tx=DC.d>0?20:380;DC.maxU=0;var keep=[];for(var i=0;i<DC.tags.length;i++){if(DC.tags[i].k==='Desert here')keep.push(DC.tags[i]);}DC.tags=keep;DC.last='';}
 function dcTag(k){for(var i=0;i<DC.tags.length;i++){if(DC.tags[i].k===k)return DC.tags[i];}return null;}
 function dcSideOk(tg,lee){if(!tg)return false;var u=DC.d>0?tg.x:400-tg.x;return lee?(u>205&&u<355):(u>45&&u<195);}
+var DC_KES={'Windward':'Barlovento','Leeward':'Sotavento','Desert here':'Aqu\u00ED hay desierto','West':'Oeste','East':'Este','Northeast':'Noreste','Southwest':'Suroeste','South':'Sur','North':'Norte'};
+var DC_CARDS_ES=[['Sierra Nevada (California)','El oeste es h\u00FAmedo: el aire del Pac\u00EDfico sube por las laderas del oeste. El lado este, con la Gran Cuenca y el Valle de la Muerte, es seco.'],
+ ['Cascadas (Washington)','El oeste es h\u00FAmedo: Seattle y la pen\u00EDnsula Ol\u00EDmpica. El este de Washington es mucho m\u00E1s seco.'],
+ ['Haw\u00E1i (Kauai)','El noreste es h\u00FAmedo: los vientos alisios soplan desde el noreste, as\u00ED que esas laderas son de barlovento. Los lados del suroeste son secos.'],
+ ['Himalaya','El sur es h\u00FAmedo: el monz\u00F3n de verano trae aire h\u00FAmedo del oc\u00E9ano \u00CDndico. La meseta del T\u00EDbet, al norte, es seca.'],
+ ['Los Andes (cerca de Atacama)','El este es h\u00FAmedo: la humedad viene del lado amaz\u00F3nico. El desierto de Atacama, en el lado oeste, es uno de los lugares m\u00E1s secos de la Tierra.']];
 var DC_CARDS=[['Sierra Nevada (California)',['West','East'],'West','West is wet: Pacific air rises up the western slopes. The east side, with the Great Basin and Death Valley, is dry.'],
  ['Cascades (Washington)',['West','East'],'West','West is wet: Seattle and the Olympic Peninsula. Eastern Washington is much drier.'],
  ['Hawaii (Kauai)',['Northeast','Southwest'],'Northeast','Northeast is wet: trade winds blow from the northeast, so those slopes are windward. The southwest sides are dry.'],
  ['Himalayas',['South','North'],'South','South is wet: the summer monsoon brings moist air from the Indian Ocean. The Tibetan Plateau to the north is dry.'],
  ['Andes (near the Atacama)',['East','West'],'East','East is wet: moisture comes from the Amazon side. The Atacama Desert on the west side is one of the driest places on Earth.']];
-function dcBuildCards(){var B=$('dcCards'),i;B.innerHTML='';for(i=0;i<DC_CARDS.length;i++){(function(i){var cd=DC_CARDS[i],box=el('div','dcard');box.appendChild(el('b',null,cd[0]));box.appendChild(el('p',null,'Which side is WET?'));var row=el('div','tools');
-  for(var j=0;j<2;j++){(function(o){var b=el('button','chip'+(DC.cards[i]===o?(o===cd[2]?' okc':' badc'):''),o);b.onclick=function(){sfx.click();DC.cards[i]=o;if(o===cd[2])sfx.good();else sfx.bad();dcBuildCards();};row.appendChild(b);})(cd[1][j]);}
-  box.appendChild(row);if(DC.cards[i])box.appendChild(el('p','dcf',(DC.cards[i]===cd[2]?'Correct! ':'Not quite. ')+cd[3]));B.appendChild(box);})(i);}}
+function dcBuildCards(){var B=$('dcCards'),i;B.innerHTML='';for(i=0;i<DC_CARDS.length;i++){(function(i){var cd=DC_CARDS[i],box=el('div','dcard');box.appendChild(el('b',null,T(cd[0],DC_CARDS_ES[i][0])));box.appendChild(el('p',null,T('Which side is WET?','\u00BFQu\u00E9 lado es H\u00DAMEDO?')));var row=el('div','tools');
+  for(var j=0;j<2;j++){(function(o){var b=el('button','chip'+(DC.cards[i]===o?(o===cd[2]?' okc':' badc'):''),T(o,DC_KES[o]));b.onclick=function(){sfx.click();DC.cards[i]=o;if(o===cd[2])sfx.good();else sfx.bad();dcBuildCards();};row.appendChild(b);})(cd[1][j]);}
+  box.appendChild(row);if(DC.cards[i])box.appendChild(el('p','dcf',(DC.cards[i]===cd[2]?T('Correct! ','\u00A1Correcto! '):T('Not quite. ','No exactamente. '))+T(cd[3],DC_CARDS_ES[i][1])));B.appendChild(box);})(i);}}
 var DC_MIS=[
  {tx:'Make it rain! Drag the cloud from the ocean up the mountain. Watch the altitude, temperature, and humidity.',hint:'Touch the picture and slide your finger toward the mountain. The cloud rains once the air is lifted above the cloud base.',start:function(){DC.chipList=[];dcChips();$('dcCards').style.display='none';},ok:function(){return DC.wet[DC.d>0?0:1]>0.3;},yes:'It rains! Rising air cooled to its dew point, so water vapor condensed into clouds and fell as rain on the windward slope. The forest is getting greener.'},
  {tx:'Now drag the cloud over the top and all the way down the other side. Compare the temperature with the windward side at the same height.',hint:'Keep dragging past the peak to the ocean on the far side.',ok:function(){return DC.maxU>=355;},yes:'The cloud dried up and the air arrived much warmer than when it started, because sinking air warms about 10 degrees per kilometer and it lost its water as rain. The leeward side became a desert: a rain shadow.'},
@@ -2316,8 +2326,16 @@ var DC_MIS=[
  {tx:'Flip the wind with the button below. Before you drag the cloud, predict: tap "Desert here" and tap where the desert will form now.',hint:'Flip the wind first. The desert forms on the side the wind blows AWAY from, after the air crosses the peak.',start:function(){DC.chipList=['Desert here'];DC.sel='';dcChips();},ok:function(){return DC.d<0&&dcSideOk(dcTag('Desert here'),true);},yes:'Great prediction! With the wind from the other side, the windward and leeward sides swap. Drag the cloud over to check it.'},
  {tx:'Real rain shadows! For each place below, tap the side that is WET.',hint:'Think about where the moist air comes from: the Pacific for California and Washington, northeast trade winds for Hawaii, the monsoon from the Indian Ocean for the Himalayas, and the Amazon for the Andes.',start:function(){DC.chipList=[];dcChips();DC.cards={};dcBuildCards();$('dcCards').style.display='block';},ok:function(){for(var i=0;i<DC_CARDS.length;i++){if(DC.cards[i]!==DC_CARDS[i][2])return false;}return true;},yes:'All five correct! In every case, the side facing the moist wind is wet, and the other side is in a rain shadow.'}
 ];
+trMis(DC_MIS,[
+ ['\u00A1Haz que llueva! Arrastra la nube desde el oc\u00E9ano hacia arriba de la monta\u00F1a. Observa la altitud, la temperatura y la humedad.','Toca la imagen y desliza el dedo hacia la monta\u00F1a. La nube llueve cuando el aire sube por encima de la base de la nube.','\u00A1Llueve! El aire que sube se enfri\u00F3 hasta su punto de roc\u00EDo, as\u00ED que el vapor de agua se condens\u00F3 en nubes y cay\u00F3 como lluvia en la ladera de barlovento. El bosque se est\u00E1 poniendo m\u00E1s verde.'],
+ ['Ahora arrastra la nube sobre la cima y hasta abajo del otro lado. Compara la temperatura con la del lado de barlovento a la misma altura.','Sigue arrastrando despu\u00E9s de la cima, hasta el oc\u00E9ano del otro lado.','La nube se sec\u00F3 y el aire lleg\u00F3 mucho m\u00E1s c\u00E1lido que cuando empez\u00F3, porque el aire que baja se calienta unos 10 grados por kil\u00F3metro y perdi\u00F3 su agua como lluvia. El lado de sotavento se volvi\u00F3 un desierto: una sombra de lluvia.'],
+ ['Etiqueta los lados. Toca "Barlovento" y luego toca esa ladera. Despu\u00E9s haz lo mismo con "Sotavento".','El barlovento mira hacia el viento (el lado contra el que sopla la flecha). El sotavento es el lado protegido y seco.','\u00A1Correcto! El lado de barlovento mira hacia el viento y recibe la lluvia. El lado de sotavento est\u00E1 en la sombra de lluvia.'],
+ ['Cambia la direcci\u00F3n del viento con el bot\u00F3n de abajo. Antes de arrastrar la nube, predice: toca "Aqu\u00ED hay desierto" y toca donde se formar\u00E1 el desierto ahora.','Primero cambia el viento. El desierto se forma en el lado hacia donde se ALEJA el viento, despu\u00E9s de que el aire cruza la cima.','\u00A1Gran predicci\u00F3n! Con el viento del otro lado, el barlovento y el sotavento se intercambian. Arrastra la nube para comprobarlo.'],
+ ['\u00A1Sombras de lluvia reales! Para cada lugar de abajo, toca el lado que es H\u00DAMEDO.','Piensa de d\u00F3nde viene el aire h\u00FAmedo: del Pac\u00EDfico para California y Washington, de los alisios del noreste para Haw\u00E1i, del monz\u00F3n del oc\u00E9ano \u00CDndico para el Himalaya, y del Amazonas para los Andes.','\u00A1Las cinco correctas! En cada caso, el lado que mira hacia el viento h\u00FAmedo es h\u00FAmedo, y el otro lado est\u00E1 en una sombra de lluvia.']
+]);
+LREF.scrDc=function(){dcChips();if($('dcCards').style.display==='block')dcBuildCards();DC.last='';};
 function startDc(){show('scrDc');DC.d=1;DC.x=DC.tx=20;DC.wet=[0,0];DC.dry=[0,0];DC.tags=[];DC.sel='';DC.maxU=0;DC.last='';DC.cards={};DC.chipList=[];
- DC.c=setupCanvas($('dcCv'),400,300,0.4);DC.ms=misRun('dc',DC_MIS,'Take the quiz',function(){startQuiz('ch6',CH6_QUIZ);});startLoop(dcLoop);}
+ DC.c=setupCanvas($('dcCv'),400,300,0.4);DC.ms=misRun('dc',DC_MIS,['Take the quiz','Hacer el cuestionario'],function(){startQuizL('ch6',CH6_QUIZ,CH6_QUIZ_ES);});startLoop(dcLoop);}
 
 /* ---- quiz backgrounds ---- */
 function bgMtn(c){var r=crossSec(c,0,0,600,560,0,{wet:1,dry:1,sky:true});c.fillStyle='#E4F2FB';c.fillRect(0,0,600,30);
@@ -2325,8 +2343,25 @@ function bgMtn(c){var r=crossSec(c,0,0,600,560,0,{wet:1,dry:1,sky:true});c.fillS
  c.fillStyle='#4F8A3C';for(var i=0;i<4;i++){var x=r.pk+r.half+20+i*20;c.fillRect(x-2,r.base-10,4,12);}
  rainCloud(c,r.pk-110,r.gy(r.pk-110)-50,1.6,0.6,1,0);arw(c,20,120,120,120,'#FFFFFF',7,24);}
 function bgMtnDraw(c){var r=crossSec(c,0,0,600,560,0,{wet:0.4,dry:0.4});c.fillStyle='#9FB57A';c.fillRect(60,r.base,540,40);c.fillStyle='#2F7FD1';c.fillRect(0,r.base,60,40);c.fillStyle='#E4F2FB';c.fillRect(0,560,600,40);
- arw(c,20,90,120,90,'#FFFFFF',7,24);txt(c,'Wind',70,70,'800 20px '+FONT,'#0E1B2C','center');txt(c,'Ocean',30,590,'800 16px '+FONT,'#1F5FA8','center');}
+ arw(c,20,90,120,90,'#FFFFFF',7,24);txt(c,T('Wind','Viento'),70,70,'800 20px '+FONT,'#0E1B2C','center');txt(c,T('Ocean','Oc\u00E9ano'),30,590,'800 16px '+FONT,'#1F5FA8','center');}
 
+var CH6_STEPS_ES=trSteps(CH6_STEPS,[
+ "\u00A1Bienvenidos a la presentaci\u00F3n de hoy! Vamos a descubrir por qu\u00E9 un lado de una monta\u00F1a puede ser una selva lluviosa mientras el otro lado es un desierto.",
+ "Cuando el viento empuja aire h\u00FAmedo contra una monta\u00F1a, el aire no tiene a d\u00F3nde ir m\u00E1s que hacia arriba por el lado de barlovento, el lado que mira hacia el viento. Esto se llama ascenso orogr\u00E1fico.",
+ "Mientras el aire sube, la presi\u00F3n del aire a su alrededor baja, as\u00ED que el aire se expande y se enfr\u00EDa. El aire seco se enfr\u00EDa unos 10 grados Celsius por cada kil\u00F3metro que sube. Cuando se forman nubes, se enfr\u00EDa m\u00E1s lento, unos 5 a 6 grados por kil\u00F3metro.",
+ "\u00BFPor qu\u00E9 el aire se enfr\u00EDa m\u00E1s lento cuando est\u00E1 dentro de una nube?",
+ "\u00A1Excelente pregunta! Cuando el vapor de agua se condensa en gotitas de nube, libera calor. Ese calor compensa en parte el enfriamiento.",
+ "Cuando el aire que sube se enfr\u00EDa hasta su punto de roc\u00EDo, el vapor de agua se condensa en nubes. La lluvia o la nieve caen en el lado de barlovento, as\u00ED que ese lado es verde y muchas veces tiene bosques.",
+ "Para cuando el aire cruza la cima, ya perdi\u00F3 gran parte de su humedad. Mientras baja por el lado de sotavento, se comprime y se calienta unos 10 grados por kil\u00F3metro. As\u00ED que llega c\u00E1lido y seco.",
+ "Entonces, \u00BFel lado seco est\u00E1 en la sombra de la monta\u00F1a, pero de lluvia en vez de luz?",
+ "\u00A1Exacto! Esa zona seca se llama sombra de lluvia. Veamos algunas reales.",
+ "En California, el aire del Pac\u00EDfico sube por la Sierra Nevada y empapa las laderas del oeste. Al este de las monta\u00F1as est\u00E1n la seca Gran Cuenca y el Valle de la Muerte.",
+ "En el estado de Washington, la cordillera de las Cascadas hace lo mismo. Seattle y la pen\u00EDnsula Ol\u00EDmpica son h\u00FAmedas, mientras que el este de Washington es mucho m\u00E1s seco.",
+ "En Haw\u00E1i, los vientos alisios traen aire h\u00FAmedo desde el noreste. Las laderas de barlovento son lluviosas y los lados de sotavento son secos. El monte Waialeale, en Kauai, es uno de los lugares m\u00E1s lluviosos de la Tierra.",
+ "Durante el monz\u00F3n de verano, el aire h\u00FAmedo del oc\u00E9ano \u00CDndico choca con el Himalaya. El lado sur recibe lluvias enormes, mientras que la meseta del T\u00EDbet, al norte, se mantiene seca.",
+ "En Am\u00E9rica del Sur, los Andes bloquean la humedad que viene del lado amaz\u00F3nico. Eso ayuda a que el desierto de Atacama sea uno de los lugares m\u00E1s secos de la Tierra. Una corriente oce\u00E1nica fr\u00EDa a lo largo de la costa tambi\u00E9n influye.",
+ "Ahora te toca a ti. \u00A1Arrastra una nube sobre una monta\u00F1a y observa c\u00F3mo se forma una sombra de lluvia!"
+]);
 var CH6_QUIZ=[
  {t:'mc',q:'What is orographic lifting?',o:['Air being pushed up the side of a mountain','Air sinking down into a valley','Wind blowing along a flat beach','Clouds forming over the ocean at night'],a:0,why:'When wind pushes air into a mountain, the air is forced to rise up the windward slope. That is orographic lifting.'},
  {t:'mc',q:'Why does air cool as it rises up a mountain?',o:['The air pressure drops, so the air expands and cools','The mountain is made of ice','Rising air gets closer to the Sun','Rain cools the air from above'],a:0,why:'Air pressure is lower higher up, so rising air expands. Expanding air cools, about 10 C per km when dry and about 5 to 6 C per km in clouds.'},
@@ -2338,6 +2373,17 @@ var CH6_QUIZ=[
  {t:'draw',q:'The wind blows from the left. Draw the cloud\'s path over the mountain, and draw rain on the correct side.',bg:'mtndraw',cols:[['Black (path)','#111418'],['Blue (rain)','#1F5FD1'],['Gray (cloud)','#7A8794']]},
  {t:'text',q:'Explain why one side of a mountain can be a rainforest while the other side is a desert.'}
 ];
+var CH6_QUIZ_ES=trQuiz(CH6_QUIZ,[
+ {q:'\u00BFQu\u00E9 es el ascenso orogr\u00E1fico?',o:['El aire es empujado hacia arriba por la ladera de una monta\u00F1a','El aire baja hacia un valle','El viento sopla a lo largo de una playa plana','Se forman nubes sobre el oc\u00E9ano en la noche'],why:'Cuando el viento empuja aire contra una monta\u00F1a, el aire tiene que subir por la ladera de barlovento. Eso es el ascenso orogr\u00E1fico.'},
+ {q:'\u00BFPor qu\u00E9 el aire se enfr\u00EDa cuando sube por una monta\u00F1a?',o:['La presi\u00F3n del aire baja, as\u00ED que el aire se expande y se enfr\u00EDa','La monta\u00F1a est\u00E1 hecha de hielo','El aire que sube se acerca m\u00E1s al Sol','La lluvia enfr\u00EDa el aire desde arriba'],why:'La presi\u00F3n del aire es m\u00E1s baja en lo alto, as\u00ED que el aire que sube se expande. El aire que se expande se enfr\u00EDa, unos 10 C por km cuando es seco y unos 5 a 6 C por km dentro de las nubes.'},
+ {q:'\u00BFQu\u00E9 lado de una monta\u00F1a suele recibir m\u00E1s lluvia?',o:['El lado de barlovento, que mira hacia el viento','El lado de sotavento, lejos del viento','Los dos lados reciben exactamente lo mismo','Solo la cima'],why:'El aire sube y se enfr\u00EDa en el lado de barlovento, as\u00ED que ah\u00ED se forman nubes que dejan caer lluvia y nieve.'},
+ {q:'\u00BFQu\u00E9 es una sombra de lluvia?',o:['Una zona seca en el lado de sotavento de una monta\u00F1a','Una nube oscura que tapa el Sol','La sombra que hace una monta\u00F1a al atardecer','Una zona lluviosa en el lado de barlovento'],why:'Despu\u00E9s de que el aire deja caer su humedad en el lado de barlovento, baja y se calienta en el lado de sotavento. Esa zona seca es la sombra de lluvia.'},
+ {q:'\u00BFPor qu\u00E9 el aire est\u00E1 c\u00E1lido cuando llega al pie del lado de sotavento?',o:['El aire que baja se comprime y se calienta, unos 10 C por km','El lado de sotavento est\u00E1 m\u00E1s cerca del ecuador','Los volcanes calientan el lado de sotavento','El oc\u00E9ano lo calienta mientras baja'],why:'El aire que baja se comprime y se calienta unos 10 C por km. Adem\u00E1s, perdi\u00F3 gran parte de su humedad como lluvia, as\u00ED que llega c\u00E1lido y seco.'},
+ {q:'El Valle de la Muerte es muy seco en parte porque est\u00E1 en una sombra de lluvia. \u00BFDe qu\u00E9 monta\u00F1as?',o:['La Sierra Nevada','El Himalaya','Los Andes','Los Apalaches'],why:'El aire del Pac\u00EDfico deja caer su lluvia en las laderas del oeste de la Sierra Nevada. El Valle de la Muerte y la Gran Cuenca, al este, est\u00E1n en la sombra de lluvia.'},
+ {q:'Etiqueta la monta\u00F1a. Toca una etiqueta y luego toca el c\u00EDrculo punteado donde va.',labels:['Direcci\u00F3n del viento','Lado de barlovento','Lado de sotavento','Sombra de lluvia']},
+ {q:'El viento sopla desde la izquierda. Dibuja el camino de la nube sobre la monta\u00F1a, y dibuja la lluvia en el lado correcto.',cols:['Negro (camino)','Azul (lluvia)','Gris (nube)']},
+ {q:'Explica por qu\u00E9 un lado de una monta\u00F1a puede ser una selva lluviosa mientras el otro lado es un desierto.'}
+]);
 
 /* ================= CHAPTER 7: CITY PLANNER ================= */
 /* City climate normals (monthly). hi/lo/av in degrees C, pr in mm. Sources in src. */
@@ -3293,7 +3339,7 @@ function startChapter(i){var ch=CH[i];ac();if(!ch.ready){show('scrSoon');$('soon
  $('hpCard').style.display='block';$('hpCard').scrollTop=0;
  say(T('Put on your headphones and turn up the volume so you can hear the story.','Ponte los aud\u00EDfonos y sube el volumen para que puedas escuchar la historia.'),1.05);}
 function hpSoundBtn(){$('hpSound').style.display=V.on?'none':'block';}
-function launchChapter(i){var ch=CH[i];CURCH=ch.id;ENONLY=(LANG==='es'&&!ESDONE[ch.id]);if(ch.id==='ch1'){startStory(T(CH1_STEPS,CH1_STEPS_ES),startDrillGame,T('Start drilling','Empezar a perforar'));story.ch1=true;}else if(ch.id==='ch2')startStoryL(CH2_STEPS,CH2_STEPS_ES,startSeasons,'Start the missions','Empezar las misiones');else if(ch.id==='ch3')startStoryL(CH3_STEPS,CH3_STEPS_ES,startLab,'Start the Photon Lab','Empezar el Laboratorio de Fotones');else if(ch.id==='ch4')startStoryL(CH4_STEPS,CH4_STEPS_ES,startOrbit,'Start the Orbit Lab','Empezar el Laboratorio de \u00D3rbitas');else if(ch.id==='ch5')startStoryL(CH5_STEPS,CH5_STEPS_ES,startConv,'Start the Convection Tank','Empezar el Tanque de Convecci\u00F3n');else if(ch.id==='ch6')startStory(CH6_STEPS,startDc,'Start Drag the Cloud');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');}
+function launchChapter(i){var ch=CH[i];CURCH=ch.id;ENONLY=(LANG==='es'&&!ESDONE[ch.id]);if(ch.id==='ch1'){startStory(T(CH1_STEPS,CH1_STEPS_ES),startDrillGame,T('Start drilling','Empezar a perforar'));story.ch1=true;}else if(ch.id==='ch2')startStoryL(CH2_STEPS,CH2_STEPS_ES,startSeasons,'Start the missions','Empezar las misiones');else if(ch.id==='ch3')startStoryL(CH3_STEPS,CH3_STEPS_ES,startLab,'Start the Photon Lab','Empezar el Laboratorio de Fotones');else if(ch.id==='ch4')startStoryL(CH4_STEPS,CH4_STEPS_ES,startOrbit,'Start the Orbit Lab','Empezar el Laboratorio de \u00D3rbitas');else if(ch.id==='ch5')startStoryL(CH5_STEPS,CH5_STEPS_ES,startConv,'Start the Convection Tank','Empezar el Tanque de Convecci\u00F3n');else if(ch.id==='ch6')startStoryL(CH6_STEPS,CH6_STEPS_ES,startDc,'Start Drag the Cloud','Empezar Arrastra la nube');else if(ch.id==='ch7')startStory(CH7_STEPS,startPlan,'Start City Planner');else if(ch.id==='ch8')startStory(CH8_STEPS,startSpiral,'Start the Climate Spiral');}
 
 /* ---------- report + PDF ---------- */
 var pdfBlob=null,pdfName='';
@@ -3532,6 +3578,8 @@ var LTX=[
  ['cvNote','Los puntos rojos son aire c\u00E1lido y los azules son aire fresco. El calentador calienta el aire abajo a la izquierda; el aire se enfr\u00EDa cerca de la parte de arriba del tanque.'],
  ['coV1','Polo Norte'],['coV2','Polo Sur'],['coV3','Ecuador'],['coLaunch','Lanzar el aire'],['coNote','El giro est\u00E1 mucho m\u00E1s lento y el desv\u00EDo de Coriolis est\u00E1 exagerado para que puedas verlo. La Tierra real da una vuelta al d\u00EDa.'],
  ['amNote','c = continental (seca), m = mar\u00EDtima (h\u00FAmeda), T = tropical (c\u00E1lida), P = polar (fr\u00EDa), A = \u00E1rtica (muy fr\u00EDa). El mapa y las regiones son aproximados.'],
+ ['dcFlip','Cambiar el viento'],['dcZl','Altitud:'],['dcTl','Temperatura del aire:'],['dcRHl','Humedad:'],['dcWl','Vapor de agua:'],['dcRl','\u00BFLlueve?:'],
+ ['dcNote','Porci\u00F3n de aire de ejemplo: 25&deg;C al nivel del mar con un punto de roc\u00EDo de 17&deg;C, y una monta\u00F1a de unos 3 km de altura. Las tasas de enfriamiento y calentamiento son reales: unos 10&deg;C por km para el aire seco y unos 5 a 6&deg;C por km dentro de las nubes.',1],
  ['hpSound','El sonido est\u00E1 apagado. Toca para activarlo.'],['hpGo','\u00A1Empezar la historia!'],['hpBack','Volver a los cap\u00EDtulos']];
 var LTX_EN={},LPH=[['inFirst','Nombre'],['inLast','Apellido'],['inCode','Escribe el c\u00F3digo']];
 function langBtns(){var es=LANG==='es';$('lgEn').className='chip'+(es?'':' sel');$('lgEs').className='chip'+(es?' sel':'');$('sgEn').className='chip'+(es?'':' sel');$('sgEs').className='chip'+(es?' sel':'');}
